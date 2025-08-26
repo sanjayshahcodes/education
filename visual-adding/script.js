@@ -163,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const onesDigitA = a % 10;
             const crossesTen = (onesDigitA + b) >= 10;
             
-            if (crossesTen) {
+            // Accept if there's a carry AND sum is <= 100
+            if (crossesTen && (a + b) <= 100) {
                 break;
             }
         } while (true);
