@@ -57,7 +57,7 @@
         }
         #numberContainer {
             display: grid;
-            grid-template-columns: repeat(8, 1fr); /* 8 columns for 8 numbers */
+            grid-template-columns: repeat(3, 1fr); /* 3x3 grid for 9 numbers */
             gap: 1rem;
             max-width: 90%;
             margin-bottom: 2rem;
@@ -103,7 +103,7 @@
     <div id="celebrationMessage">Great Job! 🎉</div>
     <canvas id="confettiCanvas"></canvas>
     <script>
-        const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
+        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         
         // Function to shuffle an array randomly
         function shuffleArray(array) {
@@ -138,7 +138,7 @@
                 if (!div.classList.contains('grayed')) {
                     div.classList.add('grayed');
                     grayedCount++;
-                    if (grayedCount === 8) {
+                    if (grayedCount === 9) {
                         setTimeout(celebrate, 500); // Delay celebration for smoother effect
                     }
                 }
