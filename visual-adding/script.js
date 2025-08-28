@@ -55,8 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Question format configuration - cycle through these combinations
     // Each array element is [show_blocks, allow_splitting, generator_function_name]
     let question_format = [
-        [1, 1, "generateOneMultipleOfTenPlusNonMultiple"],
-        [0, 0, "generateOneMultipleOfTenPlusNonMultiple"],
+        [1, 1, "generateDoubleDigitsNoCarry"],
+        [0, 1, "generateDoubleDigitsNoCarry"],
+        [0, 0, "generateDoubleDigitsNoCarry"],
+        [0, 0, "generateDoubleDigitsNoCarry"],
         [0, 0, "generateDoublePlusSingleNoCarry"],
         [1, 1, "generateDoublePlusSingleWithCarry"],
         [0, 0, "generateDoublePlusSingleWithCarry"],
