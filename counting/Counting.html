@@ -371,6 +371,10 @@
 
         function handleTouchStart(e) {
             e.preventDefault();
+            
+            // Initialize audio on first touch (required for iOS)
+            initializeAudio();
+            
             draggedElement = e.target;
             draggedElement.classList.add('dragging');
             
@@ -415,6 +419,9 @@
         }
 
         function handleMouseStart(e) {
+            // Initialize audio on first mouse interaction (required for some browsers)
+            initializeAudio();
+            
             draggedElement = e.target;
             draggedElement.classList.add('dragging');
             
@@ -517,12 +524,28 @@
 
         // Global audio context to reuse
         let globalAudioContext = null;
+        let audioInitialized = false;
         
         function getAudioContext() {
             if (!globalAudioContext || globalAudioContext.state === 'closed') {
                 globalAudioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
             return globalAudioContext;
+        }
+        
+        function initializeAudio() {
+            if (!audioInitialized) {
+                try {
+                    const audioContext = getAudioContext();
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    audioInitialized = true;
+                    console.log('Audio initialized for iOS');
+                } catch (error) {
+                    console.log('Audio initialization failed:', error);
+                }
+            }
         }
         
         function playDropSound() {
@@ -648,6 +671,9 @@
         }
 
         function resetGame() {
+            // Initialize audio on button click (required for iOS)
+            initializeAudio();
+            
             // Play new game sound
             playNewGameSound();
             
