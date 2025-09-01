@@ -549,38 +549,34 @@
         }
         
         function playDropSound() {
-            // Create a simple drop sound using the same method as New Game sound
+            // Use EXACTLY the same structure as playNewGameSound (which works)
             try {
                 console.log('playDropSound called'); // Debug log
                 
-                // Use the same approach as playNewGameSound which works on iPad
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 
-                // Resume if needed
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-                
-                console.log('Playing drop sound, audioContext state:', audioContext.state); // Debug log
-                
-                // Create a simple drop sound - single note like the new game sound
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                // Simple single note drop sound (like the new game sound that works)
-                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-                oscillator.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
-                
-                console.log('Drop sound should be playing now'); // Debug log
+                // Single note (copy exact pattern from working playNewGameSound)
+                const notes = [400]; // Single drop note
+                notes.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                        oscillator.type = 'sine';
+                        
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.3);
+                        
+                        console.log('Drop sound playing with freq:', freq); // Debug log
+                    }, index * 100);
+                });
                 
             } catch (error) {
                 console.log('Audio not supported:', error);
@@ -618,10 +614,13 @@
         }
         
         function playCelebrationSound() {
+            // Use EXACTLY the same structure as playNewGameSound (which works)
             try {
+                console.log('playCelebrationSound called'); // Debug log
+                
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 
-                // Play a celebratory sequence
+                // Play a celebratory sequence (copy exact pattern from working playNewGameSound)
                 const notes = [523, 659, 784, 1047]; // C, E, G, C (higher)
                 notes.forEach((freq, index) => {
                     setTimeout(() => {
@@ -635,17 +634,17 @@
                         oscillator.type = 'sine';
                         
                         gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3); // Same timing as working version
                         
                         oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.4);
-                    }, index * 150);
+                        oscillator.stop(audioContext.currentTime + 0.3); // Same timing as working version
+                        
+                        console.log('Celebration sound playing with freq:', freq); // Debug log
+                    }, index * 100); // Same timing as working version
                 });
                 
-                // Skip the robotic voice - just use musical celebration
-                // The voice synthesis is too robotic, so we'll rely on the musical celebration instead
             } catch (error) {
-                console.log('Audio not supported');
+                console.log('Audio not supported:', error);
             }
         }
 
