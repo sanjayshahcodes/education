@@ -521,39 +521,45 @@
                 // Create a new audio context each time to avoid the 4-sound limit
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 
+                // Function to actually play the sound
+                const playSound = () => {
+                    // Create a gentle drop sound
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    // Simple drop sound - starts high and goes low
+                    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    
+                    // Clean up the audio context after the sound finishes
+                    setTimeout(() => {
+                        try {
+                            audioContext.close();
+                        } catch (e) {
+                            // Ignore cleanup errors
+                        }
+                    }, 300);
+                };
+                
                 // Resume audio context if it's suspended (required on some browsers)
                 if (audioContext.state === 'suspended') {
-                    audioContext.resume();
+                    audioContext.resume().then(playSound).catch(() => playSound());
+                } else {
+                    playSound();
                 }
                 
-                // Create a gentle drop sound
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                // Simple drop sound - starts high and goes low
-                oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
-                oscillator.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
-                
-                // Clean up the audio context after the sound finishes
-                setTimeout(() => {
-                    try {
-                        audioContext.close();
-                    } catch (e) {
-                        // Ignore cleanup errors
-                    }
-                }, 300);
             } catch (error) {
-                console.log('Audio not supported');
+                console.log('Audio not supported:', error);
             }
         }
         
