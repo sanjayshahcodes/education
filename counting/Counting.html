@@ -515,14 +515,27 @@
             }
         }
 
+        // Global audio context to reuse
+        let globalAudioContext = null;
+        
+        function getAudioContext() {
+            if (!globalAudioContext || globalAudioContext.state === 'closed') {
+                globalAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return globalAudioContext;
+        }
+        
         function playDropSound() {
             // Create a simple drop sound (no counting)
             try {
-                // Create a new audio context each time to avoid the 4-sound limit
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('playDropSound called'); // Debug log
+                
+                const audioContext = getAudioContext();
                 
                 // Function to actually play the sound
                 const playSound = () => {
+                    console.log('Playing drop sound, audioContext state:', audioContext.state); // Debug log
+                    
                     // Create a gentle drop sound
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
@@ -535,25 +548,25 @@
                     oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
                     oscillator.type = 'sine';
                     
-                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); // Increased volume
                     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
                     
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + 0.2);
                     
-                    // Clean up the audio context after the sound finishes
-                    setTimeout(() => {
-                        try {
-                            audioContext.close();
-                        } catch (e) {
-                            // Ignore cleanup errors
-                        }
-                    }, 300);
+                    console.log('Drop sound should be playing now'); // Debug log
                 };
                 
                 // Resume audio context if it's suspended (required on some browsers)
                 if (audioContext.state === 'suspended') {
-                    audioContext.resume().then(playSound).catch(() => playSound());
+                    console.log('AudioContext suspended, resuming...'); // Debug log
+                    audioContext.resume().then(() => {
+                        console.log('AudioContext resumed successfully'); // Debug log
+                        playSound();
+                    }).catch((error) => {
+                        console.log('Failed to resume AudioContext:', error); // Debug log
+                        playSound(); // Try anyway
+                    });
                 } else {
                     playSound();
                 }
