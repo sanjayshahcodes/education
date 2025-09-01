@@ -549,50 +549,38 @@
         }
         
         function playDropSound() {
-            // Create a simple drop sound (no counting)
+            // Create a simple drop sound using the same method as New Game sound
             try {
                 console.log('playDropSound called'); // Debug log
                 
-                const audioContext = getAudioContext();
+                // Use the same approach as playNewGameSound which works on iPad
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 
-                // Function to actually play the sound
-                const playSound = () => {
-                    console.log('Playing drop sound, audioContext state:', audioContext.state); // Debug log
-                    
-                    // Create a gentle drop sound
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    
-                    // Simple drop sound - starts high and goes low
-                    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
-                    oscillator.type = 'sine';
-                    
-                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); // Increased volume
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                    
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.2);
-                    
-                    console.log('Drop sound should be playing now'); // Debug log
-                };
-                
-                // Resume audio context if it's suspended (required on some browsers)
+                // Resume if needed
                 if (audioContext.state === 'suspended') {
-                    console.log('AudioContext suspended, resuming...'); // Debug log
-                    audioContext.resume().then(() => {
-                        console.log('AudioContext resumed successfully'); // Debug log
-                        playSound();
-                    }).catch((error) => {
-                        console.log('Failed to resume AudioContext:', error); // Debug log
-                        playSound(); // Try anyway
-                    });
-                } else {
-                    playSound();
+                    audioContext.resume();
                 }
+                
+                console.log('Playing drop sound, audioContext state:', audioContext.state); // Debug log
+                
+                // Create a simple drop sound - single note like the new game sound
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Simple single note drop sound (like the new game sound that works)
+                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+                
+                console.log('Drop sound should be playing now'); // Debug log
                 
             } catch (error) {
                 console.log('Audio not supported:', error);
@@ -696,6 +684,41 @@
 
         // Initialize game
         resetGame();
+
+        // Add click/touch listener to the entire document to unlock audio on iOS
+        let audioUnlocked = false;
+        function unlockAudio() {
+            if (!audioUnlocked) {
+                console.log('Attempting to unlock audio...');
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Play a silent sound to unlock audio
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                    
+                    audioUnlocked = true;
+                    console.log('Audio unlocked successfully');
+                    
+                    // Remove the event listeners after first unlock
+                    document.removeEventListener('touchstart', unlockAudio);
+                    document.removeEventListener('click', unlockAudio);
+                } catch (error) {
+                    console.log('Failed to unlock audio:', error);
+                }
+            }
+        }
+
+        // Listen for first user interaction to unlock audio
+        document.addEventListener('touchstart', unlockAudio, { once: true });
+        document.addEventListener('click', unlockAudio, { once: true });
 
         // Prevent scrolling on touch devices
         document.addEventListener('touchmove', function(e) {
