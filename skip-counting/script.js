@@ -1,0 +1,281 @@
+// Game configuration - Change this value to skip by different numbers
+const SKIP_BY = 2;
+
+// Game state
+let currentNumber = 0;
+let targetNumber = 0;
+let correctCount = 0;
+let gamesCompleted = 0;
+let gameActive = false;
+let sequence = [];
+
+// DOM elements
+let numberGrid;
+let skipValueDisplay;
+let gamesCompletedDisplay;
+let nextGameBtn;
+let confettiContainer;
+
+// Initialize the game when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeGame();
+});
+
+function initializeGame() {
+    // Get DOM elements
+    numberGrid = document.getElementById('number-grid');
+    skipValueDisplay = document.getElementById('skip-value');
+    gamesCompletedDisplay = document.getElementById('games-completed');
+    nextGameBtn = document.getElementById('next-game-btn');
+    confettiContainer = document.getElementById('confetti-container');
+    
+    // Set up the skip value display
+    skipValueDisplay.textContent = SKIP_BY;
+    
+    // Create the number grid
+    createNumberGrid();
+    
+    // Set up event listeners
+    nextGameBtn.addEventListener('click', startNewGame);
+    
+    // Start the first game
+    startNewGame();
+}
+
+function createNumberGrid() {
+    numberGrid.innerHTML = '';
+    
+    // Create tiles for numbers 1-100
+    for (let i = 1; i <= 100; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'number-tile';
+        tile.textContent = i;
+        tile.dataset.number = i;
+        
+        // Add touch event listeners
+        tile.addEventListener('click', handleTileClick);
+        tile.addEventListener('touchstart', handleTileClick, { passive: false });
+        
+        numberGrid.appendChild(tile);
+    }
+}
+
+function handleTileClick(event) {
+    event.preventDefault(); // Prevent default touch behavior
+    
+    if (!gameActive) return;
+    
+    const clickedNumber = parseInt(event.target.dataset.number);
+    
+    if (clickedNumber === targetNumber) {
+        handleCorrectAnswer(event.target);
+    } else {
+        handleIncorrectAnswer(event.target);
+    }
+}
+
+function handleCorrectAnswer(tile) {
+    // Mark tile as correct
+    tile.classList.add('correct');
+    tile.classList.remove('current');
+    
+    // Update progress within current game
+    correctCount++;
+    
+    // Add to sequence
+    sequence.push(targetNumber);
+    
+    // Check if game is complete
+    if (correctCount >= 10) {
+        completeGame();
+        return;
+    }
+    
+    // Set up next target
+    currentNumber = targetNumber;
+    targetNumber = currentNumber + SKIP_BY;
+    
+    // Remove any current highlighting from previous tiles
+    document.querySelectorAll('.number-tile.current').forEach(t => {
+        t.classList.remove('current');
+    });
+    
+    // Check if game should continue or complete
+    if (targetNumber > 100) {
+        // If target exceeds 100, complete the game
+        completeGame();
+    }
+    // Note: We don't highlight the next target - child must figure it out!
+}
+
+function handleIncorrectAnswer(tile) {
+    // Show red X animation
+    showErrorX(tile);
+    
+    // Briefly highlight tile as incorrect
+    tile.classList.add('incorrect');
+    
+    setTimeout(() => {
+        tile.classList.remove('incorrect');
+    }, 1000);
+}
+
+function showErrorX(tile) {
+    // Create error X element
+    const errorX = document.createElement('div');
+    errorX.className = 'error-x';
+    errorX.textContent = '✗';
+    
+    // Add to tile
+    tile.appendChild(errorX);
+    
+    // Remove after animation
+    setTimeout(() => {
+        if (tile.contains(errorX)) {
+            tile.removeChild(errorX);
+        }
+    }, 1000);
+}
+
+function startNewGame() {
+    // Reset game state
+    correctCount = 0;
+    sequence = [];
+    gameActive = true;
+    
+    // Hide next game button
+    nextGameBtn.classList.add('hidden');
+    
+    // Clear confetti
+    confettiContainer.classList.add('hidden');
+    confettiContainer.innerHTML = '';
+    
+    // Reset all tiles
+    document.querySelectorAll('.number-tile').forEach(tile => {
+        tile.classList.remove('correct', 'current', 'incorrect');
+    });
+    
+    // Choose random starting number (1-9)
+    currentNumber = Math.floor(Math.random() * 9) + 1;
+    targetNumber = currentNumber + SKIP_BY;
+    
+    // No need to update displays since we removed current number display
+    
+    // Highlight starting number as correct (already completed)
+    const startTile = document.querySelector(`[data-number="${currentNumber}"]`);
+    if (startTile) {
+        startTile.classList.add('correct');
+    }
+    
+    // DO NOT highlight target number - that would give away the answer!
+    // The target number should remain gray until the child taps it
+    
+    // Add starting number to sequence
+    sequence.push(currentNumber);
+}
+
+function completeGame() {
+    gameActive = false;
+    
+    // Increment games completed counter
+    gamesCompleted++;
+    gamesCompletedDisplay.textContent = gamesCompleted;
+    
+    // Show confetti
+    showConfetti();
+    
+    // Show next game button
+    setTimeout(() => {
+        nextGameBtn.classList.remove('hidden');
+    }, 1000);
+    
+    // Remove current highlighting
+    document.querySelectorAll('.number-tile.current').forEach(tile => {
+        tile.classList.remove('current');
+    });
+}
+
+function showConfetti() {
+    confettiContainer.classList.remove('hidden');
+    
+    // Create multiple bursts
+    createConfettiBurst(80); // First big burst
+    
+    setTimeout(() => {
+        createConfettiBurst(60); // Second burst
+    }, 300);
+    
+    setTimeout(() => {
+        createConfettiBurst(40); // Third burst
+    }, 600);
+    
+    // Hide confetti container after animation completes
+    setTimeout(() => {
+        confettiContainer.classList.add('hidden');
+        confettiContainer.innerHTML = ''; // Clear all confetti
+    }, 3000);
+}
+
+function createConfettiBurst(pieceCount) {
+    for (let i = 0; i < pieceCount; i++) {
+        setTimeout(() => {
+            createConfettiPiece();
+        }, i * 10); // Stagger the creation slightly
+    }
+}
+
+function createConfettiPiece() {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti-piece';
+    
+    // Random size
+    const size = Math.random() * 15 + 15; // 15-30px
+    confetti.style.width = size + 'px';
+    confetti.style.height = size + 'px';
+    
+    // Random shapes - some circular, some square
+    if (Math.random() > 0.6) {
+        confetti.style.borderRadius = '50%';
+    }
+    
+    // Calculate random direction for burst effect
+    const angle = Math.random() * 360; // Random angle in degrees
+    const distance = Math.random() * 300 + 150; // Random distance 150-450px
+    
+    // Convert to radians and calculate end position
+    const radian = (angle * Math.PI) / 180;
+    const endX = Math.cos(radian) * distance;
+    const endY = Math.sin(radian) * distance;
+    
+    // Set custom CSS properties for the burst direction
+    confetti.style.setProperty('--end-x', endX + 'px');
+    confetti.style.setProperty('--end-y', endY + 'px');
+    
+    // Random animation delay for more natural effect
+    confetti.style.animationDelay = Math.random() * 0.2 + 's';
+    
+    confettiContainer.appendChild(confetti);
+    
+    // Remove after animation completes
+    setTimeout(() => {
+        if (confettiContainer.contains(confetti)) {
+            confettiContainer.removeChild(confetti);
+        }
+    }, 2500);
+}
+
+// Prevent zooming on double tap for better touch experience
+document.addEventListener('touchstart', function(event) {
+    if (event.touches.length > 1) {
+        event.preventDefault();
+    }
+});
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(event) {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
