@@ -8,6 +8,8 @@ let correctCount = 0;
 let gamesCompleted = 0;
 let gameActive = false;
 let sequence = [];
+let gameMode = 'grid'; // 'grid' or 'sequence'
+let currentInput = '';
 
 // DOM elements
 let numberGrid;
@@ -15,6 +17,10 @@ let skipValueDisplay;
 let gamesCompletedDisplay;
 let nextGameBtn;
 let confettiContainer;
+let gridMode;
+let sequenceMode;
+let sequenceDisplay;
+let questionTile;
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -28,6 +34,9 @@ function initializeGame() {
     gamesCompletedDisplay = document.getElementById('games-completed');
     nextGameBtn = document.getElementById('next-game-btn');
     confettiContainer = document.getElementById('confetti-container');
+    gridMode = document.getElementById('grid-mode');
+    sequenceMode = document.getElementById('sequence-mode');
+    sequenceDisplay = document.getElementById('sequence-display');
     
     // Set up the skip value display
     skipValueDisplay.textContent = SKIP_BY;
@@ -37,6 +46,7 @@ function initializeGame() {
     
     // Set up event listeners
     nextGameBtn.addEventListener('click', startNewGame);
+    setupNumberPadListeners();
     
     // Start the first game
     startNewGame();
@@ -137,54 +147,19 @@ function showErrorX(tile) {
     }, 1000);
 }
 
-function startNewGame() {
-    // Reset game state
-    correctCount = 0;
-    sequence = [];
-    gameActive = true;
-    
-    // Hide next game button
-    nextGameBtn.classList.add('hidden');
-    
-    // Clear confetti
-    confettiContainer.classList.add('hidden');
-    confettiContainer.innerHTML = '';
-    
-    // Reset all tiles
-    document.querySelectorAll('.number-tile').forEach(tile => {
-        tile.classList.remove('correct', 'current', 'incorrect');
-    });
-    
-    // Choose random starting number (1-9)
-    currentNumber = Math.floor(Math.random() * 9) + 1;
-    targetNumber = currentNumber + SKIP_BY;
-    
-    // No need to update displays since we removed current number display
-    
-    // Highlight starting number as correct (already completed)
-    const startTile = document.querySelector(`[data-number="${currentNumber}"]`);
-    if (startTile) {
-        startTile.classList.add('correct');
-    }
-    
-    // DO NOT highlight target number - that would give away the answer!
-    // The target number should remain gray until the child taps it
-    
-    // Add starting number to sequence
-    sequence.push(currentNumber);
-}
+
 
 function completeGame() {
     gameActive = false;
     
-    // Increment games completed counter
+    // Increment games completed counter for both modes
     gamesCompleted++;
     gamesCompletedDisplay.textContent = gamesCompleted;
     
-    // Show confetti
+    // Show confetti for both modes
     showConfetti();
     
-    // Show next game button
+    // Show next game button for both modes
     setTimeout(() => {
         nextGameBtn.classList.remove('hidden');
     }, 1000);
@@ -262,6 +237,181 @@ function createConfettiPiece() {
             confettiContainer.removeChild(confetti);
         }
     }, 2500);
+}
+
+// Mode switching functions
+function switchToSequenceMode() {
+    gameMode = 'sequence';
+    gridMode.classList.add('hidden');
+    sequenceMode.classList.remove('hidden');
+    
+    // Start fresh problem for sequence mode
+    correctCount = 0;
+    currentInput = '';
+    sequence = []; // Clear the old sequence
+    
+    // Generate new starting number for sequence mode
+    currentNumber = Math.floor(Math.random() * 9) + 1;
+    targetNumber = currentNumber + SKIP_BY;
+    sequence.push(currentNumber); // Start with just one number
+    
+    // Create sequence display
+    updateSequenceDisplay();
+    
+    gameActive = true;
+}
+
+function switchToGridMode() {
+    gameMode = 'grid';
+    gridMode.classList.remove('hidden');
+    sequenceMode.classList.add('hidden');
+}
+
+function updateSequenceDisplay() {
+    sequenceDisplay.innerHTML = '';
+    
+    // Add completed numbers
+    for (let i = 0; i < sequence.length; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'sequence-tile completed';
+        tile.textContent = sequence[i];
+        sequenceDisplay.appendChild(tile);
+    }
+    
+    // Add question mark tile for next number (only if we haven't completed 10 numbers)
+    if (sequence.length < 10) {
+        questionTile = document.createElement('div');
+        questionTile.className = 'sequence-tile question';
+        questionTile.textContent = currentInput || '?';
+        sequenceDisplay.appendChild(questionTile);
+    }
+}
+
+// Number pad functions
+function setupNumberPadListeners() {
+    const numberButtons = document.querySelectorAll('.number-btn');
+    numberButtons.forEach(button => {
+        button.addEventListener('click', handleNumberPadClick);
+        button.addEventListener('touchstart', handleNumberPadClick, { passive: false });
+    });
+}
+
+function handleNumberPadClick(event) {
+    event.preventDefault();
+    
+    if (!gameActive || gameMode !== 'sequence') return;
+    
+    const value = event.target.dataset.number;
+    
+    if (value === 'clear') {
+        // Backspace - remove last character
+        if (currentInput.length > 0) {
+            currentInput = currentInput.slice(0, -1);
+            if (questionTile) {
+                questionTile.textContent = currentInput || '?';
+                questionTile.classList.remove('incorrect');
+            }
+        }
+    } else if (value === 'enter') {
+        if (currentInput !== '') {
+            checkSequenceAnswer(parseInt(currentInput));
+        }
+    } else {
+        // Add digit to input (max 3 digits for numbers up to 100)
+        if (currentInput.length < 3) {
+            currentInput += value;
+            if (questionTile) {
+                questionTile.textContent = currentInput;
+                questionTile.classList.remove('incorrect');
+            }
+        }
+    }
+}
+
+function checkSequenceAnswer(answer) {
+    const expectedAnswer = sequence[sequence.length - 1] + SKIP_BY;
+    
+    if (answer === expectedAnswer) {
+        // Correct answer
+        sequence.push(answer);
+        correctCount++;
+        
+        // Reset input
+        currentInput = '';
+        
+        // Update display
+        updateSequenceDisplay();
+        
+        // Check if sequence is complete (need 9 more after starting number = 10 total)
+        if (correctCount >= 9) {
+            completeGame();
+        }
+    } else {
+        // Wrong answer - show red flash like in grid mode
+        showSequenceError();
+    }
+}
+
+function showSequenceError() {
+    if (!questionTile) return;
+    
+    // Show red X animation just like in grid mode
+    showErrorX(questionTile);
+    
+    // Show red flash on the question tile
+    questionTile.classList.add('incorrect');
+    
+    // Keep the wrong number visible and reset after flash
+    setTimeout(() => {
+        if (questionTile) {
+            questionTile.classList.remove('incorrect');
+            // Don't clear the input - let them see their wrong answer
+        }
+    }, 1000);
+}
+
+
+
+function startNewGame() {
+    // Reset game state
+    correctCount = 0;
+    sequence = [];
+    gameActive = true;
+    
+    // Hide next game button
+    nextGameBtn.classList.add('hidden');
+    
+    // Clear confetti
+    confettiContainer.classList.add('hidden');
+    confettiContainer.innerHTML = '';
+    
+    // Alternate between grid and sequence modes
+    if (gamesCompleted % 2 === 0) {
+        // Even games: start with grid mode (0, 2, 4, ...)
+        gameMode = 'grid';
+        switchToGridMode();
+        
+        // Reset all tiles
+        document.querySelectorAll('.number-tile').forEach(tile => {
+            tile.classList.remove('correct', 'current', 'incorrect');
+        });
+        
+        // Choose random starting number (1-9)
+        currentNumber = Math.floor(Math.random() * 9) + 1;
+        targetNumber = currentNumber + SKIP_BY;
+        
+        // Highlight starting number as correct (already completed)
+        const startTile = document.querySelector(`[data-number="${currentNumber}"]`);
+        if (startTile) {
+            startTile.classList.add('correct');
+        }
+        
+        // Add starting number to sequence
+        sequence.push(currentNumber);
+    } else {
+        // Odd games: start with sequence mode (1, 3, 5, ...)
+        switchToSequenceMode();
+    }
 }
 
 // Prevent zooming on double tap for better touch experience
