@@ -8,14 +8,10 @@
 </head>
 <body>
     <div class="game-container">
+        <div class="games-completed-counter">Games completed: <span id="games-completed">0</span></div>
         <button id="next-game-btn" class="next-game-btn hidden">Next Game</button>
         
         <div class="game-board">
-            <div class="game-sidebar">
-                <div class="game-info">
-                    <div class="progress">Games completed: <span id="games-completed">0</span></div>
-                </div>
-            </div>
             <!-- Grid Mode -->
             <div id="grid-mode" class="grid-container">
                 <div class="skip-reminder">Skip by: <span id="skip-value">2</span></div>
@@ -41,8 +37,8 @@
                         <button class="number-btn" data-number="7">7</button>
                         <button class="number-btn" data-number="8">8</button>
                         <button class="number-btn" data-number="9">9</button>
-                        <button class="number-btn clear-btn" data-number="clear">←</button>
                         <button class="number-btn" data-number="0">0</button>
+                        <button class="number-btn clear-btn" data-number="clear">←</button>
                         <button class="number-btn enter-btn" data-number="enter">→</button>
                     </div>
 
