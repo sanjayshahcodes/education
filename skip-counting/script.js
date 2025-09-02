@@ -1,5 +1,17 @@
-// Game configuration - Change this value to skip by different numbers
-const SKIP_BY = 2;
+// Game configuration - Settings array defines the sequence of games
+// Format: [skipBy, mode, maxStartingNumber]
+// Modes: 'numberBoard' or 'numberPad'
+const GAME_SETTINGS = [
+    [3, 'numberBoard', 90],
+    [2, 'numberBoard', 10], 
+    [5, 'numberBoard', 10],
+    [6, 'numberPad', 10]
+];
+
+// Current game variables
+let currentGameIndex = 0;
+let currentSkipBy = 2;
+let currentMaxStarting = 10;
 
 // Game state
 let currentNumber = 0;
@@ -38,8 +50,11 @@ function initializeGame() {
     sequenceMode = document.getElementById('sequence-mode');
     sequenceDisplay = document.getElementById('sequence-display');
     
+    // Initialize current game settings
+    loadCurrentGameSettings();
+    
     // Set up the skip value display
-    skipValueDisplay.textContent = SKIP_BY;
+    skipValueDisplay.textContent = currentSkipBy;
     
     // Create the number grid
     createNumberGrid();
@@ -50,6 +65,13 @@ function initializeGame() {
     
     // Start the first game
     startNewGame();
+}
+
+function loadCurrentGameSettings() {
+    const settings = GAME_SETTINGS[currentGameIndex];
+    currentSkipBy = settings[0];
+    currentMaxStarting = settings[2];
+    // Mode will be determined in startNewGame()
 }
 
 function createNumberGrid() {
@@ -103,7 +125,7 @@ function handleCorrectAnswer(tile) {
     
     // Set up next target
     currentNumber = targetNumber;
-    targetNumber = currentNumber + SKIP_BY;
+    targetNumber = currentNumber + currentSkipBy;
     
     // Remove any current highlighting from previous tiles
     document.querySelectorAll('.number-tile.current').forEach(t => {
@@ -251,8 +273,8 @@ function switchToSequenceMode() {
     sequence = []; // Clear the old sequence
     
     // Generate new starting number for sequence mode
-    currentNumber = Math.floor(Math.random() * 9) + 1;
-    targetNumber = currentNumber + SKIP_BY;
+    currentNumber = Math.floor(Math.random() * currentMaxStarting) + 1;
+    targetNumber = currentNumber + currentSkipBy;
     sequence.push(currentNumber); // Start with just one number
     
     // Create sequence display
@@ -329,7 +351,7 @@ function handleNumberPadClick(event) {
 }
 
 function checkSequenceAnswer(answer) {
-    const expectedAnswer = sequence[sequence.length - 1] + SKIP_BY;
+    const expectedAnswer = sequence[sequence.length - 1] + currentSkipBy;
     
     if (answer === expectedAnswer) {
         // Correct answer
@@ -373,6 +395,12 @@ function showSequenceError() {
 
 
 function startNewGame() {
+    // Load current game settings
+    loadCurrentGameSettings();
+    
+    // Update skip value display
+    skipValueDisplay.textContent = currentSkipBy;
+    
     // Reset game state
     correctCount = 0;
     sequence = [];
@@ -385,9 +413,12 @@ function startNewGame() {
     confettiContainer.classList.add('hidden');
     confettiContainer.innerHTML = '';
     
-    // Alternate between grid and sequence modes
-    if (gamesCompleted % 2 === 0) {
-        // Even games: start with grid mode (0, 2, 4, ...)
+    // Get current game mode from settings
+    const settings = GAME_SETTINGS[currentGameIndex];
+    const targetMode = settings[1];
+    
+    if (targetMode === 'numberBoard') {
+        // Grid mode
         gameMode = 'grid';
         switchToGridMode();
         
@@ -396,9 +427,9 @@ function startNewGame() {
             tile.classList.remove('correct', 'current', 'incorrect');
         });
         
-        // Choose random starting number (1-9)
-        currentNumber = Math.floor(Math.random() * 9) + 1;
-        targetNumber = currentNumber + SKIP_BY;
+        // Choose random starting number based on max starting number
+        currentNumber = Math.floor(Math.random() * currentMaxStarting) + 1;
+        targetNumber = currentNumber + currentSkipBy;
         
         // Highlight starting number as correct (already completed)
         const startTile = document.querySelector(`[data-number="${currentNumber}"]`);
@@ -409,9 +440,12 @@ function startNewGame() {
         // Add starting number to sequence
         sequence.push(currentNumber);
     } else {
-        // Odd games: start with sequence mode (1, 3, 5, ...)
+        // Sequence mode (numberPad)
         switchToSequenceMode();
     }
+    
+    // Advance to next game in settings array (with wraparound)
+    currentGameIndex = (currentGameIndex + 1) % GAME_SETTINGS.length;
 }
 
 // Prevent zooming on double tap for better touch experience
