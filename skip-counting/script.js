@@ -26,6 +26,7 @@ let currentInput = '';
 // DOM elements
 let numberGrid;
 let skipValueDisplay;
+let skipValueSequenceDisplay;
 let gamesCompletedDisplay;
 let nextGameBtn;
 let confettiContainer;
@@ -43,6 +44,7 @@ function initializeGame() {
     // Get DOM elements
     numberGrid = document.getElementById('number-grid');
     skipValueDisplay = document.getElementById('skip-value');
+    skipValueSequenceDisplay = document.getElementById('skip-value-sequence');
     gamesCompletedDisplay = document.getElementById('games-completed');
     nextGameBtn = document.getElementById('next-game-btn');
     confettiContainer = document.getElementById('confetti-container');
@@ -53,8 +55,9 @@ function initializeGame() {
     // Initialize current game settings
     loadCurrentGameSettings();
     
-    // Set up the skip value display
+    // Set up the skip value displays
     skipValueDisplay.textContent = currentSkipBy;
+    skipValueSequenceDisplay.textContent = currentSkipBy;
     
     // Create the number grid
     createNumberGrid();
@@ -398,8 +401,9 @@ function startNewGame() {
     // Load current game settings
     loadCurrentGameSettings();
     
-    // Update skip value display
+    // Update skip value displays
     skipValueDisplay.textContent = currentSkipBy;
+    skipValueSequenceDisplay.textContent = currentSkipBy;
     
     // Reset game state
     correctCount = 0;
