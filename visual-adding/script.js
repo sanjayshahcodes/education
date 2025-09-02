@@ -55,14 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Question format configuration - cycle through these combinations
     // Each array element is [show_blocks, allow_splitting, generator_function_name]
     let question_format = [
-        [1, 1, "generateDoubleDigitsNoCarry"],
-        [0, 1, "generateDoubleDigitsNoCarry"],
-        [0, 0, "generateDoubleDigitsNoCarry"],
-        [0, 0, "generateDoubleDigitsNoCarry"],
-        [0, 0, "generateDoublePlusSingleNoCarry"],
         [1, 1, "generateDoublePlusSingleWithCarry"],
         [0, 0, "generateDoublePlusSingleWithCarry"],
-        [0, 0, "generateDoublePlusSingleWithCarry"]
+        [0, 0, "generateDoublePlusSingleWithCarry"],
+        [1, 1, "generateDoublePlusDoubleWithCarry"],
+        [0, 0, "generateDoublePlusDoubleWithCarry"],
+        [0, 0, "generateDoublePlusDoubleWithCarry"],
+        [1, 1, "generateDoubleDigitsNoCarry"],
+        [0, 0, "generateDoubleDigitsNoCarry"]
         
         ];
     
@@ -74,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "generateBothMultiplesOfTen": generateBothMultiplesOfTen,
         "generateOneMultipleOfTenPlusNonMultiple": generateOneMultipleOfTenPlusNonMultiple,
         "generateDoublePlusSingleWithCarry": generateDoublePlusSingleWithCarry,
-        "generateDoublePlusSingleNoCarry": generateDoublePlusSingleNoCarry
+        "generateDoublePlusSingleNoCarry": generateDoublePlusSingleNoCarry,
+        "generateDoublePlusDoubleWithCarry": generateDoublePlusDoubleWithCarry
     };
     
     // Function to get current settings based on problem count
@@ -192,6 +193,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const sumLessThan100 = (a + b) < 100;
             
             if (!crossesTen && sumLessThan100) {
+                break;
+            }
+        } while (true);
+        
+        return [a, b];
+    }
+
+    function generateDoublePlusDoubleWithCarry() {
+        let a, b;
+        do {
+            [a, b] = generateRandomBothDoubleDigits();
+            
+            // Check if adding them results in a carry
+            const onesDigitA = a % 10;
+            const onesDigitB = b % 10;
+            const hasCarry = (onesDigitA + onesDigitB) >= 10;
+            
+            // Accept if there's a carry AND sum is <= 100
+            if (hasCarry && (a + b) <= 100) {
                 break;
             }
         } while (true);
