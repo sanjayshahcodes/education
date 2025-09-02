@@ -199,7 +199,7 @@ body {
     100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
 }
 
-#skip-value, #games-completed {
+#skip-value, #skip-value-sequence, #games-completed {
     color: #8e44ad;
     font-weight: bold;
 }

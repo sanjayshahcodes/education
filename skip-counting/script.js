@@ -3,7 +3,7 @@
 // Modes: 'numberBoard' or 'numberPad'
 const GAME_SETTINGS = [
     [3, 'numberBoard', 90],
-    [2, 'numberBoard', 10], 
+    [2, 'numberPad', 10], 
     [5, 'numberBoard', 10],
     [6, 'numberPad', 10]
 ];
