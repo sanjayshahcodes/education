@@ -271,16 +271,16 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-    max-width: 240px;
+    max-width: 285px;
 }
 
 .number-btn {
-    width: 60px;
-    height: 60px;
+    width: 75px;
+    height: 75px;
     border: 2px solid #333;
     border-radius: 8px;
     background: #f0f0f0;
-    font-size: 1.4rem;
+    font-size: 1.75rem;
     font-weight: bold;
     color: #333;
     cursor: pointer;
