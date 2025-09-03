@@ -2,10 +2,9 @@
 // Format: [skipBy, mode, maxStartingNumber]
 // Modes: 'numberBoard' or 'numberPad'
 const GAME_SETTINGS = [
-    [3, 'numberPad', 90],
-    [2, 'numberPad', 10], 
-    [5, 'numberBoard', 10],
-    [6, 'numberPad', 10]
+    [2, 'numberBoard', 10],
+    [3, 'numberBoard', 10], 
+    [2, 'numberPad', 10],
 ];
 
 // Current game variables
