@@ -111,8 +111,10 @@ body {
     grid-template-columns: repeat(10, 1fr);
     grid-template-rows: repeat(10, 1fr);
     gap: 0;
-    width: 90vmin;
-    height: 90vmin;
+    width: min(85vw, calc(100vh - 100px));
+    height: min(85vw, calc(100vh - 100px));
+    max-width: 700px;
+    max-height: 700px;
     border: 3px solid #333;
     background: #333;
     box-sizing: border-box;
@@ -380,24 +382,6 @@ body {
     }
 }
 
-/* iPad landscape orientation */
-@media screen and (min-width: 768px) and (orientation: landscape) {
-    .number-grid {
-        width: 80vh;
-        height: 80vh;
-        max-width: 700px;
-        max-height: 700px;
-    }
-}
 
-/* iPad portrait orientation */
-@media screen and (min-width: 768px) and (orientation: portrait) {
-    .number-grid {
-        width: 90vw;
-        height: 90vw;
-        max-width: 700px;
-        max-height: 700px;
-    }
-}
 
 
