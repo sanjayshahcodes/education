@@ -234,9 +234,9 @@ body {
 }
 
 .sequence-tile.question {
-    background: #d9b6e7;
+    background: #eedcf5;
     color: #8e44ad;
-    border: 3px dashed #8e44ad;
+    border: 2px dashed #8e44ad;
     font-weight: bold;
     transform: scale(1.35);
     z-index: 1;
