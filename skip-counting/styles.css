@@ -95,7 +95,7 @@ body {
 
 .sequence-container {
     flex-direction: column;
-    gap: 40px;
+    gap: 80px;
 }
 
 .skip-reminder {
@@ -203,7 +203,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 25px;
+    gap: 35px;
     flex-wrap: wrap;
     margin-bottom: 20px;
 }
@@ -229,7 +229,7 @@ body {
     color: white;
     font-weight: bold;
     border-color: #333;
-    transform: scale(1.25);
+    transform: scale(1.35);
     z-index: 1;
 }
 
@@ -238,7 +238,7 @@ body {
     color: #8e44ad;
     border: 3px dashed #8e44ad;
     font-weight: bold;
-    transform: scale(1.25);
+    transform: scale(1.35);
     z-index: 1;
 }
 
