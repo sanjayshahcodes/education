@@ -24,7 +24,7 @@ body {
     background: white;
     border-radius: 8px;
     box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    overflow: auto;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -386,28 +386,42 @@ body {
 /* iPad-specific styles */
 @media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
     .number-grid {
-        width: 70vh;
-        height: 70vh;
-        max-width: 600px;
-        max-height: 600px;
+        width: 65vh !important;
+        height: 65vh !important;
+        max-width: 550px !important;
+        max-height: 550px !important;
     }
     
     .game-board {
-        padding: 20px;
+        padding: 10px;
     }
     
     .skip-reminder {
-        font-size: 2rem;
-        margin-bottom: 20px;
+        font-size: 1.8rem;
+        margin-bottom: 10px;
     }
 }
 
 @media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
     .number-grid {
-        width: 80vw;
-        height: 80vw;
-        max-width: 600px;
-        max-height: 600px;
+        width: 80vw !important;
+        height: 80vw !important;
+        max-width: 600px !important;
+        max-height: 600px !important;
+    }
+}
+
+/* More specific iPad landscape targeting */
+@media screen and (min-width: 1024px) and (max-height: 768px) {
+    .number-grid {
+        width: 60vh !important;
+        height: 60vh !important;
+        max-width: 500px !important;
+        max-height: 500px !important;
+    }
+    
+    .game-container {
+        overflow-y: auto !important;
     }
 }
 
