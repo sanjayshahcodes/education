@@ -383,4 +383,32 @@ body {
     }
 }
 
+/* iPad-specific styles */
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .number-grid {
+        width: 70vh;
+        height: 70vh;
+        max-width: 600px;
+        max-height: 600px;
+    }
+    
+    .game-board {
+        padding: 20px;
+    }
+    
+    .skip-reminder {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+    .number-grid {
+        width: 80vw;
+        height: 80vw;
+        max-width: 600px;
+        max-height: 600px;
+    }
+}
+
 
