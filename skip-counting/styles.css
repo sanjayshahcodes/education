@@ -55,6 +55,48 @@ body {
     display: none;
 }
 
+.grid-help-btn {
+    position: absolute;
+    top: 5px;
+    right: 35px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    z-index: 100;
+    min-width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid-help-btn:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+.grid-help-btn.hidden {
+    display: none;
+}
+
+.grid-help-btn.active {
+    background: #8e44ad;
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+}
+
+.grid-help-btn.active:hover {
+    background: #9b59b6;
+    box-shadow: 0 6px 20px rgba(142, 68, 173, 0.4);
+}
+
 .games-completed-counter {
     position: absolute;
     top: 5px;

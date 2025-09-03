@@ -2,7 +2,7 @@
 // Format: [skipBy, mode, maxStartingNumber]
 // Modes: 'numberBoard' or 'numberPad'
 const GAME_SETTINGS = [
-    [4, 'numberBoard', 10],
+    [4, 'numberPad', 10],
     [5, 'numberBoard', 10], 
     [3, 'numberPad', 10],
 ];
@@ -28,11 +28,13 @@ let skipValueDisplay;
 let skipValueSequenceDisplay;
 let gamesCompletedDisplay;
 let nextGameBtn;
+let gridHelpBtn;
 let confettiContainer;
 let gridMode;
 let sequenceMode;
 let sequenceDisplay;
 let questionTile;
+let isGridHelpActive = false;
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -46,6 +48,7 @@ function initializeGame() {
     skipValueSequenceDisplay = document.getElementById('skip-value-sequence');
     gamesCompletedDisplay = document.getElementById('games-completed');
     nextGameBtn = document.getElementById('next-game-btn');
+    gridHelpBtn = document.getElementById('grid-help-btn');
     confettiContainer = document.getElementById('confetti-container');
     gridMode = document.getElementById('grid-mode');
     sequenceMode = document.getElementById('sequence-mode');
@@ -63,6 +66,7 @@ function initializeGame() {
     
     // Set up event listeners
     nextGameBtn.addEventListener('click', startNewGame);
+    gridHelpBtn.addEventListener('click', toggleGridHelp);
     setupNumberPadListeners();
     
     // Start the first game
@@ -97,7 +101,7 @@ function createNumberGrid() {
 function handleTileClick(event) {
     event.preventDefault(); // Prevent default touch behavior
     
-    if (!gameActive) return;
+    if (!gameActive || isGridHelpActive) return;
     
     const clickedNumber = parseInt(event.target.dataset.number);
     
@@ -175,6 +179,11 @@ function showErrorX(tile) {
 
 function completeGame() {
     gameActive = false;
+    
+    // Hide grid help button when game completes
+    gridHelpBtn.classList.add('hidden');
+    isGridHelpActive = false;
+    gridHelpBtn.classList.remove('active');
     
     // Increment games completed counter for both modes
     gamesCompleted++;
@@ -269,6 +278,11 @@ function switchToSequenceMode() {
     gridMode.classList.add('hidden');
     sequenceMode.classList.remove('hidden');
     
+    // Show grid help button for sequence mode
+    gridHelpBtn.classList.remove('hidden');
+    isGridHelpActive = false;
+    gridHelpBtn.classList.remove('active');
+    
     // Start fresh problem for sequence mode
     correctCount = 0;
     currentInput = '';
@@ -289,6 +303,10 @@ function switchToGridMode() {
     gameMode = 'grid';
     gridMode.classList.remove('hidden');
     sequenceMode.classList.add('hidden');
+    
+    // Hide grid help button for grid mode
+    gridHelpBtn.classList.add('hidden');
+    isGridHelpActive = false;
 }
 
 function updateSequenceDisplay() {
@@ -408,9 +426,12 @@ function startNewGame() {
     correctCount = 0;
     sequence = [];
     gameActive = true;
+    isGridHelpActive = false;
     
-    // Hide next game button
+    // Hide next game button and grid help button
     nextGameBtn.classList.add('hidden');
+    gridHelpBtn.classList.add('hidden');
+    gridHelpBtn.classList.remove('active');
     
     // Clear confetti
     confettiContainer.classList.add('hidden');
@@ -466,3 +487,49 @@ document.addEventListener('touchend', function(event) {
     }
     lastTouchEnd = now;
 }, false);
+
+// Grid help functionality
+function toggleGridHelp() {
+    if (!gameActive || gameMode !== 'sequence') return;
+    
+    isGridHelpActive = !isGridHelpActive;
+    
+    if (isGridHelpActive) {
+        // Show grid with completed numbers
+        showGridHelp();
+        gridHelpBtn.classList.add('active');
+    } else {
+        // Return to sequence mode
+        hideGridHelp();
+        gridHelpBtn.classList.remove('active');
+    }
+}
+
+function showGridHelp() {
+    // Hide sequence mode elements
+    sequenceMode.classList.add('hidden');
+    
+    // Show grid mode elements
+    gridMode.classList.remove('hidden');
+    
+    // Reset all tiles first
+    document.querySelectorAll('.number-tile').forEach(tile => {
+        tile.classList.remove('correct', 'current', 'incorrect');
+    });
+    
+    // Mark completed numbers as correct (purple)
+    sequence.forEach(num => {
+        const tile = document.querySelector(`[data-number="${num}"]`);
+        if (tile) {
+            tile.classList.add('correct');
+        }
+    });
+}
+
+function hideGridHelp() {
+    // Hide grid mode elements
+    gridMode.classList.add('hidden');
+    
+    // Show sequence mode elements
+    sequenceMode.classList.remove('hidden');
+}
