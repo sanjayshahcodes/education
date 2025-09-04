@@ -1,16 +1,22 @@
 // Game configuration - Settings array defines the sequence of games
-// Format: [skipBy, mode, maxStartingNumber]
+// Format: [skipBy, mode, maxStartingNumber, fixedStartingNumber]
 // Modes: 'numberBoard' or 'numberPad'
+// fixedStartingNumber: specific number to start with, or -1 for random (1 to maxStartingNumber)
 const GAME_SETTINGS = [
-    [4, 'numberPad', 10],
-    [5, 'numberBoard', 10], 
-    [3, 'numberPad', 10],
+    [4, 'numberBoard', 10, 3],
+    [4, 'numberBoard', 10, 4], 
+    [4, 'numberPad', 10, 5],
+    [5, 'numberBoard', 10, 7],
+    [5, 'numberBoard', 10, 8], 
+    [5, 'numberPad', 10, 3],
 ];
 
 // Current game variables
 let currentGameIndex = 0;
 let currentSkipBy = 2;
 let currentMaxStarting = 10;
+let currentFixedStarting = -1;
+let isFirstCycleOfGame = true;
 
 // Game state
 let currentNumber = 0;
@@ -77,7 +83,17 @@ function loadCurrentGameSettings() {
     const settings = GAME_SETTINGS[currentGameIndex];
     currentSkipBy = settings[0];
     currentMaxStarting = settings[2];
+    currentFixedStarting = settings[3];
     // Mode will be determined in startNewGame()
+}
+
+function getStartingNumber() {
+    // If it's the first cycle and we have a fixed starting number, use it
+    if (isFirstCycleOfGame && currentFixedStarting !== -1) {
+        return currentFixedStarting;
+    }
+    // Otherwise, choose randomly between 1 and maxStartingNumber
+    return Math.floor(Math.random() * currentMaxStarting) + 1;
 }
 
 function createNumberGrid() {
@@ -289,7 +305,7 @@ function switchToSequenceMode() {
     sequence = []; // Clear the old sequence
     
     // Generate new starting number for sequence mode
-    currentNumber = Math.floor(Math.random() * currentMaxStarting) + 1;
+    currentNumber = getStartingNumber();
     targetNumber = currentNumber + currentSkipBy;
     sequence.push(currentNumber); // Start with just one number
     
@@ -451,8 +467,8 @@ function startNewGame() {
             tile.classList.remove('correct', 'current', 'incorrect');
         });
         
-        // Choose random starting number based on max starting number
-        currentNumber = Math.floor(Math.random() * currentMaxStarting) + 1;
+        // Choose starting number based on settings
+        currentNumber = getStartingNumber();
         targetNumber = currentNumber + currentSkipBy;
         
         // Highlight starting number as correct (already completed)
@@ -469,7 +485,16 @@ function startNewGame() {
     }
     
     // Advance to next game in settings array (with wraparound)
+    const previousGameIndex = currentGameIndex;
     currentGameIndex = (currentGameIndex + 1) % GAME_SETTINGS.length;
+    
+    // If we moved to a different game setting, reset first cycle flag
+    // If we stayed on the same game setting, mark as not first cycle anymore
+    if (previousGameIndex !== currentGameIndex) {
+        isFirstCycleOfGame = true;
+    } else {
+        isFirstCycleOfGame = false;
+    }
 }
 
 // Prevent zooming on double tap for better touch experience
