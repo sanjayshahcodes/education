@@ -410,9 +410,9 @@ function updateSequenceDisplay() {
             tile.className = 'sequence-tile completed';
             tile.textContent = allNumbers[i];
         } else if (i === sequence.length && sequence.length <= 10) {
-            // Current question - show input or ? with light purple styling
+            // Current question - show input or empty with light purple styling
             tile.className = 'sequence-tile question';
-            tile.textContent = currentInput || '?';
+            tile.textContent = currentInput || '';
             questionTile = tile;
         } else {
             // Empty future tiles - show empty with gray styling
