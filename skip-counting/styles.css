@@ -99,16 +99,30 @@ body {
 
 .games-completed-counter {
     position: absolute;
-    top: 5px;
-    left: 5px;
+    top: 10px;
+    left: 10px;
     color: #444;
-    padding: 6px 12px;
-    border-radius: 15px;
+    padding: 8px 16px;
+    border-radius: 20px;
     font-size: 0.9rem;
-    font-weight: 400;
-    background: rgba(0, 0, 0, 0.05);
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.06);
     border: 1px solid #ddd;
     z-index: 100;
+    min-width: 160px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.numbers-counter {
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    color: #666;
+    font-size: 2rem;
+    font-weight: bold;
+    z-index: 100;
+    text-align: left;
 }
 
 .game-board {

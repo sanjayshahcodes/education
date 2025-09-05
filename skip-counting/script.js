@@ -3,7 +3,7 @@
 // Modes: 'numberBoard' or 'numberPad'
 // fixedStartingNumber: specific number to start with, or -1 for random (1 to maxStartingNumber)
 const GAME_SETTINGS = [
-    [6, 'numberBoard', 10, 19],
+    [6, 'numberPad', 10, 19],
     [2, 'numberPad', 10, 33], 
     [3, 'numberBoard', 10, 15],
     [3, 'numberPad', 10, 27],
@@ -37,6 +37,7 @@ let numberGrid;
 let skipValueDisplay;
 let skipValueSequenceDisplay;
 let gamesCompletedDisplay;
+let numbersCompletedDisplay;
 let nextGameBtn;
 let gridHelpBtn;
 let confettiContainer;
@@ -57,6 +58,7 @@ function initializeGame() {
     skipValueDisplay = document.getElementById('skip-value');
     skipValueSequenceDisplay = document.getElementById('skip-value-sequence');
     gamesCompletedDisplay = document.getElementById('games-completed');
+    numbersCompletedDisplay = document.getElementById('numbers-completed');
     nextGameBtn = document.getElementById('next-game-btn');
     gridHelpBtn = document.getElementById('grid-help-btn');
     confettiContainer = document.getElementById('confetti-container');
@@ -138,6 +140,9 @@ function handleCorrectAnswer(tile) {
     
     // Add to sequence
     sequence.push(targetNumber);
+    
+    // Update numbers completed display
+    numbersCompletedDisplay.textContent = correctCount;
     
     // Update tile coloring with new system
     updateTileColoring();
@@ -441,6 +446,9 @@ function checkSequenceAnswer(answer) {
         sequence.push(answer);
         correctCount++;
         
+        // Update numbers completed display
+        numbersCompletedDisplay.textContent = correctCount;
+        
         // Reset input
         currentInput = '';
         
@@ -493,6 +501,9 @@ function startNewGame() {
     sequence = [];
     gameActive = true;
     isGridHelpActive = false;
+    
+    // Reset numbers completed counter
+    numbersCompletedDisplay.textContent = 0;
     
     // Hide next game button and grid help button
     nextGameBtn.classList.add('hidden');
