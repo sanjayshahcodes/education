@@ -116,13 +116,12 @@ body {
 
 .numbers-counter {
     position: absolute;
-    top: 55px;
-    left: 10px;
+    top: -44px;
+    right: 0px;
     color: #666;
     font-size: 1.5rem;
     font-weight: bold;
-    z-index: 100;
-    text-align: left;
+    z-index: 10;
 }
 
 .game-board {
@@ -147,6 +146,7 @@ body {
     min-height: 0;
     width: 100%;
     padding: 0;
+    position: relative;
 }
 
 .sequence-container {
@@ -160,6 +160,10 @@ body {
     color: #333;
     text-align: center;
     margin: 0 0 15px 0;
+}
+
+.grid-wrapper {
+    position: relative;
 }
 
 .number-grid {

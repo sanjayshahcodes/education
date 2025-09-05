@@ -3,7 +3,7 @@
 // Modes: 'numberBoard' or 'numberPad'
 // fixedStartingNumber: specific number to start with, or -1 for random (1 to maxStartingNumber)
 const GAME_SETTINGS = [
-    [6, 'numberBoard', 10, 19],
+    [5, 'numberBoard', 10, 19],
     [2, 'numberPad', 10, 33], 
     [3, 'numberBoard', 10, 15],
     [3, 'numberPad', 10, 27],
@@ -60,7 +60,7 @@ function initializeGame() {
     skipValueSequenceDisplay = document.getElementById('skip-value-sequence');
     gamesCompletedDisplay = document.getElementById('games-completed');
     numbersCompletedDisplay = document.getElementById('numbers-completed');
-    numbersCompletedCounter = document.querySelector('.numbers-counter');
+    numbersCompletedCounter = numbersCompletedDisplay; // Same element
     nextGameBtn = document.getElementById('next-game-btn');
     gridHelpBtn = document.getElementById('grid-help-btn');
     confettiContainer = document.getElementById('confetti-container');
@@ -348,10 +348,7 @@ function switchToSequenceMode() {
     gridMode.classList.add('hidden');
     sequenceMode.classList.remove('hidden');
     
-    // Hide counter for numberPad mode (visual tiles show progress)
-    if (numbersCompletedCounter) {
-        numbersCompletedCounter.style.display = 'none';
-    }
+    // Counter is now part of the grid and will be hidden automatically with the grid
     
     // Show grid help button for sequence mode
     gridHelpBtn.classList.remove('hidden');
@@ -379,10 +376,7 @@ function switchToGridMode() {
     gridMode.classList.remove('hidden');
     sequenceMode.classList.add('hidden');
     
-    // Show counter for numberBoard mode (needed to track progress on large grid)
-    if (numbersCompletedCounter) {
-        numbersCompletedCounter.style.display = 'block';
-    }
+    // Counter is now part of the grid and will be shown automatically with the grid
     
     // Hide grid help button for grid mode
     gridHelpBtn.classList.add('hidden');
