@@ -308,7 +308,7 @@ body {
 .sequence-tile.question {
     background: #dda0dd;
     color: #333;
-    border: 2px solid #333;
+    border: 2px dashed #8e44ad;
     font-weight: bold;
     transform: scale(1.35);
     z-index: 1;
