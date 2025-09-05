@@ -3,12 +3,16 @@
 // Modes: 'numberBoard' or 'numberPad'
 // fixedStartingNumber: specific number to start with, or -1 for random (1 to maxStartingNumber)
 const GAME_SETTINGS = [
+    [2, 'numberBoard', 10, 19],
+    [2, 'numberPad', 10, 33], 
+    [3, 'numberBoard', 10, 15],
+    [3, 'numberPad', 10, 27],
+    [4, 'numberBoard', 10, 7],
+    [4, 'numberPad', 10, 9], 
+    [5, 'numberBoard', 10, 3],
+    [5, 'numberPad', 10, 5],
     [6, 'numberBoard', 10, 3],
-    [6, 'numberBoard', 10, 4], 
     [6, 'numberPad', 10, 5],
-    [7, 'numberBoard', 10, 7],
-    [7, 'numberBoard', 10, 8], 
-    [7, 'numberPad', 10, 3],
 ];
 
 // Current game variables
@@ -400,8 +404,11 @@ function checkSequenceAnswer(answer) {
         // Update display
         updateSequenceDisplay();
         
-        // Check if sequence is complete (need 9 more after starting number = 10 total)
-        if (correctCount >= 9) {
+        // Check if sequence is complete
+        // Complete after 10 correct answers (plus starting number = 11 total)
+        // OR if next number would exceed 100
+        const nextNumber = answer + currentSkipBy;
+        if (correctCount >= 10 || nextNumber > 100) {
             completeGame();
         }
     } else {
