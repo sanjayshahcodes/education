@@ -3,7 +3,7 @@
 // Modes: 'numberBoard' or 'numberPad'
 // fixedStartingNumber: specific number to start with, or -1 for random (1 to maxStartingNumber)
 const GAME_SETTINGS = [
-    [6, 'numberBoard', 10, 19],
+    [6, 'numberPad', 10, 19],
     [2, 'numberPad', 10, 33], 
     [3, 'numberBoard', 10, 15],
     [3, 'numberPad', 10, 27],
@@ -162,7 +162,7 @@ function handleCorrectAnswer(tile) {
 function updateTileColoring() {
     // Clear all previous coloring
     document.querySelectorAll('.number-tile').forEach(tile => {
-        tile.classList.remove('correct', 'current', 'completed', 'current-sequence', 'current-position');
+        tile.classList.remove('correct', 'current', 'completed', 'current-sequence', 'current-position', 'current-completed');
         tile.style.fontSize = ''; // Reset font size
     });
     
@@ -188,7 +188,7 @@ function updateTileColoring() {
         const tile = document.querySelector(`[data-number="${i}"]`);
         if (tile) {
             if (i === currentPos) {
-                // Current position gets bigger font and bold
+                // Current position gets bigger font and bold but stays light purple
                 tile.classList.add('current-position');
             } else {
                 tile.classList.add('current-sequence');
@@ -502,7 +502,7 @@ function startNewGame() {
         
         // Reset all tiles
         document.querySelectorAll('.number-tile').forEach(tile => {
-            tile.classList.remove('correct', 'current', 'incorrect', 'completed', 'current-sequence', 'current-position');
+            tile.classList.remove('correct', 'current', 'incorrect', 'completed', 'current-sequence', 'current-position', 'current-completed');
             tile.style.fontSize = ''; // Reset font size
         });
         
@@ -575,12 +575,33 @@ function showGridHelp() {
     
     // Reset all tiles first
     document.querySelectorAll('.number-tile').forEach(tile => {
-        tile.classList.remove('correct', 'current', 'incorrect', 'completed', 'current-sequence', 'current-position');
+        tile.classList.remove('correct', 'current', 'incorrect', 'completed', 'current-sequence', 'current-position', 'current-completed');
         tile.style.fontSize = ''; // Reset font size
     });
     
-    // Apply the new coloring system to show progress
-    updateTileColoring();
+    // For numberPad mode, show all tiles up to current number as light blue
+    // with the current number having bigger font and bold
+    if (gameMode === 'sequence') {
+        if (sequence.length > 0) {
+            const currentPos = sequence[sequence.length - 1];
+            
+            // Color all numbers from 1 to current position as light blue
+            for (let i = 1; i <= currentPos; i++) {
+                const tile = document.querySelector(`[data-number="${i}"]`);
+                if (tile) {
+                    if (i === currentPos) {
+                        // Current position gets bigger font and bold
+                        tile.classList.add('current-completed');
+                    } else {
+                        tile.classList.add('completed');
+                    }
+                }
+            }
+        }
+    } else {
+        // For grid mode, use the normal pattern coloring
+        updateTileColoring();
+    }
 }
 
 function hideGridHelp() {

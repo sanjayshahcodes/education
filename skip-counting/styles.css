@@ -218,6 +218,14 @@ body {
     border-color: #333;
 }
 
+.number-tile.current-completed {
+    background: #add8e6;
+    color: #333;
+    font-weight: bold;
+    font-size: 1.3rem;
+    border-color: #333;
+}
+
 .number-tile.incorrect {
     background: #f44336;
     border-color: #d32f2f;
@@ -289,8 +297,8 @@ body {
 }
 
 .sequence-tile.completed {
-    background: #8e44ad;
-    color: white;
+    background: #add8e6;
+    color: #333;
     font-weight: bold;
     border-color: #333;
     transform: scale(1.35);
@@ -298,9 +306,9 @@ body {
 }
 
 .sequence-tile.question {
-    background: #eedcf5;
-    color: #8e44ad;
-    border: 2px dashed #8e44ad;
+    background: #dda0dd;
+    color: #333;
+    border: 2px solid #333;
     font-weight: bold;
     transform: scale(1.35);
     z-index: 1;
