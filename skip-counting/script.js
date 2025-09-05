@@ -3,7 +3,7 @@
 // Modes: 'numberBoard' or 'numberPad'
 // fixedStartingNumber: specific number to start with, or -1 for random (1 to maxStartingNumber)
 const GAME_SETTINGS = [
-    [2, 'numberBoard', 10, 19],
+    [6, 'numberBoard', 10, 19],
     [2, 'numberPad', 10, 33], 
     [3, 'numberBoard', 10, 15],
     [3, 'numberPad', 10, 27],
@@ -171,16 +171,20 @@ function updateTileColoring() {
     const currentPos = sequence[sequence.length - 1];
     const previousPos = sequence.length > 1 ? sequence[sequence.length - 2] : 0;
     
-    // Color all numbers from 1 to previous position as light blue (completed)
-    for (let i = 1; i <= previousPos; i++) {
+    // Calculate the pattern continuation
+    // Find what the previous number in the skip counting pattern would be
+    const patternPrevious = currentPos - currentSkipBy;
+    
+    // Color all numbers from 1 to pattern previous position as light blue (completed)
+    for (let i = 1; i <= patternPrevious; i++) {
         const tile = document.querySelector(`[data-number="${i}"]`);
         if (tile) {
             tile.classList.add('completed');
         }
     }
     
-    // Color numbers from previous position + 1 to current position as light purple (current sequence)
-    for (let i = previousPos + 1; i <= currentPos; i++) {
+    // Color numbers from pattern previous + 1 to current position as light purple (current sequence)
+    for (let i = patternPrevious + 1; i <= currentPos; i++) {
         const tile = document.querySelector(`[data-number="${i}"]`);
         if (tile) {
             if (i === currentPos) {
