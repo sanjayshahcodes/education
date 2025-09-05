@@ -191,9 +191,6 @@ body {
     overflow: hidden;
 }
 
-.number-tile:hover {
-    background: #d0d0d0;
-}
 
 .number-tile.current {
     background: #8e44ad;
