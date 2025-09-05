@@ -380,20 +380,35 @@ function switchToGridMode() {
 function updateSequenceDisplay() {
     sequenceDisplay.innerHTML = '';
     
-    // Add completed numbers
-    for (let i = 0; i < sequence.length; i++) {
-        const tile = document.createElement('div');
-        tile.className = 'sequence-tile completed';
-        tile.textContent = sequence[i];
-        sequenceDisplay.appendChild(tile);
+    // Calculate all the numbers in the sequence (starting number + 10 more)
+    const startingNumber = sequence[0];
+    const allNumbers = [startingNumber];
+    for (let i = 1; i <= 10; i++) {
+        allNumbers.push(startingNumber + (i * currentSkipBy));
     }
     
-    // Add question mark tile for next number (only if we haven't completed 10 numbers)
-    if (sequence.length < 10) {
-        questionTile = document.createElement('div');
-        questionTile.className = 'sequence-tile question';
-        questionTile.textContent = currentInput || '?';
-        sequenceDisplay.appendChild(questionTile);
+    // Create tiles for all 11 numbers
+    for (let i = 0; i < allNumbers.length; i++) {
+        const tile = document.createElement('div');
+        tile.dataset.index = i;
+        tile.dataset.number = allNumbers[i];
+        
+        if (i < sequence.length) {
+            // Completed numbers - show actual number with light blue styling
+            tile.className = 'sequence-tile completed';
+            tile.textContent = allNumbers[i];
+        } else if (i === sequence.length && sequence.length <= 10) {
+            // Current question - show input or ? with light purple styling
+            tile.className = 'sequence-tile question';
+            tile.textContent = currentInput || '?';
+            questionTile = tile;
+        } else {
+            // Empty future tiles - show empty with gray styling
+            tile.className = 'sequence-tile empty';
+            tile.textContent = '';
+        }
+        
+        sequenceDisplay.appendChild(tile);
     }
 }
 
@@ -417,10 +432,7 @@ function handleNumberPadClick(event) {
         // Backspace - remove last character
         if (currentInput.length > 0) {
             currentInput = currentInput.slice(0, -1);
-            if (questionTile) {
-                questionTile.textContent = currentInput || '?';
-                questionTile.classList.remove('incorrect');
-            }
+            updateSequenceDisplay(); // Refresh display to show updated input
         }
     } else if (value === 'enter') {
         if (currentInput !== '') {
@@ -430,10 +442,7 @@ function handleNumberPadClick(event) {
         // Add digit to input (max 3 digits for numbers up to 100)
         if (currentInput.length < 3) {
             currentInput += value;
-            if (questionTile) {
-                questionTile.textContent = currentInput;
-                questionTile.classList.remove('incorrect');
-            }
+            updateSequenceDisplay(); // Refresh display to show current input
         }
     }
 }
