@@ -133,15 +133,14 @@ function handleTileClick(event) {
 }
 
 function handleCorrectAnswer(tile) {
-    // Mark tile as correct
-    tile.classList.add('correct');
-    tile.classList.remove('current');
-    
     // Update progress within current game
     correctCount++;
     
     // Add to sequence
     sequence.push(targetNumber);
+    
+    // Update tile coloring with new system
+    updateTileColoring();
     
     // Check if game is complete
     if (correctCount >= 10) {
@@ -153,17 +152,45 @@ function handleCorrectAnswer(tile) {
     currentNumber = targetNumber;
     targetNumber = currentNumber + currentSkipBy;
     
-    // Remove any current highlighting from previous tiles
-    document.querySelectorAll('.number-tile.current').forEach(t => {
-        t.classList.remove('current');
-    });
-    
     // Check if game should continue or complete
     if (targetNumber > 100) {
         // If target exceeds 100, complete the game
         completeGame();
     }
-    // Note: We don't highlight the next target - child must figure it out!
+}
+
+function updateTileColoring() {
+    // Clear all previous coloring
+    document.querySelectorAll('.number-tile').forEach(tile => {
+        tile.classList.remove('correct', 'current', 'completed', 'current-sequence', 'current-position');
+        tile.style.fontSize = ''; // Reset font size
+    });
+    
+    if (sequence.length === 0) return;
+    
+    const currentPos = sequence[sequence.length - 1];
+    const previousPos = sequence.length > 1 ? sequence[sequence.length - 2] : 0;
+    
+    // Color all numbers from 1 to previous position as light blue (completed)
+    for (let i = 1; i <= previousPos; i++) {
+        const tile = document.querySelector(`[data-number="${i}"]`);
+        if (tile) {
+            tile.classList.add('completed');
+        }
+    }
+    
+    // Color numbers from previous position + 1 to current position as light purple (current sequence)
+    for (let i = previousPos + 1; i <= currentPos; i++) {
+        const tile = document.querySelector(`[data-number="${i}"]`);
+        if (tile) {
+            if (i === currentPos) {
+                // Current position gets bigger font and bold
+                tile.classList.add('current-position');
+            } else {
+                tile.classList.add('current-sequence');
+            }
+        }
+    }
 }
 
 function handleIncorrectAnswer(tile) {
@@ -471,21 +498,19 @@ function startNewGame() {
         
         // Reset all tiles
         document.querySelectorAll('.number-tile').forEach(tile => {
-            tile.classList.remove('correct', 'current', 'incorrect');
+            tile.classList.remove('correct', 'current', 'incorrect', 'completed', 'current-sequence', 'current-position');
+            tile.style.fontSize = ''; // Reset font size
         });
         
         // Choose starting number based on settings
         currentNumber = getStartingNumber();
         targetNumber = currentNumber + currentSkipBy;
         
-        // Highlight starting number as correct (already completed)
-        const startTile = document.querySelector(`[data-number="${currentNumber}"]`);
-        if (startTile) {
-            startTile.classList.add('correct');
-        }
-        
         // Add starting number to sequence
         sequence.push(currentNumber);
+        
+        // Initialize tile coloring
+        updateTileColoring();
     } else {
         // Sequence mode (numberPad)
         switchToSequenceMode();
@@ -546,16 +571,12 @@ function showGridHelp() {
     
     // Reset all tiles first
     document.querySelectorAll('.number-tile').forEach(tile => {
-        tile.classList.remove('correct', 'current', 'incorrect');
+        tile.classList.remove('correct', 'current', 'incorrect', 'completed', 'current-sequence', 'current-position');
+        tile.style.fontSize = ''; // Reset font size
     });
     
-    // Mark completed numbers as correct (purple)
-    sequence.forEach(num => {
-        const tile = document.querySelector(`[data-number="${num}"]`);
-        if (tile) {
-            tile.classList.add('correct');
-        }
-    });
+    // Apply the new coloring system to show progress
+    updateTileColoring();
 }
 
 function hideGridHelp() {

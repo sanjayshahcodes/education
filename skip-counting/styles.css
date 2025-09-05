@@ -196,6 +196,28 @@ body {
     border-color: #333;
 }
 
+.number-tile.completed {
+    background: #add8e6;
+    color: #333;
+    font-weight: normal;
+    border-color: #333;
+}
+
+.number-tile.current-sequence {
+    background: #dda0dd;
+    color: #333;
+    font-weight: normal;
+    border-color: #333;
+}
+
+.number-tile.current-position {
+    background: #dda0dd;
+    color: #333;
+    font-weight: bold;
+    font-size: 1.3rem;
+    border-color: #333;
+}
+
 .number-tile.incorrect {
     background: #f44336;
     border-color: #d32f2f;
