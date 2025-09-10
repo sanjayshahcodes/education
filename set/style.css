@@ -1,0 +1,307 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #2d5a27;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 1024px;
+    height: 100vh;
+    max-height: 768px;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 0 20px;
+}
+
+h1 {
+    font-size: 48px;
+    font-weight: bold;
+    letter-spacing: 4px;
+}
+
+.progress-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.progress-box {
+    width: 40px;
+    height: 40px;
+    border: 3px dashed #888;
+    border-radius: 8px;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.progress-box.completed {
+    border: 3px solid #6f42c1;
+    background-color: #6f42c1;
+    position: relative;
+}
+
+.progress-box.completed::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.progress-box:not(.completed) {
+    cursor: default;
+}
+
+.game-board {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    padding: 0 20px;
+    max-height: 500px;
+}
+
+.card {
+    background-color: white;
+    border: 3px solid #aaa;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 140px;
+    padding: 15px;
+    position: relative;
+}
+
+.card:hover {
+    /* Removed scaling effect */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card.selected {
+    border-color: #ea2fa2;
+    border-width: 9px;
+}
+
+.card.highlighted {
+    border-color: #d36708;
+    border-width: 9px;
+}
+
+.card.correct-set {
+    border-color: #28a745;
+    background-color: #f8fff8;
+    animation: flash-correct 0.6s ease-in-out;
+}
+
+.card.incorrect-set {
+    border-color: #dc3545;
+    animation: flash-incorrect 0.6s ease-in-out;
+}
+
+@keyframes flash-correct {
+    0%, 100% { background-color: #f8fff8; }
+    50% { background-color: #d4edda; }
+}
+
+@keyframes flash-incorrect {
+    0%, 100% { background-color: white; }
+    25%, 75% { background-color: #f8d7da; }
+    50% { background-color: #f5c6cb; }
+}
+
+.card.duplicate-set {
+    border-color: #ffc107;
+    background-color: #fff3cd;
+    animation: flash-duplicate 0.6s ease-in-out;
+}
+
+@keyframes flash-duplicate {
+    0%, 100% { background-color: #fff3cd; }
+    50% { background-color: #ffeaa7; }
+}
+
+.shapes {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.shape {
+    width: 40px;
+    height: 40px;
+}
+
+/* Circle shape */
+.circle {
+    border-radius: 50%;
+}
+
+/* Square shape */
+.square {
+    border-radius: 4px;
+}
+
+/* Triangle shape using CSS */
+.triangle {
+    width: 0;
+    height: 0;
+    background: transparent !important;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 35px solid;
+}
+
+/* Colors */
+.red { background-color: #dc3545; }
+.green { background-color: #28a745; }
+.purple { background-color: #6f42c1; }
+
+/* Triangle colors need border-bottom-color */
+.triangle.red { border-bottom-color: #dc3545; }
+.triangle.green { border-bottom-color: #28a745; }
+.triangle.purple { border-bottom-color: #6f42c1; }
+
+.game-controls {
+    text-align: center;
+    margin-top: 30px;
+}
+
+#new-game {
+    background-color: #4a9eff;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#new-game:hover {
+    background-color: #357abd;
+}
+
+.game-over {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    color: #333;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+.game-over h2 {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: #28a745;
+}
+
+.game-over p {
+    font-size: 20px;
+    margin-bottom: 25px;
+}
+
+.game-over button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.game-over button:hover {
+    background-color: #1e7e34;
+}
+
+.checkmark {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #28a745;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 10;
+    animation: checkmark-appear 0.3s ease-in-out;
+    transition: opacity 0.5s ease-out;
+}
+
+.checkmark.fade-out {
+    opacity: 0;
+}
+
+@keyframes checkmark-appear {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background-color: #ff6b6b;
+    animation: confetti-fall 3s linear forwards;
+    z-index: 1000;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}

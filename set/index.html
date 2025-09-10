@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SET Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SET</h1>
+            <div class="progress-bar">
+                <div class="progress-box" data-set-index="0"></div>
+                <div class="progress-box" data-set-index="1"></div>
+                <div class="progress-box" data-set-index="2"></div>
+                <div class="progress-box" data-set-index="3"></div>
+                <div class="progress-box" data-set-index="4"></div>
+                <div class="progress-box" data-set-index="5"></div>
+            </div>
+        </header>
+        
+        <div class="game-board" id="game-board">
+            <!-- Cards will be generated here -->
+        </div>
+        
+        <div class="game-controls">
+            <button id="new-game" onclick="startNewGame()">New Game</button>
+        </div>
+        
+        <div class="game-over" id="game-over" style="display: none;">
+            <h2>Congratulations!</h2>
+            <p>You found all 6 sets!</p>
+            <button onclick="startNewGame()">Play Again</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
