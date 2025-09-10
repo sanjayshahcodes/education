@@ -6,8 +6,8 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #2d5a27;
-    color: white;
+    background-color: lightblue;
+    color: #333;
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -36,6 +36,7 @@ h1 {
     font-size: 48px;
     font-weight: bold;
     letter-spacing: 4px;
+    color: #2c3e50;
 }
 
 .progress-bar {
@@ -190,25 +191,6 @@ h1 {
 .triangle.green { border-bottom-color: #28a745; }
 .triangle.purple { border-bottom-color: #6f42c1; }
 
-.game-controls {
-    text-align: center;
-    margin-top: 30px;
-}
-
-#new-game {
-    background-color: #4a9eff;
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    font-size: 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#new-game:hover {
-    background-color: #357abd;
-}
 
 .game-over {
     position: fixed;
