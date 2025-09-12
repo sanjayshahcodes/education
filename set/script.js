@@ -297,12 +297,21 @@ class SetGame {
                     cardElement.classList.add('highlighted');
                 }
             });
+            
+            // Also highlight the corresponding progress box
+            const progressBox = document.querySelector(`[data-set-index="${setIndex}"]`);
+            if (progressBox) {
+                progressBox.classList.add('highlighted');
+            }
         }
     }
 
     clearHighlight() {
         document.querySelectorAll('.card.highlighted').forEach(card => {
             card.classList.remove('highlighted');
+        });
+        document.querySelectorAll('.progress-box.highlighted').forEach(box => {
+            box.classList.remove('highlighted');
         });
     }
 
