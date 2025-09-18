@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Counting Jar Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Games completed counter -->
+        <div id="games-counter">
+            <div id="counter-label">Games Completed:</div>
+            <div id="counter-value">0</div>
+        </div>
+        
+        <!-- Left side - Objects to drag -->
+        <div id="objects-area">
+            <h2>Drag all items into the jar!</h2>
+            <div id="objects-container"></div>
+        </div>
+        
+        <!-- Right side - Jar -->
+        <div id="jar-area">
+            <div id="jar">
+                <div id="jar-contents"></div>
+            </div>
+        </div>
+        
+        <!-- Bottom - Number selection (hidden initially) -->
+        <div id="number-selection" class="hidden">
+            <h2>How many items are in the jar?</h2>
+            <div id="numbers-container">
+                <button class="number-btn" data-number="1">1</button>
+                <button class="number-btn" data-number="2">2</button>
+                <button class="number-btn" data-number="3">3</button>
+                <button class="number-btn" data-number="4">4</button>
+                <button class="number-btn" data-number="5">5</button>
+                <button class="number-btn" data-number="6">6</button>
+                <button class="number-btn" data-number="7">7</button>
+                <button class="number-btn" data-number="8">8</button>
+                <button class="number-btn" data-number="9">9</button>
+                <button class="number-btn" data-number="10">10</button>
+            </div>
+        </div>
+        
+        <!-- Feedback messages -->
+        <div id="feedback" class="hidden"></div>
+        
+        <!-- Confetti container -->
+        <div id="confetti-container"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
