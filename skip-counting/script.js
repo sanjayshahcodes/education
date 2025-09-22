@@ -5,12 +5,12 @@
 const GAME_SETTINGS = [
     [3, 'numberBoard', 10, -1],
     [3, 'numberPad', 10, -1],
-    [10, 'numberBoard', 10,-1],
-    [10, 'numberPad', 10, -1],
     [4, 'numberBoard', 10,-1],
     [4, 'numberPad', 10, -1],
     [5, 'numberBoard', 10,-1],
-    [5, 'numberPad', 10, -1]
+    [5, 'numberPad', 10, -1],
+    [6, 'numberBoard', 10,-1],
+    [6, 'numberPad', 10, -1]
 ];
 
 // Current game variables

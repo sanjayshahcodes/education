@@ -203,20 +203,20 @@ body {
 
 #numbers-container {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     flex-wrap: nowrap;
     justify-content: center;
     overflow-x: auto;
 }
 
 .number-btn {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     border: 3px solid #2E8B57;
     border-radius: 50%;
     background: white;
     color: #2E8B57;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
