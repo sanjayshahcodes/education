@@ -1,11 +1,11 @@
 class CountingJarGame {
     constructor() {
         this.objects = [
-            { type: 'dog', emoji: '🐶', class: 'dog' },
-            { type: 'cat', emoji: '🐱', class: 'cat' },
-            { type: 'frog', emoji: '🐸', class: 'frog' },
-            { type: 'rabbit', emoji: '🐰', class: 'rabbit' },
-            { type: 'bear', emoji: '🐻', class: 'bear' }
+            { type: 'lollipop', emoji: '🍭', class: 'lollipop' },
+            { type: 'apple', emoji: '🍎', class: 'apple' },
+            { type: 'diamond', emoji: '💎', class: 'diamond' },
+            { type: 'heart', emoji: '💜', class: 'heart' },
+            { type: 'balloon', emoji: '🎈', class: 'balloon' }
         ];
         
         this.currentCount = 0;

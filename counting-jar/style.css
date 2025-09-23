@@ -99,11 +99,11 @@ body {
 }
 
 /* Object types */
-.dog { background: #87CEEB; }
-.cat { background: #DDA0DD; }
-.frog { background: #98FB98; }
-.rabbit { background: #F0E68C; }
-.bear { background: #FFB6C1; }
+.lollipop { background: #FFB6C1; }
+.apple { background: #98FB98; }
+.diamond { background: #E6E6FA; }
+.heart { background: #F0E68C; }
+.balloon { background: #87CEEB; }
 
 #jar-area {
     flex: 1;
