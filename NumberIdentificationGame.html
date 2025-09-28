@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Identification Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #fce4ec;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            user-select: none;
+            position: relative;
+        }
+
+        .game-container {
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #6b46c1;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats {
+            font-size: 1rem;
+            color: #666;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 15px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-weight: normal;
+        }
+
+        .instruction {
+            font-size: 3rem;
+            color: #ffffff;
+            margin-bottom: 40px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #667eea;
+            padding: 20px;
+            border-radius: 25px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .instruction:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            background: #7c8af0;
+        }
+        
+        .instruction:active {
+            transform: translateY(0);
+        }
+
+        .numbers-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .number-button {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            background: #ffecd2;
+            color: #8b4513;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #ffffff;
+        }
+
+        .number-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            background: #ffb347;
+        }
+
+        .number-button:active {
+            transform: translateY(0);
+        }
+
+        .number-button.correct {
+            animation: correctFlash 0.6s ease;
+        }
+
+        .number-button.wrong {
+            animation: wrongFlash 0.6s ease;
+        }
+
+        @keyframes correctFlash {
+            0%, 100% { background: #ffecd2; }
+            50% { background: #56f39a; color: white; transform: scale(1.1); }
+        }
+
+        @keyframes wrongFlash {
+            0%, 100% { background: #ffecd2; }
+            50% { background: #ff6b9d; color: white; transform: scale(0.95); }
+        }
+
+
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: #f56565;
+            animation: confetti-fall 1s linear forwards;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* iPad specific styles */
+        @media (max-width: 1024px) {
+            .numbers-container {
+                gap: 10px;
+            }
+            
+            .number-button {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .instruction {
+                font-size: 1.5rem;
+            }
+            
+            .number-button {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stats">
+        Completed: <span id="score">0</span>
+    </div>
+    
+    <div class="game-container">
+        <h1 class="title">Number Game</h1>
+        
+        <div class="instruction" id="instruction">
+            🔊
+        </div>
+        
+        <div class="numbers-container" id="numbersContainer">
+            <!-- Numbers 1-10 will be generated here -->
+        </div>
+        
+    </div>
+
+    <script>
+        class NumberGame {
+            constructor() {
+                this.currentTarget = null;
+                this.gamesCompleted = 0;
+                this.numbersUsed = [];
+                this.allNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+                this.isWaitingForAnswer = false;
+                this.colorSchemes = [
+                    { bg: '#fce4ec', instruction: '#667eea', buttons: '#ffecd2' },
+                    { bg: '#e8f5e8', instruction: '#4caf50', buttons: '#c8e6c9' },
+                    { bg: '#fff3e0', instruction: '#ff9800', buttons: '#ffcc80' },
+                    { bg: '#e3f2fd', instruction: '#2196f3', buttons: '#90caf9' },
+                    { bg: '#f3e5f5', instruction: '#9c27b0', buttons: '#ce93d8' }
+                ];
+                this.currentSchemeIndex = 0;
+                
+                this.initializeGame();
+                this.createNumberButtons();
+                this.setupEventListeners();
+            }
+
+            initializeGame() {
+                this.instruction = document.getElementById('instruction');
+                this.scoreElement = document.getElementById('score');
+                this.numbersContainer = document.getElementById('numbersContainer');
+            }
+
+            createNumberButtons() {
+                this.numbersContainer.innerHTML = '';
+                
+                for (let i = 1; i <= 10; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'number-button';
+                    button.textContent = i;
+                    button.dataset.number = i;
+                    button.addEventListener('click', () => this.handleNumberClick(i, button));
+                    this.numbersContainer.appendChild(button);
+                }
+            }
+
+            setupEventListeners() {
+                this.instruction.addEventListener('click', () => this.handleInstructionClick());
+                
+                // Start the first game automatically
+                setTimeout(() => this.startNewGame(), 1000);
+            }
+            
+            handleInstructionClick() {
+                if (this.isWaitingForAnswer) {
+                    // Repeat current instruction
+                    this.speak(this.currentInstruction);
+                } else {
+                    // Start new game
+                    this.startNewGame();
+                }
+            }
+
+            startNewGame() {
+                this.isWaitingForAnswer = false;
+                
+                // Reset button styles
+                const buttons = document.querySelectorAll('.number-button');
+                buttons.forEach(button => {
+                    button.classList.remove('correct', 'wrong');
+                });
+                
+                // Check if we need to reset the cycle
+                if (this.numbersUsed.length === this.allNumbers.length) {
+                    this.numbersUsed = [];
+                }
+                
+                // Pick a random number that hasn't been used in this cycle
+                const availableNumbers = this.allNumbers.filter(num => !this.numbersUsed.includes(num));
+                this.currentTarget = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+                this.numbersUsed.push(this.currentTarget);
+                
+                this.isWaitingForAnswer = true;
+                this.speakInstruction(`Press ${this.currentTarget}`);
+            }
+
+            handleNumberClick(number, buttonElement) {
+                if (!this.isWaitingForAnswer) return;
+                
+                if (number === this.currentTarget) {
+                    this.handleCorrectAnswer(buttonElement);
+                } else {
+                    this.handleWrongAnswer(buttonElement);
+                }
+            }
+
+            handleCorrectAnswer(buttonElement) {
+                this.isWaitingForAnswer = false;
+                buttonElement.classList.add('correct');
+                
+                this.createConfetti();
+                this.gamesCompleted++;
+                this.scoreElement.textContent = this.gamesCompleted;
+                
+                // Change color scheme for next game
+                this.currentSchemeIndex = (this.currentSchemeIndex + 1) % this.colorSchemes.length;
+                this.updateColorScheme();
+                
+                // Show temporary celebration emoji that fades away
+                this.showTemporaryCelebration();
+            }
+
+            handleWrongAnswer(buttonElement) {
+                buttonElement.classList.add('wrong');
+                
+                setTimeout(() => {
+                    buttonElement.classList.remove('wrong');
+                    this.speakInstruction(`Try again. Press ${this.currentTarget}`);
+                }, 600);
+            }
+
+            speakInstruction(text) {
+                // Store the current instruction for repeat functionality
+                this.currentInstruction = text;
+                
+                // Just show audio symbol
+                this.instruction.textContent = '🔊';
+                
+                this.speak(text);
+            }
+            
+            speak(text) {
+                // Use Web Speech API for text-to-speech
+                if ('speechSynthesis' in window) {
+                    // Cancel any ongoing speech
+                    speechSynthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    
+                    // Set voice preferences for more natural sound
+                    utterance.rate = 0.7;  // Slower for clarity
+                    utterance.pitch = 1.2; // Slightly higher pitch
+                    utterance.volume = 1;
+                    
+                    // Try to use a female voice with priority order
+                    const voices = speechSynthesis.getVoices();
+                    const femaleVoice = voices.find(voice => 
+                        voice.name.toLowerCase().includes('samantha') ||
+                        voice.name.toLowerCase().includes('susan') ||
+                        voice.name.toLowerCase().includes('karen') ||
+                        voice.name.toLowerCase().includes('victoria') ||
+                        voice.name.toLowerCase().includes('female') ||
+                        (voice.gender && voice.gender === 'female')
+                    );
+                    
+                    if (femaleVoice) {
+                        utterance.voice = femaleVoice;
+                    }
+                    
+                    // Add pauses around the number for emphasis
+                    if (text.includes('Press')) {
+                        const number = text.match(/\d+/)[0];
+                        utterance.text = `Press... ${number}`;
+                    }
+                    
+                    // Small delay to ensure iPad compatibility
+                    setTimeout(() => {
+                        speechSynthesis.speak(utterance);
+                    }, 100);
+                }
+            }
+
+            showTemporaryCelebration() {
+                // Show celebration emoji briefly
+                this.instruction.textContent = '🎉';
+                
+                // Fade back to audio symbol after 1.5 seconds
+                setTimeout(() => {
+                    this.instruction.textContent = '🔊';
+                }, 1500);
+            }
+            
+            updateColorScheme() {
+                const scheme = this.colorSchemes[this.currentSchemeIndex];
+                
+                // Update background
+                document.body.style.background = scheme.bg;
+                
+                // Update instruction bar
+                this.instruction.style.background = scheme.instruction;
+                
+                // Update number buttons
+                const buttons = document.querySelectorAll('.number-button');
+                buttons.forEach(button => {
+                    button.style.background = scheme.buttons;
+                });
+            }
+            
+            createConfetti() {
+                const colors = ['#ff6b9d', '#c44569', '#f8b500', '#40739e', '#487eb0', '#8c7ae6', '#00a8ff', '#9c88ff', '#fbc531', '#e55039'];
+                
+                for (let i = 0; i < 40; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * window.innerWidth + 'px';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDelay = Math.random() * 0.3 + 's';
+                        confetti.style.width = (Math.random() * 8 + 8) + 'px';
+                        confetti.style.height = confetti.style.width;
+                        
+                        document.body.appendChild(confetti);
+                        
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, 1000);
+                    }, i * 15);
+                }
+            }
+        }
+
+        // Initialize the game when the page loads
+        window.addEventListener('load', () => {
+            // Wait for voices to load on iPad
+            if ('speechSynthesis' in window) {
+                const loadVoices = () => {
+                    if (speechSynthesis.getVoices().length > 0) {
+                        new NumberGame();
+                    } else {
+                        setTimeout(loadVoices, 100);
+                    }
+                };
+                
+                if (speechSynthesis.getVoices().length > 0) {
+                    new NumberGame();
+                } else {
+                    speechSynthesis.onvoiceschanged = () => {
+                        new NumberGame();
+                    };
+                }
+            } else {
+                new NumberGame();
+            }
+        });
+
+        // Prevent zoom on double tap for iPad
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
