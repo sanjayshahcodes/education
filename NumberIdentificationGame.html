@@ -340,19 +340,13 @@
                     utterance.pitch = 1.2; // Slightly higher pitch
                     utterance.volume = 1;
                     
-                    // Try to use a female voice with priority order
-                    const voices = speechSynthesis.getVoices();
-                    const femaleVoice = voices.find(voice => 
-                        voice.name.toLowerCase().includes('samantha') ||
-                        voice.name.toLowerCase().includes('susan') ||
-                        voice.name.toLowerCase().includes('karen') ||
-                        voice.name.toLowerCase().includes('victoria') ||
-                        voice.name.toLowerCase().includes('female') ||
-                        (voice.gender && voice.gender === 'female')
-                    );
+                    // Lock to one specific voice for consistency
+                    if (!this.selectedVoice) {
+                        this.selectBestVoice();
+                    }
                     
-                    if (femaleVoice) {
-                        utterance.voice = femaleVoice;
+                    if (this.selectedVoice) {
+                        utterance.voice = this.selectedVoice;
                     }
                     
                     // Add pauses around the number for emphasis
@@ -365,6 +359,62 @@
                     setTimeout(() => {
                         speechSynthesis.speak(utterance);
                     }, 100);
+                }
+            }
+
+            selectBestVoice() {
+                const voices = speechSynthesis.getVoices();
+                
+                // Priority order of preferred voices (best quality first)
+                const preferredVoices = [
+                    'Samantha',           // High-quality US English female
+                    'Alex',               // High-quality US English male (fallback)
+                    'Victoria',           // UK English female
+                    'Susan',              // US English female
+                    'Karen',              // Australian English female
+                    'Moira',              // Irish English female
+                    'Tessa',              // South African English female
+                ];
+                
+                // First, try to find exact matches from our preferred list
+                for (const preferredName of preferredVoices) {
+                    const voice = voices.find(v => v.name === preferredName);
+                    if (voice) {
+                        this.selectedVoice = voice;
+                        console.log(`Selected voice: ${voice.name} (${voice.lang})`);
+                        return;
+                    }
+                }
+                
+                // If no exact matches, try partial matches
+                for (const preferredName of preferredVoices) {
+                    const voice = voices.find(v => v.name.toLowerCase().includes(preferredName.toLowerCase()));
+                    if (voice) {
+                        this.selectedVoice = voice;
+                        console.log(`Selected voice: ${voice.name} (${voice.lang})`);
+                        return;
+                    }
+                }
+                
+                // Final fallback: any English female voice
+                const englishFemaleVoice = voices.find(voice => 
+                    voice.lang.startsWith('en') && 
+                    (voice.gender === 'female' || voice.name.toLowerCase().includes('female'))
+                );
+                
+                if (englishFemaleVoice) {
+                    this.selectedVoice = englishFemaleVoice;
+                    console.log(`Selected voice: ${englishFemaleVoice.name} (${englishFemaleVoice.lang})`);
+                    return;
+                }
+                
+                // Ultimate fallback: first available English voice
+                const englishVoice = voices.find(voice => voice.lang.startsWith('en'));
+                if (englishVoice) {
+                    this.selectedVoice = englishVoice;
+                    console.log(`Selected voice: ${englishVoice.name} (${englishVoice.lang})`);
+                } else {
+                    console.log('No suitable voice found, using system default');
                 }
             }
 
