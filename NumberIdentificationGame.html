@@ -132,6 +132,28 @@
         }
 
 
+        .next-button {
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            background: #84fab0;
+            color: #2d3748;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            display: none;
+            font-weight: bold;
+            border: 3px solid #ffffff;
+        }
+        
+        .next-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            background: #a8e6cf;
+        }
+
         .confetti {
             position: fixed;
             width: 12px;
@@ -199,6 +221,8 @@
             <!-- Numbers 1-10 will be generated here -->
         </div>
         
+        <button class="next-button" id="nextButton">Next Game</button>
+        
     </div>
 
     <script>
@@ -227,6 +251,7 @@
                 this.instruction = document.getElementById('instruction');
                 this.scoreElement = document.getElementById('score');
                 this.numbersContainer = document.getElementById('numbersContainer');
+                this.nextButton = document.getElementById('nextButton');
             }
 
             createNumberButtons() {
@@ -244,14 +269,15 @@
 
             setupEventListeners() {
                 this.instruction.addEventListener('click', () => this.handleInstructionClick());
+                this.nextButton.addEventListener('click', () => this.startNewGame());
                 
-                // Start the first game automatically
+                // Start the first game automatically after a short delay
                 setTimeout(() => this.startNewGame(), 1000);
             }
             
             handleInstructionClick() {
                 if (this.isWaitingForAnswer) {
-                    // Repeat current instruction
+                    // Repeat current instruction (also unlocks speech on first use)
                     this.speak(this.currentInstruction);
                 } else {
                     // Start new game
@@ -261,6 +287,9 @@
 
             startNewGame() {
                 this.isWaitingForAnswer = false;
+                
+                // Hide next game button
+                this.nextButton.style.display = 'none';
                 
                 // Reset button styles
                 const buttons = document.querySelectorAll('.number-button');
@@ -279,7 +308,11 @@
                 this.numbersUsed.push(this.currentTarget);
                 
                 this.isWaitingForAnswer = true;
-                this.speakInstruction(`Press ${this.currentTarget}`);
+                
+                // Add delay before instruction (gives time to see color change)
+                setTimeout(() => {
+                    this.speakInstruction(`Press ${this.currentTarget}`);
+                }, 1000);
             }
 
             handleNumberClick(number, buttonElement) {
@@ -304,7 +337,7 @@
                 this.currentSchemeIndex = (this.currentSchemeIndex + 1) % this.colorSchemes.length;
                 this.updateColorScheme();
                 
-                // Show temporary celebration emoji that fades away
+                // Show celebration and next game button
                 this.showTemporaryCelebration();
             }
 
@@ -328,6 +361,8 @@
             }
             
             speak(text) {
+                console.log(`Attempting to speak: "${text}"`);
+                
                 // Use Web Speech API for text-to-speech
                 if ('speechSynthesis' in window) {
                     // Cancel any ongoing speech
@@ -347,6 +382,7 @@
                     
                     if (this.selectedVoice) {
                         utterance.voice = this.selectedVoice;
+                        console.log(`Using voice: ${this.selectedVoice.name}`);
                     }
                     
                     // Add pauses around the number for emphasis
@@ -355,10 +391,23 @@
                         utterance.text = `Press... ${number}`;
                     }
                     
+                    console.log(`Actually speaking: "${utterance.text}"`);
+                    
+                    // Add event listeners to track speech
+                    utterance.onstart = () => console.log('Speech started');
+                    utterance.onend = () => console.log('Speech ended');
+                    utterance.onerror = (e) => console.log('Speech error:', e);
+                    
                     // Small delay to ensure iPad compatibility
                     setTimeout(() => {
-                        speechSynthesis.speak(utterance);
+                        try {
+                            speechSynthesis.speak(utterance);
+                        } catch (error) {
+                            console.log('Speech synthesis error:', error);
+                        }
                     }, 100);
+                } else {
+                    console.log('Speech synthesis not available');
                 }
             }
 
@@ -422,9 +471,10 @@
                 // Show celebration emoji briefly
                 this.instruction.textContent = '🎉';
                 
-                // Fade back to audio symbol after 1.5 seconds
+                // Show Next Game button after celebration
                 setTimeout(() => {
                     this.instruction.textContent = '🔊';
+                    this.nextButton.style.display = 'inline-block';
                 }, 1500);
             }
             
