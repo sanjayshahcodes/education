@@ -3,12 +3,12 @@
 // Modes: 'numberBoard' or 'numberPad'
 // fixedStartingNumber: specific number to start with, or -1 for random (1 to maxStartingNumber)
 const GAME_SETTINGS = [
-    [8, 'numberBoard', 20,-1],
-    [8, 'numberPad', 20, -1],
     [9, 'numberBoard', 10,-1],
     [9, 'numberPad', 10, -1],
     [11, 'numberBoard', 10,-1],
-    [11, 'numberPad', 10, -1]
+    [11, 'numberPad', 10, -1],
+    [12, 'numberBoard', 10,-1],
+    [12, 'numberPad', 10, -1]
 ];
 
 // Current game variables
