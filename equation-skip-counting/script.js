@@ -1,6 +1,9 @@
 // Equation Skip Counting Game
 // Combines visual adding equation format with skip counting number board
 
+// Game settings
+const show_blocks = false; // Set to false to hide blocks above numbers
+
 // Question format configuration - cycle through these combinations
 // Each array element is [generator_function_name]
 let question_format = [
@@ -342,6 +345,41 @@ function renderEquation() {
         valueDiv.className = 'number-value';
         valueDiv.textContent = num;
         circle.appendChild(valueDiv);
+        
+        // Add blocks if enabled
+        if (show_blocks) {
+            const blocksContainer = document.createElement('div');
+            blocksContainer.className = 'blocks-container';
+
+            const tens = Math.floor(num / 10);
+            const ones = num % 10;
+
+            // Add full tens columns
+            for (let i = 0; i < tens; i++) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < 10; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
+            }
+
+            // Add ones column if any
+            if (ones > 0) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < ones; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
+            }
+
+            circle.appendChild(blocksContainer);
+        }
         
         // Add arrow indicator for active number
         if (shouldShowArrow(idx)) {
