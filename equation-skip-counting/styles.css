@@ -349,6 +349,13 @@ body {
     border-color: #333;
 }
 
+/* Override font-weight for current-position when combined with color classes */
+.number-tile.current-position.light-purple,
+.number-tile.current-position.dark-purple {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
 .number-tile.incorrect {
     background: #f44336;
     border-color: #d32f2f;

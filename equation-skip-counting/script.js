@@ -293,11 +293,12 @@ function updateTileColoring() {
         for (let i = startPos; i <= endPos; i++) {
             const tile = document.querySelector(`[data-number="${i}"]`);
             if (tile) {
-                if (i === endPos && !gameComplete) {
-                    // End position gets special highlighting only if game is not complete
+                // Always add the base color class
+                tile.classList.add(colorClass);
+                
+                // Add bold/bigger styling if it's the end position of current or final step
+                if (i === endPos && (step === maxStep || !gameComplete)) {
                     tile.classList.add('current-position');
-                } else {
-                    tile.classList.add(colorClass);
                 }
             }
         }
@@ -441,6 +442,9 @@ function completeGame() {
     
     gameActive = false;
     gameComplete = true;
+    
+    // Update tile coloring with final state
+    updateTileColoring();
     
     // Update equation to show final answer
     renderEquation();
