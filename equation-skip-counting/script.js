@@ -206,18 +206,27 @@ function getExpectedNumber() {
 }
 
 function handleCorrectAnswer(tile) {
+    console.log('handleCorrectAnswer called');
+    console.log('Before increment - currentStepIndex:', currentStepIndex);
+    console.log('currentNumbers:', currentNumbers);
+    
     // Move to next step
     currentStepIndex++;
+    
+    console.log('After increment - currentStepIndex:', currentStepIndex);
+    console.log('Completion check:', currentStepIndex, '>', currentNumbers.length - 1, '=', currentStepIndex > currentNumbers.length - 1);
     
     // Update tile coloring
     updateTileColoring();
     
     // Check if game is complete (we've added all numbers after the first one)
     if (currentStepIndex > currentNumbers.length - 1) {
+        console.log('Completing game');
         completeGame();
         return;
     }
     
+    console.log('Continuing game, rendering equation');
     // Update equation display to show next active number
     renderEquation();
 }
@@ -270,7 +279,9 @@ function updateTileColoring() {
     }
     
     // Color each addition step
-    for (let step = 1; step <= currentStepIndex && step < currentNumbers.length; step++) {
+    const maxStep = gameComplete ? currentNumbers.length - 1 : currentStepIndex - 1;
+    
+    for (let step = 1; step <= maxStep && step < currentNumbers.length; step++) {
         const addAmount = currentNumbers[step];
         const startPos = cumulativeSum + 1;
         cumulativeSum += addAmount;
@@ -282,8 +293,8 @@ function updateTileColoring() {
         for (let i = startPos; i <= endPos; i++) {
             const tile = document.querySelector(`[data-number="${i}"]`);
             if (tile) {
-                if (i === endPos) {
-                    // End position gets special highlighting
+                if (i === endPos && !gameComplete) {
+                    // End position gets special highlighting only if game is not complete
                     tile.classList.add('current-position');
                 } else {
                     tile.classList.add(colorClass);
@@ -425,6 +436,9 @@ function handleDoubleTap(event) {
 }
 
 function completeGame() {
+    console.log('completeGame() called');
+    console.log('Stack trace:', new Error().stack);
+    
     gameActive = false;
     gameComplete = true;
     
