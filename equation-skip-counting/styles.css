@@ -213,12 +213,11 @@ body {
 
 /* Number circle color states */
 .number-circle.grayed {
-    opacity: 0.7;
     cursor: default;
 }
 
 .number-circle.grayed .number-value {
-    background-color: #d3d3d3;
+    background-color: #f7f3a7;
 }
 
 .number-circle.splittable .number-value {
