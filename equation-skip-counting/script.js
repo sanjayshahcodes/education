@@ -4,9 +4,6 @@
 // Question format configuration - cycle through these combinations
 // Each array element is [generator_function_name]
 let question_format = [
-    "generateDoubleDigitsNoCarry",
-    "generateBothMultiplesOfTen",
-    "generateDoublePlusSingleNoCarry",
     "generateDoublePlusDoubleWithCarry"
 ];
 
@@ -263,7 +260,7 @@ function showErrorX(tile) {
 function updateTileColoring() {
     // Clear all previous coloring
     document.querySelectorAll('.number-tile').forEach(tile => {
-        tile.classList.remove('correct', 'current', 'completed', 'current-sequence', 'current-position', 'current-completed', 'light-purple', 'dark-purple');
+        tile.classList.remove('correct', 'current', 'completed', 'current-sequence', 'current-position', 'current-completed', 'starting-blocks', 'first-addition', 'second-addition');
     });
     
     if (currentNumbers.length === 0) return;
@@ -273,16 +270,13 @@ function updateTileColoring() {
     // Calculate how many steps to color
     const maxStep = gameComplete ? currentNumbers.length - 1 : currentStepIndex - 1;
     
-    if (currentNumbers[0] >= 90) { // Only debug for problems starting around 90+
-        console.log('Debug:', {currentStepIndex, maxStep, gameComplete});
-    }
     
     
     // Color starting position (1 to first number) as gray
     for (let i = 1; i <= currentNumbers[0]; i++) {
         const tile = document.querySelector(`[data-number="${i}"]`);
         if (tile) {
-            tile.classList.add('completed');
+            tile.classList.add('starting-blocks');
             // Make the starting position (final gray square) big/bold if no steps completed yet
             if (i === currentNumbers[0] && currentStepIndex === 0) {
                 tile.classList.add('current-position');
@@ -298,14 +292,14 @@ function updateTileColoring() {
         cumulativeSum += addAmount;
         const endPos = cumulativeSum;
         
-        // Determine color based on step
-        const colorClass = step === 1 ? 'light-purple' : 'dark-purple';
+        // Determine semantic class based on step
+        const stepClass = step === 1 ? 'first-addition' : 'second-addition';
         
         for (let i = startPos; i <= endPos; i++) {
             const tile = document.querySelector(`[data-number="${i}"]`);
             if (tile) {
-                // Always add the base color class
-                tile.classList.add(colorClass);
+                // Always add the semantic class
+                tile.classList.add(stepClass);
                 
                 // Add bold/bigger styling to the end position of the most recently completed step
                 if (i === endPos && step === maxStep) {
