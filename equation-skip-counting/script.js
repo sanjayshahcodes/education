@@ -367,13 +367,10 @@ function renderEquation() {
         equals.textContent = '=';
         equationDisplay.appendChild(equals);
         
-        const answerCircle = document.createElement('div');
-        answerCircle.className = 'number-circle answer';
-        const answerValue = document.createElement('div');
-        answerValue.className = 'number-value';
-        answerValue.textContent = currentNumbers.reduce((sum, num) => sum + num, 0);
-        answerCircle.appendChild(answerValue);
-        equationDisplay.appendChild(answerCircle);
+        const answerText = document.createElement('div');
+        answerText.className = 'answer-text';
+        answerText.textContent = currentNumbers.reduce((sum, num) => sum + num, 0);
+        equationDisplay.appendChild(answerText);
     }
 }
 

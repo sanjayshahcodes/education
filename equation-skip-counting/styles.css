@@ -225,6 +225,15 @@ body {
     align-self: flex-end;
 }
 
+.answer-text {
+    margin: 0 14px;
+    margin-bottom: 26px;
+    align-self: flex-end;
+    font-size: 34px;
+    font-weight: bold;
+    color: #000000;
+}
+
 /* Arrow indicator */
 .arrow-indicator {
     position: absolute;
