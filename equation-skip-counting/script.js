@@ -25,7 +25,6 @@ let gameComplete = false;
 let numberGrid;
 let equationDisplay;
 let gamesCompletedDisplay;
-let numbersCompletedDisplay;
 let nextGameBtn;
 let confettiContainer;
 
@@ -39,7 +38,6 @@ function initializeGame() {
     numberGrid = document.getElementById('number-grid');
     equationDisplay = document.getElementById('equation-display');
     gamesCompletedDisplay = document.getElementById('games-completed');
-    numbersCompletedDisplay = document.getElementById('numbers-completed');
     nextGameBtn = document.getElementById('next-game-btn');
     confettiContainer = document.getElementById('confetti-container');
     
@@ -214,8 +212,8 @@ function handleCorrectAnswer(tile) {
     // Update tile coloring
     updateTileColoring();
     
-    // Check if game is complete
-    if (currentStepIndex >= currentNumbers.length - 1) {
+    // Check if game is complete (we've added all numbers after the first one)
+    if (currentStepIndex > currentNumbers.length - 1) {
         completeGame();
         return;
     }
@@ -393,6 +391,10 @@ function handleSplitNumber(event) {
     if (tens > 0 && ones > 0) {
         // Split the number
         currentNumbers = [currentNumbers[0], tens, ones];
+        
+        // Set step index to 1 to show arrow on first split number
+        currentStepIndex = 1;
+        
         renderEquation();
         
         // Enable number board interaction
@@ -522,8 +524,8 @@ function startNewGame() {
     gameComplete = false;
     currentStepIndex = 0;
     
-    // Reset numbers completed counter
-    numbersCompletedDisplay.textContent = problemCount;
+    // Problem count tracking (for internal use)
+    // problemCount is tracked internally for generator cycling
     
     // Hide next game button
     nextGameBtn.classList.add('hidden');
@@ -531,9 +533,9 @@ function startNewGame() {
     // Clear confetti
     confettiContainer.classList.add('hidden');
     confettiContainer.innerHTML = '';
-    
-    // Reset all tiles
-    document.querySelectorAll('.number-tile').forEach(tile => {
+        
+        // Reset all tiles
+        document.querySelectorAll('.number-tile').forEach(tile => {
         tile.classList.remove('correct', 'current', 'incorrect', 'completed', 'current-sequence', 'current-position', 'current-completed', 'light-purple', 'dark-purple');
     });
     
