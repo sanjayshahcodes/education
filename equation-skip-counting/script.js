@@ -270,16 +270,27 @@ function updateTileColoring() {
     
     let cumulativeSum = currentNumbers[0];
     
-    // Color starting position (1 to first number) as light blue
+    // Calculate how many steps to color
+    const maxStep = gameComplete ? currentNumbers.length - 1 : currentStepIndex - 1;
+    
+    if (currentNumbers[0] >= 90) { // Only debug for problems starting around 90+
+        console.log('Debug:', {currentStepIndex, maxStep, gameComplete});
+    }
+    
+    
+    // Color starting position (1 to first number) as gray
     for (let i = 1; i <= currentNumbers[0]; i++) {
         const tile = document.querySelector(`[data-number="${i}"]`);
         if (tile) {
             tile.classList.add('completed');
+            // Make the starting position (final gray square) big/bold if no steps completed yet
+            if (i === currentNumbers[0] && currentStepIndex === 0) {
+                tile.classList.add('current-position');
+            }
         }
     }
     
     // Color each addition step
-    const maxStep = gameComplete ? currentNumbers.length - 1 : currentStepIndex - 1;
     
     for (let step = 1; step <= maxStep && step < currentNumbers.length; step++) {
         const addAmount = currentNumbers[step];
@@ -296,8 +307,8 @@ function updateTileColoring() {
                 // Always add the base color class
                 tile.classList.add(colorClass);
                 
-                // Add bold/bigger styling if it's the end position of current or final step
-                if (i === endPos && (step === maxStep || !gameComplete)) {
+                // Add bold/bigger styling to the end position of the most recently completed step
+                if (i === endPos && step === maxStep) {
                     tile.classList.add('current-position');
                 }
             }

@@ -305,7 +305,7 @@ body {
 }
 
 .number-tile.completed {
-    background: #add8e6;
+    background: #b8b8b8;
     color: #333;
     font-weight: normal;
     border-color: #333;
@@ -319,11 +319,11 @@ body {
 }
 
 .number-tile.current-position {
-    background: #dda0dd;
+    /* No background - let the base color class handle that */
     color: #333;
-    font-weight: bold;
-    font-size: 1.3rem;
-    border-color: #333;
+    font-weight: bold !important; /* Force bold to override color class font-weight */
+    font-size: 1.3rem !important; /* Force bigger size */
+    border: 4px solid red !important; /* Temporary - to see if class is applied */
 }
 
 .number-tile.current-completed {
@@ -336,25 +336,20 @@ body {
 
 /* New color classes for equation skip counting */
 .number-tile.light-purple {
-    background: #dda0dd;
+    background: lightblue;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
 .number-tile.dark-purple {
-    background: #ba55d3;
+    background: #4682b4;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
-/* Override font-weight for current-position when combined with color classes */
-.number-tile.current-position.light-purple,
-.number-tile.current-position.dark-purple {
-    font-weight: bold;
-    font-size: 1.3rem;
-}
+/* The current-position class now only adds bold/bigger styling without background color */
 
 .number-tile.incorrect {
     background: #f44336;
