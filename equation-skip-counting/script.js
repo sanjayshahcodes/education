@@ -2,7 +2,7 @@
 // Combines visual adding equation format with skip counting number board
 
 // Game settings
-const show_blocks = true; // Set to false to hide blocks above numbers
+const show_blocks = false; // Set to false to hide blocks above numbers
 
 // Question format configuration - cycle through these combinations
 // Each array element is [generator_function_name]
