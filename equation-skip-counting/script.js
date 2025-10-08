@@ -7,7 +7,7 @@ const show_blocks = true; // Set to false to hide blocks above numbers
 // Question format configuration - cycle through these combinations
 // Each array element is [generator_function_name]
 let question_format = [
-    "generateDoublePlusDoubleWithCarry"
+    "generateRandomBothDoubleDigits"
 ];
 
 // Current game variables
@@ -616,7 +616,13 @@ function createConfettiPiece() {
 function startNewGame() {
     // Generate new problem
     const generator = getCurrentGenerator();
-    const [a, b] = generator();
+    let [a, b] = generator();
+    
+    // Temporary constraint: limit second number to 30 or less for easier learning
+    while (b > 30) {
+        [a, b] = generator();
+    }
+    
     currentNumbers = [a, b];
     
     // Reset game state
