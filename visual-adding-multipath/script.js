@@ -856,15 +856,20 @@ document.addEventListener('DOMContentLoaded', () => {
         table.className = 'path-table';
         
         for (let i = startIndex; i < endIndex; i++) {
-            const step = path[i];
+            let step = path[i];
             const nextStep = i < endIndex - 1 ? path[i + 1] : null;
+            
+            // Find combinations for diagonal lines
+            const combinations = nextStep ? findCombinations(step, nextStep) : [];
+            
+            // Reorder the step so combining numbers are adjacent
+            if (combinations.length > 0) {
+                step = reorderStepForCombinations(step, combinations);
+            }
             
             // Create row for the numbers
             const numberRow = document.createElement('tr');
             numberRow.className = 'number-row';
-            
-            // Find combinations for diagonal lines
-            const combinations = nextStep ? findCombinations(step, nextStep) : [];
             
             step.forEach((num, idx) => {
                 if (idx > 0) {
@@ -1066,6 +1071,48 @@ document.addEventListener('DOMContentLoaded', () => {
             renderPath(consolidatedPath, container);
         }
     }
+    
+    // Reorder numbers in a step so that combining numbers are adjacent
+    function reorderStepForCombinations(step, combinations) {
+        if (combinations.length === 0) return step;
+        
+        const reordered = [...step];
+        let insertPosition = 0;
+        
+        // For each combination, move the source numbers to be adjacent
+        combinations.forEach(combo => {
+            const sourceNumbers = combo.sources;
+            const sourceIndices = [];
+            
+            // Find indices of source numbers in the reordered array
+            sourceNumbers.forEach(num => {
+                const idx = reordered.indexOf(num);
+                if (idx !== -1) {
+                    sourceIndices.push(idx);
+                }
+            });
+            
+            // Sort indices in descending order to avoid index shifting when removing
+            sourceIndices.sort((a, b) => b - a);
+            
+            // Remove source numbers from their current positions
+            const removedNumbers = [];
+            sourceIndices.forEach(idx => {
+                removedNumbers.unshift(reordered.splice(idx, 1)[0]);
+            });
+            
+            // Insert the removed numbers at the current insert position
+            removedNumbers.forEach((num, idx) => {
+                reordered.splice(insertPosition + idx, 0, num);
+            });
+            
+            // Update insert position for next combination
+            insertPosition += removedNumbers.length;
+        });
+        
+        return reordered;
+    }
+    
     function findCombinations(currentStep, nextStep) {
         const combinations = [];
         
