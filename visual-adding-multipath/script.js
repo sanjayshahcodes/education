@@ -826,8 +826,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPath(path, container) {
         container.innerHTML = '';
         
-        // Skip first step (original problem) and last step (final answer)
-        const startIndex = 1;
+        // Show original problem and intermediate steps, but not final answer
+        const startIndex = 0;
         const endIndex = path.length - 1;
         
         // Create a table for the path
