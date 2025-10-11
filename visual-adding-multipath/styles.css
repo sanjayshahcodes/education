@@ -534,3 +534,51 @@ input {
     background-color: lightblue;
     color: #333;
 }
+
+/* Table-based path layout for reliable positioning */
+.method-path .path-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+.method-path .number-row {
+    height: 60px;
+}
+
+.method-path .number-cell,
+.method-path .plus-cell {
+    text-align: center;
+    vertical-align: middle;
+    padding: 5px;
+    position: relative;
+}
+
+.method-path .plus-cell {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    width: 30px;
+}
+
+.method-path .number-cell .number-circle {
+    display: inline-block;
+}
+
+.method-path .number-cell .number-value {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+}
+
+/* Arrow row styling */
+.method-path .arrow-row {
+    height: 25px;
+}
+
+.method-path .arrow-cell {
+    text-align: center;
+    font-size: 24px;
+    color: #666;
+    vertical-align: middle;
+}

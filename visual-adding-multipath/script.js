@@ -827,31 +827,39 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         
         // Skip first step (original problem) and last step (final answer)
-        // Only show the intermediate steps where methods differ
         const startIndex = 1;
         const endIndex = path.length - 1;
         
-        // For now, let's show all intermediate steps with the new visual approach
-        // We'll need to track which numbers came from splits vs combinations
+        // Create a table for the path
+        const table = document.createElement('table');
+        table.className = 'path-table';
         
         for (let i = startIndex; i < endIndex; i++) {
             const step = path[i];
-            const stepDiv = document.createElement('div');
-            stepDiv.className = 'path-step';
-            stepDiv.style.position = 'relative'; // For positioning diagonal lines
+            const nextStep = i < endIndex - 1 ? path[i + 1] : null;
             
-            // Render the numbers in this step
+            // Create row for the numbers
+            const numberRow = document.createElement('tr');
+            numberRow.className = 'number-row';
+            
+            // Find combinations for diagonal lines
+            const combinations = nextStep ? findCombinations(step, nextStep) : [];
+            
             step.forEach((num, idx) => {
                 if (idx > 0) {
-                    const plus = document.createElement('div');
-                    plus.className = 'plus';
-                    plus.textContent = '+';
-                    stepDiv.appendChild(plus);
+                    // Add plus cell
+                    const plusCell = document.createElement('td');
+                    plusCell.className = 'plus-cell';
+                    plusCell.textContent = '+';
+                    numberRow.appendChild(plusCell);
                 }
+                
+                // Add number cell
+                const cell = document.createElement('td');
+                cell.className = 'number-cell';
                 
                 const circle = document.createElement('div');
                 circle.className = 'number-circle';
-                circle.style.position = 'relative';
                 circle.setAttribute('data-number', num);
                 
                 // Determine if this number came from a split
@@ -862,26 +870,138 @@ document.addEventListener('DOMContentLoaded', () => {
                     circle.classList.add('not-from-split');
                 }
                 
+                // Check if this number is part of a combination
+                const isInCombination = combinations.some(combo => combo.sources.includes(num));
+                if (isInCombination) {
+                    circle.setAttribute('data-combines', 'true');
+                    const comboIndex = combinations.findIndex(combo => combo.sources.includes(num));
+                    circle.setAttribute('data-combo-group', comboIndex);
+                }
+                
                 const valueDiv = document.createElement('div');
                 valueDiv.className = 'number-value';
                 valueDiv.textContent = num;
                 circle.appendChild(valueDiv);
                 
-                stepDiv.appendChild(circle);
+                cell.appendChild(circle);
+                numberRow.appendChild(cell);
             });
             
-            container.appendChild(stepDiv);
+            table.appendChild(numberRow);
             
-            // Add diagonal lines for combinations in the next step
+            // Add arrow row between steps (except after last step)
             if (i < endIndex - 1) {
-                addCombinationLines(stepDiv, step, path[i + 1]);
-                
-                const arrow = document.createElement('div');
-                arrow.className = 'path-arrow';
-                arrow.textContent = '↓';
-                container.appendChild(arrow);
+                const arrowRow = document.createElement('tr');
+                arrowRow.className = 'arrow-row';
+                const arrowCell = document.createElement('td');
+                arrowCell.className = 'arrow-cell';
+                arrowCell.colSpan = step.length + (step.length - 1);
+                arrowCell.textContent = '↓';
+                arrowRow.appendChild(arrowCell);
+                table.appendChild(arrowRow);
             }
         }
+        
+        container.appendChild(table);
+        
+        // Add SVG overlay for diagonal lines after table is rendered
+        setTimeout(() => {
+            addSVGDiagonalLines(container, path, startIndex, endIndex);
+        }, 50);
+    }
+    
+    function addSVGDiagonalLines(container, path, startIndex, endIndex) {
+        // Create SVG overlay
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.style.position = 'absolute';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.pointerEvents = 'none';
+        svg.style.zIndex = '10';
+        
+        container.style.position = 'relative';
+        container.appendChild(svg);
+        
+        // Draw lines for each step
+        const table = container.querySelector('.path-table');
+        const numberRows = table.querySelectorAll('.number-row');
+        
+        numberRows.forEach((numberRow, rowIndex) => {
+            const stepIndex = startIndex + rowIndex;
+            const step = path[stepIndex];
+            const nextStep = stepIndex < endIndex - 1 ? path[stepIndex + 1] : null;
+            
+            if (!nextStep) return;
+            
+            const combinations = findCombinations(step, nextStep);
+            if (combinations.length === 0) return;
+            
+            // Find the next number row to draw lines to
+            const nextNumberRow = numberRows[rowIndex + 1];
+            if (!nextNumberRow) return;
+            
+            // Draw lines for each combination
+            combinations.forEach(combo => {
+                drawCombinationLines(svg, container, numberRow, nextNumberRow, combo, step, nextStep);
+            });
+        });
+    }
+    
+    function drawCombinationLines(svg, container, sourceRow, targetRow, combination, sourceStep, targetStep) {
+        const containerRect = container.getBoundingClientRect();
+        
+        // Find source number circles
+        const sourceCells = sourceRow.querySelectorAll('.number-cell');
+        const sourceCircles = [];
+        
+        sourceCells.forEach(cell => {
+            const circle = cell.querySelector('.number-circle');
+            const num = parseInt(circle.getAttribute('data-number'));
+            if (combination.sources.includes(num)) {
+                sourceCircles.push(circle);
+            }
+        });
+        
+        // Find target number circle
+        const targetCells = targetRow.querySelectorAll('.number-cell');
+        let targetCircle = null;
+        
+        targetCells.forEach(cell => {
+            const circle = cell.querySelector('.number-circle');
+            const num = parseInt(circle.getAttribute('data-number'));
+            if (num === combination.result) {
+                targetCircle = circle;
+            }
+        });
+        
+        if (sourceCircles.length === 0 || !targetCircle) return;
+        
+        // Draw lines from each source to target
+        sourceCircles.forEach(sourceCircle => {
+            const sourceRect = sourceCircle.getBoundingClientRect();
+            const targetRect = targetCircle.getBoundingClientRect();
+            
+            // Calculate positions relative to container
+            const x1 = sourceRect.left + sourceRect.width/2 - containerRect.left;
+            const y1 = sourceRect.bottom - containerRect.top;
+            const x2 = targetRect.left + targetRect.width/2 - containerRect.left;
+            const y2 = targetRect.top - containerRect.top;
+            
+            // Create line element
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('stroke', '#666');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('opacity', '0.7');
+            line.setAttribute('stroke-dasharray', '3,3');
+            
+            svg.appendChild(line);
+        });
     }
     
     // Helper function to determine if a number came from a split IN THIS STEP
@@ -916,17 +1036,46 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
     
-    // Helper function to add diagonal lines showing combinations
-    function addCombinationLines(stepDiv, currentStep, nextStep) {
-        // This is where we'd add SVG or CSS-based diagonal lines
-        // For now, let's add a placeholder
-        // We'd need to identify which numbers from currentStep combined to form nextStep
+    // Find which numbers were combined between steps
+    function findCombinations(currentStep, nextStep) {
+        const combinations = [];
         
-        // TODO: Implement diagonal line drawing logic
-        // This would involve:
-        // 1. Identifying which numbers were combined
-        // 2. Getting their positions
-        // 3. Drawing lines between them and their result
+        // For each number in nextStep, see if it's a sum of numbers from currentStep
+        for (let nextNum of nextStep) {
+            // Skip numbers that existed in currentStep (they weren't combined)
+            if (currentStep.includes(nextNum)) continue;
+            
+            // Find combinations of currentStep numbers that sum to nextNum
+            const sources = findSumCombination(currentStep, nextNum);
+            if (sources.length >= 2) {
+                combinations.push({
+                    sources: sources,
+                    result: nextNum
+                });
+            }
+        }
+        
+        return combinations;
+    }
+    
+    // Find which numbers from currentStep sum to target
+    function findSumCombination(numbers, target) {
+        // Try all combinations of 2 or more numbers
+        for (let i = 0; i < numbers.length; i++) {
+            for (let j = i + 1; j < numbers.length; j++) {
+                if (numbers[i] + numbers[j] === target) {
+                    return [numbers[i], numbers[j]];
+                }
+                
+                // Try 3-number combinations
+                for (let k = j + 1; k < numbers.length; k++) {
+                    if (numbers[i] + numbers[j] + numbers[k] === target) {
+                        return [numbers[i], numbers[j], numbers[k]];
+                    }
+                }
+            }
+        }
+        return [];
     }
 
     function openModal() {
