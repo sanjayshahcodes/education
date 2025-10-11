@@ -241,30 +241,6 @@ input {
     border-color: #D2B48C;
 }
 
-#next-btn {
-    font-size: 28px;
-    padding: 15px 60px;
-    margin-top: 20px;
-    cursor: pointer;
-    border: none;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    color: white;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-    letter-spacing: 1px;
-}
-
-#next-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-    background: linear-gradient(135deg, #45a049, #4CAF50);
-}
-
-#next-btn:active {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
 
 .hidden {
     display: none;
@@ -356,17 +332,30 @@ input {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-#attempt-indicator {
+#next-btn {
     position: absolute;
     top: 20px;
     right: 20px;
     font-size: 18px;
     font-weight: bold;
     color: #fff;
-    background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
-    padding: 8px 12px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    padding: 8px 16px;
+    border: none;
     border-radius: 8px;
-    border: 2px solid #FF6B6B;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #45a049, #4CAF50);
+}
+
+#next-btn:active {
+    transform: translateY(0px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 

@@ -249,14 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Remove this line since we removed the original-equation element
         // document.getElementById('original-equation').textContent = `${currentProblem[0]} + ${currentProblem[1]} = __`;
         
-        // Update attempt indicator
-        const attemptIndicator = document.getElementById('attempt-indicator');
-        if (maxAttempts > 1) {
-            attemptIndicator.textContent = `Attempt ${currentAttempt} of ${maxAttempts}`;
-            attemptIndicator.classList.remove('hidden');
-        } else {
-            attemptIndicator.classList.add('hidden');
-        }
+        // Don't need attempt indicator anymore since we removed it
         
         // Don't hide path displays - they should be visible from the start
         // if (currentAttempt === 1) {
