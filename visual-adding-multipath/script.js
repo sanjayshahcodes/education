@@ -782,6 +782,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Record final state
             recordPathStep('final');
             
+            // Add confetti celebration for completing any attempt
+            console.log("Correct answer! Showing confetti");
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+            
             // Store the completed path
             const consolidatedPath = consolidatePath(currentPath);
             solutionPaths.push(consolidatedPath);
@@ -798,16 +806,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show side-by-side comparison and complete problem
                 showSolutionComparison();
                 
+                // Add extra confetti burst for completing both methods
+                setTimeout(() => {
+                    console.log("Both methods completed! Extra confetti burst!");
+                    confetti({
+                        particleCount: 150,
+                        spread: 90,
+                        origin: { y: 0.5 }
+                    });
+                }, 500);
+                
                 // Increment completed counter and reset for next problem
                 problemCount++;
                 document.getElementById('problem-counter').textContent = `Completed: ${problemCount}`;
                 currentAttempt = 1; // Reset for next problem
                 
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
                 nextBtn.classList.remove('hidden');
             }
         }

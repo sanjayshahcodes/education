@@ -340,12 +340,14 @@ input {
     font-weight: bold;
     color: #fff;
     background: linear-gradient(135deg, #4CAF50, #45a049);
-    padding: 8px 16px;
+    padding: 10px 40px;
     border: none;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     transition: all 0.2s ease;
+    min-width: 80px;
+    text-align: center;
 }
 
 #next-btn:hover {
@@ -497,7 +499,7 @@ input {
 /* All numbers that are NOT from splits should be gray */
 .method-path .number-circle.not-from-split .number-value {
     background-color: #e0e0e0;
-    color: #888;
+    color: #333;
 }
 
 /* Numbers that came from splits should be light blue */
