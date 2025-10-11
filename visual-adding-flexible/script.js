@@ -98,10 +98,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return [a, b];
     }
 
-    function generateRandomBothDoubleDigits() {
+    function generateRandomNumbersNotMultiplesOfTen() {
         let a, b;
         do {
             [a, b] = generateRandomNumbers();
+        } while (a % 10 === 0 || b % 10 === 0);
+        return [a, b];
+    }
+
+    function generateRandomBothDoubleDigits() {
+        let a, b;
+        do {
+            [a, b] = generateRandomNumbersNotMultiplesOfTen();
         } while (a < 10 || b < 10);
         
         return [a, b];
