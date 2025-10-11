@@ -496,15 +496,15 @@ input {
     margin: 5px 0;
 }
 
-/* All numbers that are NOT from splits should be gray */
-.method-path .number-circle.not-from-split .number-value {
-    background-color: #e0e0e0;
+/* First step (critical path) should be blue - this is where the splitting decision is made */
+.method-path .number-circle.first-step .number-value {
+    background-color: lightblue;
     color: #333;
 }
 
-/* Numbers that came from splits should be light blue */
-.method-path .number-circle.from-split .number-value {
-    background-color: lightblue;
+/* All other steps should be light gray */
+.method-path .number-circle.other-step .number-value {
+    background-color: #e0e0e0;
     color: #333;
 }
 

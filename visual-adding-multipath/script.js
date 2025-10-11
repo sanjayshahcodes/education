@@ -894,12 +894,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 circle.className = 'number-circle';
                 circle.setAttribute('data-number', num);
                 
-                // Determine if this number came from a split
-                const isFromSplit = isNumberFromSplit(num, path, i);
-                if (isFromSplit) {
-                    circle.classList.add('from-split');
+                // Determine color based on step position (first step is critical path)
+                const isFirstStep = (i === startIndex); // First step after skipping original
+                if (isFirstStep) {
+                    circle.classList.add('first-step');
                 } else {
-                    circle.classList.add('not-from-split');
+                    circle.classList.add('other-step');
                 }
                 
                 // Check if this number is part of a combination
