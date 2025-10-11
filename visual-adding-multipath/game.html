@@ -17,23 +17,15 @@
     <div id="original-equation">43 + 52 = __</div>
     <div id="equation"></div>
     
-    <!-- Solution Path Display -->
-    <div id="path-display" class="hidden">
-        <div id="single-path" class="hidden">
-            <h3>Your Solution Path:</h3>
-            <div id="path-1-container"></div>
+    <!-- Side-by-side Solution Path Display -->
+    <div id="side-paths-container">
+        <div id="method-1-path" class="method-path hidden">
+            <h3>Method 1:</h3>
+            <div id="method-1-content"></div>
         </div>
-        <div id="dual-path" class="hidden">
-            <div class="path-comparison">
-                <div class="path-column">
-                    <h3>Method 1:</h3>
-                    <div id="path-1-comparison"></div>
-                </div>
-                <div class="path-column">
-                    <h3>Method 2:</h3>
-                    <div id="path-2-comparison"></div>
-                </div>
-            </div>
+        <div id="method-2-path" class="method-path hidden">
+            <h3>Method 2:</h3>
+            <div id="method-2-content"></div>
         </div>
     </div>
     <div id="modal" class="hidden">

@@ -258,7 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Hide path displays during solving
-        document.getElementById('path-display').classList.add('hidden');
+        document.getElementById('method-1-path').classList.add('hidden');
+        document.getElementById('method-2-path').classList.add('hidden');
         
         renderEquation();
         
@@ -762,25 +763,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkIfDone() {
+        console.log("checkIfDone called, currentNumbers.length:", currentNumbers.length);
         if (currentNumbers.length === 1) {
             // Record final state
             recordPathStep('final');
             
+            console.log("Problem completed, currentAttempt:", currentAttempt);
+            console.log("currentPath:", currentPath);
+            
             // Store the completed path
             const consolidatedPath = consolidatePath(currentPath);
+            console.log("consolidatedPath:", consolidatedPath);
             solutionPaths.push(consolidatedPath);
             
+            console.log("solutionPaths after push:", solutionPaths);
+            
             if (currentAttempt < maxAttempts) {
+                console.log("Calling showFirstSolutionPath");
                 // Show first solution path and prepare for second attempt
                 showFirstSolutionPath();
                 currentAttempt++;
                 
-                // Generate same problem for second attempt
-                setTimeout(() => {
-                    generateProblem();
-                }, 3000); // Give time to view the path
+                // Generate same problem for second attempt immediately
+                generateProblem();
                 
             } else {
+                console.log("Calling showSolutionComparison");
                 // Show side-by-side comparison and complete problem
                 showSolutionComparison();
                 
@@ -801,35 +809,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === PATH DISPLAY FUNCTIONS ===
     function showFirstSolutionPath() {
-        const pathDisplay = document.getElementById('path-display');
-        const singlePath = document.getElementById('single-path');
-        const dualPath = document.getElementById('dual-path');
+        // Show Method 1 path on the left side
+        console.log("showFirstSolutionPath called");
+        console.log("solutionPaths:", solutionPaths);
+        console.log("solutionPaths.length:", solutionPaths.length);
         
-        // Hide dual path, show single path
-        dualPath.classList.add('hidden');
-        singlePath.classList.remove('hidden');
-        pathDisplay.classList.remove('hidden');
+        const method1Path = document.getElementById('method-1-path');
+        const container = document.getElementById('method-1-content');
         
-        // Render the first solution path
-        const container = document.getElementById('path-1-container');
-        renderPath(solutionPaths[0], container);
+        console.log("method1Path element:", method1Path);
+        console.log("container element:", container);
+        
+        if (solutionPaths.length > 0) {
+            console.log("Showing Method 1 path:", solutionPaths[0]);
+            method1Path.classList.remove('hidden');
+            renderPath(solutionPaths[0], container);
+        } else {
+            console.log("No solution paths available");
+        }
     }
     
     function showSolutionComparison() {
-        const pathDisplay = document.getElementById('path-display');
-        const singlePath = document.getElementById('single-path');
-        const dualPath = document.getElementById('dual-path');
+        // Method 1 is already visible, now show Method 2 on the right
+        const method2Path = document.getElementById('method-2-path');
+        const container = document.getElementById('method-2-content');
         
-        // Hide single path, show dual path
-        singlePath.classList.add('hidden');
-        dualPath.classList.remove('hidden');
-        pathDisplay.classList.remove('hidden');
-        
-        // Render both solution paths side by side
-        const container1 = document.getElementById('path-1-comparison');
-        const container2 = document.getElementById('path-2-comparison');
-        renderPath(solutionPaths[0], container1);
-        renderPath(solutionPaths[1], container2);
+        if (solutionPaths.length > 1) {
+            method2Path.classList.remove('hidden');
+            renderPath(solutionPaths[1], container);
+        }
     }
     
     function renderPath(path, container) {
