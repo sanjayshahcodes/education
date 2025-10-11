@@ -888,18 +888,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             table.appendChild(numberRow);
-            
-            // Add arrow row between steps (except after last step)
-            if (i < endIndex - 1) {
-                const arrowRow = document.createElement('tr');
-                arrowRow.className = 'arrow-row';
-                const arrowCell = document.createElement('td');
-                arrowCell.className = 'arrow-cell';
-                arrowCell.colSpan = step.length + (step.length - 1);
-                arrowCell.textContent = '↓';
-                arrowRow.appendChild(arrowCell);
-                table.appendChild(arrowRow);
-            }
         }
         
         container.appendChild(table);

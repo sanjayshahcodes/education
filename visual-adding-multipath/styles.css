@@ -543,7 +543,7 @@ input {
 }
 
 .method-path .number-row {
-    height: 60px;
+    height: 70px;
 }
 
 .method-path .number-cell,
@@ -569,16 +569,4 @@ input {
     width: 40px;
     height: 40px;
     font-size: 16px;
-}
-
-/* Arrow row styling */
-.method-path .arrow-row {
-    height: 25px;
-}
-
-.method-path .arrow-cell {
-    text-align: center;
-    font-size: 24px;
-    color: #666;
-    vertical-align: middle;
 }
