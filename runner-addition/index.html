@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runner Addition Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Game Header -->
+        <div class="game-header">
+            <div class="level-info">Level: <span id="current-level">1</span></div>
+            <div class="score-info">Score: <span id="current-score">0</span></div>
+            <div class="lives-info">Lives: <span id="current-lives">2</span></div>
+        </div>
+
+        <!-- Current Total Display -->
+        <div class="current-total-display">
+            <div class="total-label">Current Total:</div>
+            <div class="total-value" id="current-total">0</div>
+        </div>
+
+        <!-- Game Canvas Area -->
+        <div class="game-canvas" id="game-canvas">
+            <!-- Runner Character -->
+            <div class="runner" id="runner">
+                <div class="runner-body">🏃‍♂️➡️</div>
+            </div>
+            
+            <!-- Finish Line -->
+            <div class="finish-line" id="finish-line">
+                <div class="finish-flag">🏁</div>
+                <div class="finish-text">FINISH</div>
+            </div>
+            
+            <!-- Obstacles will be dynamically created here -->
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-label">Obstacles Destroyed:</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+                <div class="progress-text" id="progress-text">0/10</div>
+            </div>
+        </div>
+
+        <!-- Number Pad -->
+        <div class="number-pad" id="number-pad">
+            <div class="input-display" id="input-display"></div>
+            <div class="number-pad-grid">
+                <button class="number-btn" data-number="1">1</button>
+                <button class="number-btn" data-number="2">2</button>
+                <button class="number-btn" data-number="3">3</button>
+                <button class="number-btn" data-number="4">4</button>
+                <button class="number-btn" data-number="5">5</button>
+                <button class="number-btn" data-number="6">6</button>
+                <button class="number-btn" data-number="7">7</button>
+                <button class="number-btn" data-number="8">8</button>
+                <button class="number-btn" data-number="9">9</button>
+                <button class="number-btn" data-number="0">0</button>
+                <button class="number-btn clear-btn" data-number="clear">←</button>
+                <button class="number-btn enter-btn" data-number="enter">→</button>
+            </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button id="start-btn" class="control-btn start-btn">Start Game</button>
+            <button id="next-level-btn" class="control-btn next-level-btn hidden">Next Level</button>
+            <button id="restart-btn" class="control-btn restart-btn hidden">Restart Level</button>
+        </div>
+
+        <!-- Game Messages -->
+        <div class="game-message" id="game-message"></div>
+    </div>
+
+    <!-- Confetti container -->
+    <div id="confetti-container" class="confetti-container hidden"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
