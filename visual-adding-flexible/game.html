@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Addition Game - Flexible</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div id="problem-counter">Completed: 0</div>
+    <div id="original-equation">43 + 52 = __</div>
+    <div id="equation"></div>
+    <div id="modal" class="hidden">
+        <div class="popup">
+            <button id="cancel">✕</button>
+            <div id="modal-equation-container">
+                <div id="modal-equation"></div>
+                <div id="equals-sign">=</div>
+                <input id="answer-input" type="text" readonly>
+            </div>
+            <div id="error-msg" class="hidden">Wrong! Try again.</div>
+            <div id="numpad">
+                <button class="num-btn">1</button>
+                <button class="num-btn">2</button>
+                <button class="num-btn">3</button>
+                <button class="num-btn">4</button>
+                <button class="num-btn">5</button>
+                <button class="num-btn">6</button>
+                <button class="num-btn">7</button>
+                <button class="num-btn">8</button>
+                <button class="num-btn">9</button>
+                <button class="num-btn">0</button>
+                <button id="backspace">←</button>
+                <button id="submit">➔</button>
+            </div>
+        </div>
+    </div>
+    <button id="next-btn" class="hidden">Next</button>
+    <script src="script.js"></script>
+</body>
+</html>
