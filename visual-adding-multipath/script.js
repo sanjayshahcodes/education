@@ -246,7 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPath = [currentNumbers.slice()]; // Start path with initial state
         lastOperation = null;
         
-        document.getElementById('original-equation').textContent = `${currentProblem[0]} + ${currentProblem[1]} = __`;
+        // Remove this line since we removed the original-equation element
+        // document.getElementById('original-equation').textContent = `${currentProblem[0]} + ${currentProblem[1]} = __`;
         
         // Update attempt indicator
         const attemptIndicator = document.getElementById('attempt-indicator');
@@ -257,11 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
             attemptIndicator.classList.add('hidden');
         }
         
-        // Hide path displays only when starting a new problem (attempt 1)
-        if (currentAttempt === 1) {
-            document.getElementById('method-1-path').classList.add('hidden');
-            document.getElementById('method-2-path').classList.add('hidden');
-        }
+        // Don't hide path displays - they should be visible from the start
+        // if (currentAttempt === 1) {
+        //     document.getElementById('method-1-path').classList.add('hidden');
+        //     document.getElementById('method-2-path').classList.add('hidden');
+        // }
         
         renderEquation();
         
@@ -280,9 +281,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentState = currentNumbers.slice();
         const lastState = currentPath[currentPath.length - 1];
         
+        console.log('recordPathStep called:', operationType, 'currentState:', currentState, 'lastState:', lastState);
+        
         // Only add if the state is actually different
         if (!arraysEqual(currentState, lastState)) {
             currentPath.push(currentState);
+            console.log('Added new path step, currentPath now:', currentPath);
+        } else {
+            console.log('State unchanged, not adding to path');
         }
         
         lastOperation = operationType;
@@ -550,6 +556,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             recordPathStep('split'); // Record this split operation
                             renderEquation();
                             makeDraggable();
+                            // Call updateCurrentPath AFTER recordPathStep so the path includes the current state
+                            updateCurrentPath(); // Update the path display in real-time
                         }
                     }
                 }
@@ -692,6 +700,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     recordPathStep('combine'); // Record this combination operation
                     renderEquation();
                     makeDraggable();
+                    // Call updateCurrentPath AFTER recordPathStep so the path includes the current state
+                    updateCurrentPath(); // Update the path display in real-time
                 }
                 modal.classList.add('hidden');
                 checkIfDone();
@@ -826,9 +836,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPath(path, container) {
         container.innerHTML = '';
         
-        // Show original problem and intermediate steps, but not final answer
-        const startIndex = 0;
-        const endIndex = path.length - 1;
+        // For real-time updates, show all steps including current state
+        // Skip first step (original problem) but include current state
+        const startIndex = 1;
+        const endIndex = path.length; // Include current state for real-time updates
         
         // Create a table for the path
         const table = document.createElement('table');
@@ -1024,7 +1035,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
     
-    // Find which numbers were combined between steps
+    function updateCurrentPath() {
+        // Get current attempt (1 or 2) based on solutionPaths length + 1
+        const currentAttempt = solutionPaths.length + 1;
+        
+        console.log('updateCurrentPath called, attempt:', currentAttempt, 'currentPath:', currentPath);
+        
+        // Update the appropriate method display in real-time
+        if (currentAttempt === 1) {
+            // Working on Method 1
+            const container = document.getElementById('method-1-content');
+            const consolidatedPath = consolidatePath([...currentPath]);
+            console.log('Method 1 - consolidated path:', consolidatedPath);
+            renderPath(consolidatedPath, container);
+        } else if (currentAttempt === 2) {
+            // Working on Method 2
+            const container = document.getElementById('method-2-content');
+            const consolidatedPath = consolidatePath([...currentPath]);
+            console.log('Method 2 - consolidated path:', consolidatedPath);
+            renderPath(consolidatedPath, container);
+        }
+    }
     function findCombinations(currentStep, nextStep) {
         const combinations = [];
         
