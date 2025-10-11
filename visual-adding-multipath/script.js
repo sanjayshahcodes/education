@@ -831,11 +831,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const startIndex = 1;
         const endIndex = path.length - 1;
         
+        // For now, let's show all intermediate steps with the new visual approach
+        // We'll need to track which numbers came from splits vs combinations
+        
         for (let i = startIndex; i < endIndex; i++) {
             const step = path[i];
-            const prevStep = i > 0 ? path[i - 1] : [];
             const stepDiv = document.createElement('div');
             stepDiv.className = 'path-step';
+            stepDiv.style.position = 'relative'; // For positioning diagonal lines
             
             // Render the numbers in this step
             step.forEach((num, idx) => {
@@ -848,11 +851,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const circle = document.createElement('div');
                 circle.className = 'number-circle';
+                circle.style.position = 'relative';
+                circle.setAttribute('data-number', num);
                 
-                // Check if this number existed in the previous step
-                const isUnchanged = prevStep.includes(num);
-                if (isUnchanged) {
-                    circle.classList.add('unchanged');
+                // Determine if this number came from a split
+                const isFromSplit = isNumberFromSplit(num, path, i);
+                if (isFromSplit) {
+                    circle.classList.add('from-split');
+                } else {
+                    circle.classList.add('not-from-split');
                 }
                 
                 const valueDiv = document.createElement('div');
@@ -865,14 +872,61 @@ document.addEventListener('DOMContentLoaded', () => {
             
             container.appendChild(stepDiv);
             
-            // Add arrow between steps (except after last step)
+            // Add diagonal lines for combinations in the next step
             if (i < endIndex - 1) {
+                addCombinationLines(stepDiv, step, path[i + 1]);
+                
                 const arrow = document.createElement('div');
                 arrow.className = 'path-arrow';
                 arrow.textContent = '↓';
                 container.appendChild(arrow);
             }
         }
+    }
+    
+    // Helper function to determine if a number came from a split IN THIS STEP
+    function isNumberFromSplit(num, path, stepIndex) {
+        if (stepIndex === 0) return false; // First step has no splits
+        
+        const currentStep = path[stepIndex];
+        const prevStep = path[stepIndex - 1];
+        
+        // A number is "from a split" if:
+        // 1. It exists in current step
+        // 2. It didn't exist in previous step  
+        // 3. It could be a result of splitting a number that WAS in previous step
+        
+        // If this number existed in the previous step, it's not a new split
+        if (prevStep.includes(num)) {
+            return false;
+        }
+        
+        // Check if this number could be from splitting something in the previous step
+        for (let prevNum of prevStep) {
+            const tens = Math.floor(prevNum / 10) * 10;
+            const ones = prevNum % 10;
+            
+            // If this number matches a tens or ones component of a previous number
+            // AND that previous number is no longer in current step (was split)
+            if ((num === tens || num === ones) && !currentStep.includes(prevNum)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Helper function to add diagonal lines showing combinations
+    function addCombinationLines(stepDiv, currentStep, nextStep) {
+        // This is where we'd add SVG or CSS-based diagonal lines
+        // For now, let's add a placeholder
+        // We'd need to identify which numbers from currentStep combined to form nextStep
+        
+        // TODO: Implement diagonal line drawing logic
+        // This would involve:
+        // 1. Identifying which numbers were combined
+        // 2. Getting their positions
+        // 3. Drawing lines between them and their result
     }
 
     function openModal() {

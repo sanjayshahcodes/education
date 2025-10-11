@@ -523,8 +523,14 @@ input {
     margin: 5px 0;
 }
 
-/* Unchanged numbers in path steps */
-.method-path .number-circle.unchanged .number-value {
+/* All numbers that are NOT from splits should be gray */
+.method-path .number-circle.not-from-split .number-value {
     background-color: #e0e0e0;
     color: #888;
+}
+
+/* Numbers that came from splits should be light blue */
+.method-path .number-circle.from-split .number-value {
+    background-color: lightblue;
+    color: #333;
 }
