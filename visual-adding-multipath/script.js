@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Question format configuration - cycle through these combinations
     // Each array element is [show_blocks, allow_splitting, generator_function_name]
     let question_format = [
-        [1, 1, "generateRandomBothDoubleDigits"]
+        [0, 1, "generateRandomBothDoubleDigits"]
         ];
     
     // Mapping of generator function names to actual functions
@@ -257,9 +257,11 @@ document.addEventListener('DOMContentLoaded', () => {
             attemptIndicator.classList.add('hidden');
         }
         
-        // Hide path displays during solving
-        document.getElementById('method-1-path').classList.add('hidden');
-        document.getElementById('method-2-path').classList.add('hidden');
+        // Hide path displays only when starting a new problem (attempt 1)
+        if (currentAttempt === 1) {
+            document.getElementById('method-1-path').classList.add('hidden');
+            document.getElementById('method-2-path').classList.add('hidden');
+        }
         
         renderEquation();
         
@@ -763,23 +765,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkIfDone() {
-        console.log("checkIfDone called, currentNumbers.length:", currentNumbers.length);
         if (currentNumbers.length === 1) {
             // Record final state
             recordPathStep('final');
             
-            console.log("Problem completed, currentAttempt:", currentAttempt);
-            console.log("currentPath:", currentPath);
-            
             // Store the completed path
             const consolidatedPath = consolidatePath(currentPath);
-            console.log("consolidatedPath:", consolidatedPath);
             solutionPaths.push(consolidatedPath);
             
-            console.log("solutionPaths after push:", solutionPaths);
-            
             if (currentAttempt < maxAttempts) {
-                console.log("Calling showFirstSolutionPath");
                 // Show first solution path and prepare for second attempt
                 showFirstSolutionPath();
                 currentAttempt++;
@@ -788,7 +782,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 generateProblem();
                 
             } else {
-                console.log("Calling showSolutionComparison");
                 // Show side-by-side comparison and complete problem
                 showSolutionComparison();
                 
@@ -810,22 +803,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // === PATH DISPLAY FUNCTIONS ===
     function showFirstSolutionPath() {
         // Show Method 1 path on the left side
-        console.log("showFirstSolutionPath called");
-        console.log("solutionPaths:", solutionPaths);
-        console.log("solutionPaths.length:", solutionPaths.length);
-        
         const method1Path = document.getElementById('method-1-path');
         const container = document.getElementById('method-1-content');
         
-        console.log("method1Path element:", method1Path);
-        console.log("container element:", container);
-        
         if (solutionPaths.length > 0) {
-            console.log("Showing Method 1 path:", solutionPaths[0]);
             method1Path.classList.remove('hidden');
             renderPath(solutionPaths[0], container);
-        } else {
-            console.log("No solution paths available");
         }
     }
     
@@ -843,8 +826,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPath(path, container) {
         container.innerHTML = '';
         
-        for (let i = 0; i < path.length; i++) {
+        // Skip first step (original problem) and last step (final answer)
+        // Only show the intermediate steps where methods differ
+        const startIndex = 1;
+        const endIndex = path.length - 1;
+        
+        for (let i = startIndex; i < endIndex; i++) {
             const step = path[i];
+            const prevStep = i > 0 ? path[i - 1] : [];
             const stepDiv = document.createElement('div');
             stepDiv.className = 'path-step';
             
@@ -860,16 +849,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const circle = document.createElement('div');
                 circle.className = 'number-circle';
                 
+                // Check if this number existed in the previous step
+                const isUnchanged = prevStep.includes(num);
+                if (isUnchanged) {
+                    circle.classList.add('unchanged');
+                }
+                
                 const valueDiv = document.createElement('div');
                 valueDiv.className = 'number-value';
                 valueDiv.textContent = num;
                 circle.appendChild(valueDiv);
-                
-                // Add blocks for visual representation (disabled for cleaner path display)
-                // const { show_blocks } = getCurrentSettings();
-                // if (show_blocks === 1) {
-                //     // Blocks code commented out for cleaner path display
-                // }
                 
                 stepDiv.appendChild(circle);
             });
@@ -877,7 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.appendChild(stepDiv);
             
             // Add arrow between steps (except after last step)
-            if (i < path.length - 1) {
+            if (i < endIndex - 1) {
                 const arrow = document.createElement('div');
                 arrow.className = 'path-arrow';
                 arrow.textContent = '↓';

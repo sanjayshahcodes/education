@@ -522,3 +522,9 @@ input {
     color: #666;
     margin: 5px 0;
 }
+
+/* Unchanged numbers in path steps */
+.method-path .number-circle.unchanged .number-value {
+    background-color: #e0e0e0;
+    color: #888;
+}
