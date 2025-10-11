@@ -551,13 +551,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         const tens = Math.floor(num / 10) * 10;
                         const ones = num % 10;
                         if (tens > 0 && ones > 0) {
+                            console.log('SPLIT: About to split', num, 'into', tens, 'and', ones);
                             currentNumbers.splice(idx, 1, tens, ones);
+                            console.log('SPLIT: currentNumbers after split:', currentNumbers);
                             hasPerformedSplit = true; // Mark that a split has been performed
                             recordPathStep('split'); // Record this split operation
                             renderEquation();
                             makeDraggable();
                             // Call updateCurrentPath AFTER recordPathStep so the path includes the current state
+                            console.log('SPLIT: About to call updateCurrentPath');
                             updateCurrentPath(); // Update the path display in real-time
+                            console.log('SPLIT: updateCurrentPath completed');
                         }
                     }
                 }
@@ -573,11 +577,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const tens = Math.floor(num / 10) * 10;
                     const ones = num % 10;
                     if (tens > 0 && ones > 0) {
+                        console.log('DBLCLICK SPLIT: About to split', num, 'into', tens, 'and', ones);
                         currentNumbers.splice(idx, 1, tens, ones);
+                        console.log('DBLCLICK SPLIT: currentNumbers after split:', currentNumbers);
                         hasPerformedSplit = true; // Mark that a split has been performed
                         recordPathStep('split'); // Record this split operation
                         renderEquation();
                         makeDraggable();
+                        // Call updateCurrentPath AFTER recordPathStep so the path includes the current state
+                        console.log('DBLCLICK SPLIT: About to call updateCurrentPath');
+                        updateCurrentPath(); // Update the path display in real-time
+                        console.log('DBLCLICK SPLIT: updateCurrentPath completed');
                     }
                 }
             });
