@@ -56,9 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Question format configuration - cycle through these combinations
     // Each array element is [show_blocks, allow_splitting, generator_function_name]
     let question_format = [
-        [1, 1, "generateDoubleDigitsNoCarry"],
-        [1, 1, "generateDoublePlusDoubleWithCarry"]
-        
+        [1, 1, "generateRandomBothDoubleDigits"]
         ];
     
     // Mapping of generator function names to actual functions
@@ -520,7 +518,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
         
-        // After at least one split, allow ANY two numbers to be combined
+        // Don't allow adding two double-digit numbers unless at least one is a multiple of 10
+        // This prevents recreating original-style problems (like 57 + 29)
+        const isDoubleDigit = (n) => n >= 10 && n <= 99;
+        const isMultipleOf10 = (n) => n % 10 === 0 && n >= 10;
+        
+        if (isDoubleDigit(a) && isDoubleDigit(b)) {
+            // Both are double-digit, so at least one must be a multiple of 10
+            if (!isMultipleOf10(a) && !isMultipleOf10(b)) {
+                return false;
+            }
+        }
+        
+        // After at least one split, allow all other combinations
         // This gives maximum flexibility in problem-solving approach
         return true;
     }
