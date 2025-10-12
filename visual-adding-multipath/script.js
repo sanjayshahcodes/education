@@ -354,6 +354,85 @@ document.addEventListener('DOMContentLoaded', () => {
         return -1;
     }
 
+    // Function to detect if a split undoes a previous combination
+    function detectUndoCombine(originalNum, num1, num2) {
+        console.log(`DETECT UNDO COMBINE: Checking if splitting ${originalNum} into ${num1} + ${num2} undoes a previous combination`);
+        console.log(`DETECT UNDO COMBINE: Current path length: ${currentPath.length}`);
+        
+        if (currentPath.length < 2) {
+            console.log(`DETECT UNDO COMBINE: Path too short, no combinations to undo`);
+            return -1;
+        }
+        
+        // Verify this could be a valid tens/ones split
+        const tens = Math.floor(originalNum / 10) * 10;
+        const ones = originalNum % 10;
+        
+        if (!((num1 === tens && num2 === ones) || (num1 === ones && num2 === tens))) {
+            console.log(`DETECT UNDO COMBINE: ${num1} + ${num2} is not a tens/ones split of ${originalNum}`);
+            return -1;
+        }
+        
+        // Look backwards through the path to find the most recent combination that created originalNum
+        for (let i = currentPath.length - 1; i >= 1; i--) {
+            const currentStep = currentPath[i];
+            const prevStep = currentPath[i - 1];
+            
+            console.log(`DETECT UNDO COMBINE: Checking step ${i}: ${JSON.stringify(prevStep)} -> ${JSON.stringify(currentStep)}`);
+            
+            // Check if this step represents combining num1 and num2 into originalNum
+            if (!prevStep.includes(originalNum) && currentStep.includes(originalNum)) {
+                // Check if num1 and num2 were present in the previous step but not in current step
+                // (or appear fewer times in current step)
+                const num1InPrev = prevStep.filter(n => n === num1).length;
+                const num1InCurrent = currentStep.filter(n => n === num1).length;
+                const num2InPrev = prevStep.filter(n => n === num2).length;
+                const num2InCurrent = currentStep.filter(n => n === num2).length;
+                
+                const num1Removed = num1InPrev - num1InCurrent;
+                const num2Removed = num2InPrev - num2InCurrent;
+                
+                console.log(`DETECT UNDO COMBINE: ${num1}+${num2} -> ${originalNum}: removed ${num1Removed} of ${num1}, ${num2Removed} of ${num2}`);
+                
+                if (num1Removed === 1 && num2Removed === 1) {
+                    console.log(`UNDO COMBINE DETECTED: Found combination at step ${i} where ${num1} and ${num2} were combined into ${originalNum}`);
+                    return i;
+                }
+            }
+        }
+        
+        console.log(`DETECT UNDO COMBINE: No matching combination found for splitting ${originalNum} into ${num1} + ${num2}`);
+        return -1;
+    }
+
+    // Function to remove a combination from the path history
+    function removeCombineFromPath(combineIndex) {
+        console.log(`REMOVING COMBINE: Removing combination at index ${combineIndex} from path`);
+        console.log(`BEFORE REMOVAL: currentPath =`, JSON.stringify(currentPath));
+        
+        // Remove the step that created the combination
+        currentPath.splice(combineIndex, 1);
+        
+        // Now we need to replace the last step with the current state
+        // since the split has already been made
+        const currentState = currentNumbers.slice();
+        
+        if (currentPath.length > 0) {
+            // Replace the last step with the current state
+            currentPath[currentPath.length - 1] = currentState;
+            console.log(`UPDATED LAST STEP: Set last step to current state ${JSON.stringify(currentState)}`);
+        } else {
+            // If no steps left, add the current state
+            currentPath.push(currentState);
+            console.log(`ADDED CURRENT STATE: ${JSON.stringify(currentState)} as only step`);
+        }
+        
+        console.log(`AFTER REMOVAL AND UPDATE: currentPath =`, JSON.stringify(currentPath));
+        
+        // Update the path display
+        updateCurrentPath();
+    }
+
     // Function to remove a split from the path history
     function removeSplitFromPath(splitIndex) {
         console.log(`REMOVING SPLIT: Removing split at index ${splitIndex} from path`);
@@ -631,7 +710,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             currentNumbers.splice(idx, 1, tens, ones);
                             console.log('SPLIT: currentNumbers after split:', currentNumbers);
                             hasPerformedSplit = true; // Mark that a split has been performed
-                            recordPathStep('split'); // Record this split operation
+                            
+                            // Check if this split undoes a previous combination
+                            const combineIndex = detectUndoCombine(num, tens, ones);
+                            
+                            if (combineIndex !== -1) {
+                                removeCombineFromPath(combineIndex);
+                                console.log(`UNDO COMBINE: Removed combination from path, not recording this split as a separate step`);
+                            } else {
+                                recordPathStep('split'); // Record this split operation only if it's not undoing a combination
+                            }
+                            
                             renderEquation();
                             makeDraggable();
                             // Call updateCurrentPath AFTER recordPathStep so the path includes the current state
@@ -657,7 +746,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         currentNumbers.splice(idx, 1, tens, ones);
                         console.log('DBLCLICK SPLIT: currentNumbers after split:', currentNumbers);
                         hasPerformedSplit = true; // Mark that a split has been performed
-                        recordPathStep('split'); // Record this split operation
+                        
+                        // Check if this split undoes a previous combination
+                        const combineIndex = detectUndoCombine(num, tens, ones);
+                        
+                        if (combineIndex !== -1) {
+                            removeCombineFromPath(combineIndex);
+                            console.log(`UNDO COMBINE: Removed combination from path, not recording this split as a separate step`);
+                        } else {
+                            recordPathStep('split'); // Record this split operation only if it's not undoing a combination
+                        }
+                        
                         renderEquation();
                         makeDraggable();
                         // Call updateCurrentPath AFTER recordPathStep so the path includes the current state
