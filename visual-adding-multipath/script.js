@@ -238,6 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
             [a, b] = generator();
             currentProblem = [a, b];
             solutionPaths = []; // Reset paths for new problem
+            
+            // Clear the method path displays for the new problem
+            document.getElementById('method-1-content').innerHTML = '';
+            document.getElementById('method-2-content').innerHTML = '';
+            console.log('CLEARED: Method path displays for new problem');
         }
         
         // Set up current attempt
@@ -1515,6 +1520,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === EVENT HANDLERS ===
     nextBtn.onclick = () => {
+        // Clear method displays before generating new problem
+        document.getElementById('method-1-content').innerHTML = '';
+        document.getElementById('method-2-content').innerHTML = '';
+        console.log('NEXT BUTTON: Cleared method displays');
+        
         generateProblem();
     };
 
