@@ -448,7 +448,7 @@ input {
 }
 
 .method-path {
-    width: 400px;
+    width: 550px;
     background: rgba(255, 255, 255, 0.95);
     border: 2px solid #ddd;
     border-radius: 12px;
@@ -461,7 +461,7 @@ input {
     text-align: center;
     color: #333;
     margin-bottom: 15px;
-    font-size: 18px;
+    font-size: 22px;
     margin-top: 0;
 }
 
@@ -478,20 +478,20 @@ input {
 }
 
 .method-path .path-step .number-value {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
+    width: 48px;
+    height: 48px;
+    font-size: 19px;
 }
 
 .method-path .path-step .plus {
     margin: 0 4px;
     margin-bottom: 8px;
-    font-size: 20px;
+    font-size: 24px;
 }
 
 .method-path .path-arrow {
     text-align: center;
-    font-size: 24px;
+    font-size: 29px;
     color: #666;
     margin: 5px 0;
 }
@@ -516,7 +516,7 @@ input {
 }
 
 .method-path .number-row {
-    height: 70px;
+    height: 84px;
 }
 
 .method-path .number-cell,
@@ -528,10 +528,10 @@ input {
 }
 
 .method-path .plus-cell {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: bold;
     color: #333;
-    width: 30px;
+    width: 36px;
 }
 
 .method-path .number-cell .number-circle {
@@ -539,7 +539,7 @@ input {
 }
 
 .method-path .number-cell .number-value {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
+    width: 48px;
+    height: 48px;
+    font-size: 19px;
 }
