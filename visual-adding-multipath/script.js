@@ -302,6 +302,85 @@ document.addEventListener('DOMContentLoaded', () => {
         const sorted2 = [...arr2].sort((a, b) => a - b);
         return sorted1.every((val, idx) => val === sorted2[idx]);
     }
+
+    // Function to detect if a combination undoes a previous split
+    function detectUndoSplit(num1, num2, sum) {
+        console.log(`DETECT UNDO: Checking if combining ${num1} + ${num2} = ${sum} undoes a previous split`);
+        console.log(`DETECT UNDO: Current path length: ${currentPath.length}`);
+        
+        if (currentPath.length < 2) {
+            console.log(`DETECT UNDO: Path too short, no splits to undo`);
+            return -1;
+        }
+        
+        // Verify this could be a valid split (sum = tens + ones)
+        const tens = Math.floor(sum / 10) * 10;
+        const ones = sum % 10;
+        
+        if (!((num1 === tens && num2 === ones) || (num1 === ones && num2 === tens))) {
+            console.log(`DETECT UNDO: ${num1} + ${num2} is not a tens/ones split of ${sum}`);
+            return -1;
+        }
+        
+        // Look backwards through the path to find the most recent split of sum into num1 and num2
+        for (let i = currentPath.length - 1; i >= 1; i--) {
+            const currentStep = currentPath[i];
+            const prevStep = currentPath[i - 1];
+            
+            console.log(`DETECT UNDO: Checking step ${i}: ${JSON.stringify(prevStep)} -> ${JSON.stringify(currentStep)}`);
+            
+            // Check if this step represents splitting sum into num1 and num2
+            if (prevStep.includes(sum) && !currentStep.includes(sum)) {
+                // Check if num1 and num2 appear in the current step but not in the previous step
+                // (or appear more times in current step)
+                const num1InPrev = prevStep.filter(n => n === num1).length;
+                const num1InCurrent = currentStep.filter(n => n === num1).length;
+                const num2InPrev = prevStep.filter(n => n === num2).length;
+                const num2InCurrent = currentStep.filter(n => n === num2).length;
+                
+                const num1Added = num1InCurrent - num1InPrev;
+                const num2Added = num2InCurrent - num2InPrev;
+                
+                console.log(`DETECT UNDO: ${sum} -> ${num1},${num2}: added ${num1Added} of ${num1}, ${num2Added} of ${num2}`);
+                
+                if (num1Added === 1 && num2Added === 1) {
+                    console.log(`UNDO SPLIT DETECTED: Found split at step ${i} where ${sum} was split into ${num1} and ${num2}`);
+                    return i;
+                }
+            }
+        }
+        
+        console.log(`DETECT UNDO: No matching split found for ${num1} + ${num2} = ${sum}`);
+        return -1;
+    }
+
+    // Function to remove a split from the path history
+    function removeSplitFromPath(splitIndex) {
+        console.log(`REMOVING SPLIT: Removing split at index ${splitIndex} from path`);
+        console.log(`BEFORE REMOVAL: currentPath =`, JSON.stringify(currentPath));
+        
+        // Remove the step that created the split
+        currentPath.splice(splitIndex, 1);
+        
+        // Now we need to replace the last step with the current state
+        // since the combination has already been made
+        const currentState = currentNumbers.slice();
+        
+        if (currentPath.length > 0) {
+            // Replace the last step with the current state
+            currentPath[currentPath.length - 1] = currentState;
+            console.log(`UPDATED LAST STEP: Set last step to current state ${JSON.stringify(currentState)}`);
+        } else {
+            // If no steps left, add the current state
+            currentPath.push(currentState);
+            console.log(`ADDED CURRENT STATE: ${JSON.stringify(currentState)} as only step`);
+        }
+        
+        console.log(`AFTER REMOVAL AND UPDATE: currentPath =`, JSON.stringify(currentPath));
+        
+        // Update the path display
+        updateCurrentPath();
+    }
     
     function consolidatePath(path) {
         if (path.length <= 2) return path; // Keep initial state + final if only 2 steps
@@ -704,7 +783,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     const maxIdx = Math.max(idxA, idxB);
                     currentNumbers.splice(maxIdx, 1);
                     currentNumbers.splice(minIdx, 1, sum);
-                    recordPathStep('combine'); // Record this combination operation
+                    
+                    // Check if this combination undoes a previous split (AFTER the combination is made)
+                    const splitIndex = detectUndoSplit(a, b, sum);
+                    
+                    // If this combination undoes a split, remove the split from the path
+                    if (splitIndex !== -1) {
+                        removeSplitFromPath(splitIndex);
+                        console.log(`UNDO SPLIT: Removed split from path, not recording this combination as a separate step`);
+                    } else {
+                        recordPathStep('combine'); // Record this combination operation only if it's not undoing a split
+                    }
+                    
                     renderEquation();
                     makeDraggable();
                     // Call updateCurrentPath AFTER recordPathStep so the path includes the current state
