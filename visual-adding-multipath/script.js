@@ -246,6 +246,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPath = [currentNumbers.slice()]; // Start path with initial state
         lastOperation = null;
         
+        // Update the method equation headers
+        document.getElementById('method-1-equation').textContent = `${currentProblem[0]} + ${currentProblem[1]}`;
+        document.getElementById('method-2-equation').textContent = `${currentProblem[0]} + ${currentProblem[1]}`;
+        
         // Remove this line since we removed the original-equation element
         // document.getElementById('original-equation').textContent = `${currentProblem[0]} + ${currentProblem[1]} = __`;
         
