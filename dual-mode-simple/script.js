@@ -537,9 +537,18 @@ function makeDraggable() {
 function isAllowedToAdd(a, b, currentLength) {
     const isMult10 = (n) => n % 10 === 0 && n >= 10;
     const isSingle = (n) => n >= 1 && n <= 9;
+    const isDoubleDigit = (n) => n >= 10 && n % 10 !== 0;
     
+    // Tens can combine with tens
     if (isMult10(a) && isMult10(b)) return true;
+    
+    // Ones can combine with ones
     if (isSingle(a) && isSingle(b)) return true;
+    
+    // After ones have been combined, allow tens + double-digit numbers (like 70 + 13)
+    if ((isMult10(a) && isDoubleDigit(b)) || (isDoubleDigit(a) && isMult10(b))) return true;
+    
+    // Tens can combine with ones only when there are no more splits possible (length = 2)
     if (currentLength === 2 && ((isMult10(a) && isSingle(b)) || (isMult10(b) && isSingle(a)))) return true;
     
     return false;
