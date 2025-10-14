@@ -1110,11 +1110,13 @@ function switchToNextMode() {
         // Switch from numberboard display to visual mode with numberboard modal
         numberboardDisplayMode.classList.add('hidden');
         visualModeDiv.classList.remove('hidden');
+        showSwapButton(); // Show swap button for visual mode
         startVisualModeWithNumberboardModal();
     } else if (currentMode === 2) {
         // Switch from numberboard modal to visual mode with numpad modal
         numberboardDisplayMode.classList.add('hidden');
         visualModeDiv.classList.remove('hidden');
+        showSwapButton(); // Show swap button for visual mode
         startVisualModeWithNumpadModal();
     } else {
         // Switch from numpad modal to new problem (back to mode 0)
