@@ -5,7 +5,7 @@
 // Question format configuration - cycle through these combinations
 // Each array element is [show_blocks, generator_function_name]
 let question_format = [
-    [0, "generateDoublePlusDoubleWithCarry"]
+    [0, "generateDoublePlusDoubleWithCarry", [0,1]] // [weight, generator_function, [modes]]
 ];
 
 // Game state
@@ -13,6 +13,8 @@ let currentProblem = null; // [a, b] - the current problem
 let problemCount = 0;
 let gamesCompleted = 0;
 let currentMode = 0; // Track current mode: 0=numberboard display, 1=numberboard modal, 2=numpad modal
+let currentModeSequence = []; // The modes to cycle through for current problem type
+let currentModeIndex = 0; // Index in the current mode sequence
 
 // Equation mode state
 let currentNumbers = []; // [first_number, second_number] or [first_number, tens, ones] after splitting
@@ -147,31 +149,37 @@ function generateProblem() {
 
 // === GAME FLOW CONTROL ===
 function handleNextGameClick() {
-    if (currentMode === 2) {
-        // After mode 2 (numpad modal), start a completely new problem at mode 0
-        currentMode = 0; // Reset to mode 0 for new problem
+    // Check if we're at the last mode in the sequence
+    if (currentModeIndex >= currentModeSequence.length - 1) {
+        // Start a completely new problem (which will reset the mode sequence)
         startNewProblem();
     } else {
-        // After mode 0 or 1, switch to next mode with same problem
+        // Switch to next mode in the sequence with same problem
         switchToNextMode();
     }
+}
+
+function getCurrentQuestionType() {
+    // Get the current question type based on problem count
+    const questionIndex = problemCount % question_format.length;
+    return question_format[questionIndex];
 }
 
 function startNewProblem() {
     // Generate new problem
     currentProblem = generateProblem();
     
+    // Set up mode sequence for this problem type
+    const questionType = getCurrentQuestionType();
+    currentModeSequence = questionType[2] || [0, 1, 2]; // Use specified modes or default to all
+    currentModeIndex = 0;
+    currentMode = currentModeSequence[currentModeIndex];
+    
     // Show the original equation for the new problem
     showOriginalEquation();
     
     // Show swap button for new problems (will be hidden after first split)
     showSwapButton();
-    
-    // Use the currentMode that was set (don't recalculate)
-    // If currentMode wasn't set explicitly, default to mode based on problem count
-    if (currentMode === undefined || currentMode === null) {
-        currentMode = problemCount % 3;
-    }
     
     if (currentMode === 0) {
         startNumberboardDisplayMode();
@@ -1099,25 +1107,37 @@ function createNumberboardConfettiPiece() {
 }
 
 function switchToNextMode() {
-    // Move to next mode in the cycle
-    currentMode = (currentMode + 1) % 3;
+    // Move to next mode in the sequence
+    currentModeIndex++;
     
-    if (currentMode === 1) {
-        // Switch from numberboard display to visual mode with numberboard modal
+    // Check if we've completed all modes in the sequence
+    if (currentModeIndex >= currentModeSequence.length) {
+        // Start a new problem (which will reset the mode sequence)
+        startNewProblem();
+        return;
+    }
+    
+    // Get the next mode from the sequence
+    currentMode = currentModeSequence[currentModeIndex];
+    
+    if (currentMode === 0) {
+        // Switch to numberboard display mode
+        visualModeDiv.classList.add('hidden');
+        numberboardDisplayMode.classList.remove('hidden');
+        showSwapButton();
+        startNumberboardDisplayMode();
+    } else if (currentMode === 1) {
+        // Switch to visual mode with numberboard modal
         numberboardDisplayMode.classList.add('hidden');
         visualModeDiv.classList.remove('hidden');
         showSwapButton(); // Show swap button for visual mode
         startVisualModeWithNumberboardModal();
     } else if (currentMode === 2) {
-        // Switch from numberboard modal to visual mode with numpad modal
+        // Switch to visual mode with numpad modal
         numberboardDisplayMode.classList.add('hidden');
         visualModeDiv.classList.remove('hidden');
         showSwapButton(); // Show swap button for visual mode
         startVisualModeWithNumpadModal();
-    } else {
-        // Switch from numpad modal to new problem (back to mode 0)
-        startNewProblem();
-        return;
     }
 }
 
