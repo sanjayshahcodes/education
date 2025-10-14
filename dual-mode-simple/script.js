@@ -559,7 +559,8 @@ function showModal(a, b, modalType) {
         numberboard.classList.remove('hidden');
         equalsSign.style.display = 'none';
         answerInput.style.display = 'none';
-        updateModalTileColoring(a, b);
+        // Show only the first number highlighted, not the complete answer
+        showFirstNumberOnly(a);
     }
 }
 
@@ -607,6 +608,24 @@ function handleNumberboardTileClick(clickedNumber) {
         setTimeout(() => {
             handleCorrectAnswer(modalNumbers[0], modalNumbers[1]);
         }, 500);
+    }
+}
+
+function clearModalTileColoring() {
+    const tiles = document.querySelectorAll('#modal-number-grid .number-tile');
+    tiles.forEach(tile => {
+        tile.classList.remove('starting-blocks', 'first-addition', 'second-addition', 'current-position');
+    });
+}
+
+function showFirstNumberOnly(a) {
+    // Clear all coloring first
+    clearModalTileColoring();
+    
+    // Show only the first number highlighted in light yellow
+    for (let i = 1; i <= a; i++) {
+        const tile = document.querySelector(`#modal-number-grid [data-number="${i}"]`);
+        if (tile) tile.classList.add('first-addition');
     }
 }
 
