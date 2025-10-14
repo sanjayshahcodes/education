@@ -8,6 +8,12 @@ let question_format = [
     [0, "generateDoublePlusDoubleWithCarry", [4,1]] // [weight, generator_function, [modes]]
 ];
 
+// Dual mode state
+let mode4Numbers = []; // Numbers for top section (Mode 4)
+let mode1Numbers = []; // Numbers for bottom section (Mode 1)
+let mode4Complete = false;
+let mode1Complete = false;
+
 // Game state
 let currentProblem = null; // [a, b] - the current problem
 let problemCount = 0;
@@ -31,6 +37,8 @@ let equationModeDiv, visualModeDiv, numberboardDisplayMode;
 let equationEquationDiv, visualEquationDiv, numberboardEquationDisplay, modal, answerInput, errorMsg, nextGameBtn;
 let gamesCompletedDisplay, modalNumberGrid, numberboardNumberGrid, confettiContainer, originalEquationDisplay;
 let swapNumbersBtnNumberboard, swapNumbersBtnVisual;
+// Dual mode elements
+let mode4EquationDiv, mode1EquationDiv;
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -54,6 +62,10 @@ function initializeGame() {
     originalEquationDisplay = document.getElementById('original-equation-display');
     swapNumbersBtnNumberboard = document.getElementById('swap-numbers-btn-numberboard');
     swapNumbersBtnVisual = document.getElementById('swap-numbers-btn-visual');
+    
+    // Dual mode elements
+    mode4EquationDiv = document.getElementById('equation');
+    mode1EquationDiv = document.getElementById('equation-mode1');
     
     // Create the number grids
     createModalNumberGrid();
@@ -169,27 +181,37 @@ function startNewProblem() {
     // Generate new problem
     currentProblem = generateProblem();
     
-    // Set up mode sequence for this problem type
-    const questionType = getCurrentQuestionType();
-    currentModeSequence = questionType[2] || [0, 1, 2]; // Use specified modes or default to all
-    currentModeIndex = 0;
-    currentMode = currentModeSequence[currentModeIndex];
+    // Reset dual mode state
+    mode4Numbers = [...currentProblem];
+    mode1Numbers = [...currentProblem];
+    mode4Complete = false;
+    mode1Complete = false;
     
     // Show the original equation for the new problem
     showOriginalEquation();
     
-    // Show swap button for new problems (will be hidden after first split)
-    showSwapButton();
+    // Show swap button for mode 1 (bottom section)
+    swapNumbersBtnVisual.classList.remove('hidden');
     
-    if (currentMode === 0) {
-        startNumberboardDisplayMode();
-    } else if (currentMode === 1) {
-        startVisualModeWithNumberboardModal();
-    } else if (currentMode === 2) {
-        startVisualModeWithNumpadModal();
-    } else if (currentMode === 4) {
-        startVisualModeWithFlexibleCombining();
-    }
+    // Start both modes
+    startMode4(); // Top section - flexible combining
+    startMode1(); // Bottom section - numberboard modal
+    
+    // Hide next game button
+    nextGameBtn.classList.add('hidden');
+}
+
+// === DUAL MODE FUNCTIONS ===
+function startMode4() {
+    // Top section - Mode 4 (Flexible Combining)
+    renderEquationInDiv(mode4EquationDiv, mode4Numbers, 4);
+    makeMode4Draggable();
+}
+
+function startMode1() {
+    // Bottom section - Mode 1 (Numberboard Modal)
+    renderEquationInDiv(mode1EquationDiv, mode1Numbers, 1);
+    makeMode1Draggable();
 }
 
 // === EQUATION MODE IMPLEMENTATION ===
