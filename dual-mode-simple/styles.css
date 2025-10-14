@@ -149,6 +149,14 @@ input {
     transition: transform 0.2s ease;
 }
 
+.number-circle.dragging {
+    transition: none !important; /* Disable transitions during drag */
+}
+
+.number-circle.dragging .number-value {
+    transition: none !important; /* Disable transitions during drag */
+}
+
 .number-circle:hover {
     transform: scale(1.05);
 }
