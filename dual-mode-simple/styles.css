@@ -185,9 +185,9 @@ input {
     transition: all 0.2s ease;
 }
 
-/* Mode 1 specific - first number is yellow */
+/* Mode 1 specific - first number is light blue */
 #mode1-equation .number-circle:first-child .number-value {
-    background-color: #f7f3a7;
+    background-color: lightblue;
 }
 
 .plus {
