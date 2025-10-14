@@ -27,7 +27,7 @@ let visualCurrentNumbers = [];
 
 // DOM elements
 let equationModeDiv, visualModeDiv, numberboardDisplayMode;
-let equationEquationDiv, visualEquationDiv, numberboardEquationDisplay, modal, answerInput, errorMsg, nextProblemBtn, nextModeBtn;
+let equationEquationDiv, visualEquationDiv, numberboardEquationDisplay, modal, answerInput, errorMsg, nextGameBtn;
 let gamesCompletedDisplay, modalNumberGrid, numberboardNumberGrid, confettiContainer;
 
 // Initialize the game when the page loads
@@ -40,14 +40,13 @@ function initializeGame() {
     numberboardDisplayMode = document.getElementById('numberboard-display-mode');
     numberboardEquationDisplay = document.getElementById('numberboard-equation-display');
     numberboardNumberGrid = document.getElementById('numberboard-number-grid');
-    nextModeBtn = document.getElementById('next-mode-btn');
     confettiContainer = document.getElementById('confetti-container');
     visualModeDiv = document.getElementById('visual-mode');
     visualEquationDiv = document.getElementById('equation');
     modal = document.getElementById('modal');
     answerInput = document.getElementById('answer-input');
     errorMsg = document.getElementById('error-msg');
-    nextProblemBtn = document.getElementById('next-problem-btn');
+    nextGameBtn = document.getElementById('next-game-btn');
     gamesCompletedDisplay = document.getElementById('games-completed');
     modalNumberGrid = document.getElementById('modal-number-grid');
     
@@ -56,8 +55,7 @@ function initializeGame() {
     createNumberboardDisplayGrid();
     
     // Set up event listeners
-    nextProblemBtn.addEventListener('click', startNewProblem);
-    nextModeBtn.addEventListener('click', switchToNextMode);
+    nextGameBtn.addEventListener('click', handleNextGameClick);
     
     // Prevent zooming on double tap
     setupZoomPrevention();
@@ -134,6 +132,16 @@ function generateProblem() {
 }
 
 // === GAME FLOW CONTROL ===
+function handleNextGameClick() {
+    if (currentMode === 2) {
+        // After mode 2 (numpad modal), start a completely new problem
+        startNewProblem();
+    } else {
+        // After mode 0 or 1, switch to next mode with same problem
+        switchToNextMode();
+    }
+}
+
 function startNewProblem() {
     // Generate new problem
     currentProblem = generateProblem();
@@ -159,8 +167,8 @@ function startEquationMode() {
     startVisualMode();
     return;
     
-    // Hide next mode button
-    nextModeBtn.classList.add('hidden');
+    // Hide next game button
+    nextGameBtn.classList.add('hidden');
 }
 
 function createModalNumberGrid() {
@@ -499,9 +507,9 @@ function completeEquationMode() {
     // Show confetti
     showConfetti();
     
-    // Show next mode button
+    // Show next game button
     setTimeout(() => {
-        nextModeBtn.classList.remove('hidden');
+        nextGameBtn.classList.remove('hidden');
     }, 1000);
 }
 
@@ -659,9 +667,8 @@ function startNumberboardDisplayMode() {
     gameComplete = false;
     currentStepIndex = 0;
     
-    // Hide buttons initially
-    nextModeBtn.classList.add('hidden');
-    nextProblemBtn.classList.add('hidden');
+    // Hide button initially
+    nextGameBtn.classList.add('hidden');
     
     // Render initial equation
     renderNumberboardDisplayEquation();
@@ -1022,12 +1029,16 @@ function completeNumberboardDisplayMode() {
     // Update equation to show final answer
     renderNumberboardDisplayEquation();
     
+    // Increment games completed counter for this mode
+    gamesCompleted++;
+    gamesCompletedDisplay.textContent = gamesCompleted;
+    
     // Show confetti
     showNumberboardConfetti();
     
-    // Show next mode button
+    // Show next game button (which will switch to next mode)
     setTimeout(() => {
-        nextModeBtn.classList.remove('hidden');
+        nextGameBtn.classList.remove('hidden');
     }, 1000);
 }
 
@@ -1129,7 +1140,7 @@ function startVisualMode() {
     renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
     makeVisualDraggable();
     
-    nextProblemBtn.classList.add('hidden');
+    nextGameBtn.classList.add('hidden');
     modal.classList.add('hidden');
 }
 
@@ -1144,7 +1155,7 @@ function startVisualModeWithNumberboardModal() {
     renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
     makeVisualDraggable();
     
-    nextProblemBtn.classList.add('hidden');
+    nextGameBtn.classList.add('hidden');
     modal.classList.add('hidden');
 }
 
@@ -1159,7 +1170,7 @@ function startVisualModeWithNumpadModal() {
     renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
     makeVisualDraggable();
     
-    nextProblemBtn.classList.add('hidden');
+    nextGameBtn.classList.add('hidden');
     modal.classList.add('hidden');
 }
 
@@ -1478,7 +1489,7 @@ function checkIfEquationDone() {
             spread: 70,
             origin: { y: 0.6 }
         });
-        nextModeBtn.classList.remove('hidden');
+        nextGameBtn.classList.remove('hidden');
     }
 }
 
@@ -1548,28 +1559,25 @@ function renderModalEquation(a, b) {
 
 function checkIfDone() {
     if (visualCurrentNumbers.length === 1) {
+        // Increment games completed counter for each mode completion
+        gamesCompleted++;
+        gamesCompletedDisplay.textContent = gamesCompleted;
+        
+        // Show confetti for completion
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+        
         if (currentMode === 2) {
-            // Mode 2 (numpad modal) - this completes the full cycle
+            // Mode 2 (numpad modal) - increment problem count and show next game button
             problemCount++;
-            gamesCompleted++;
-            gamesCompletedDisplay.textContent = gamesCompleted;
-            
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-            nextProblemBtn.classList.remove('hidden');
+            nextGameBtn.classList.remove('hidden');
         } else {
-            // Mode 1 (numberboard modal) - switch to next mode
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-            
+            // Mode 1 (numberboard modal) - show next game button to continue to next mode
             setTimeout(() => {
-                switchToNextMode();
+                nextGameBtn.classList.remove('hidden');
             }, 1500);
         }
     }
