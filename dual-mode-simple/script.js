@@ -135,12 +135,12 @@ function startNewProblem() {
 
 function renderMode4() {
     renderEquation(mode4EquationDiv, mode4Numbers, false); // No grayed first number
-    makeMode4Draggable();
+    makeDraggable();
 }
 
 function renderMode1() {
     renderEquation(mode1EquationDiv, mode1Numbers, true); // Grayed first number
-    makeMode1Draggable();
+    makeDraggable();
 }
 
 function renderEquation(targetDiv, numbers, grayFirst) {
@@ -168,46 +168,94 @@ function renderEquation(targetDiv, numbers, grayFirst) {
 }
 
 // === MODE 4 (FLEXIBLE COMBINING) ===
-function makeMode4Draggable() {
-    // Clear existing bindings
-    interact('#mode4-equation .number-circle').unset();
-    
-    setTimeout(() => {
-        // Make draggable
-        interact('#mode4-equation .number-circle')
-            .draggable({
-                inertia: false,
-                autoScroll: false,
-                listeners: {
-                    start(event) {
-                        event.target.style.transform = 'scale(1.1)';
-                        event.target.style.zIndex = '1000';
-                    },
-                    move(event) {
-                        const target = event.target;
-                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                        target.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
-                        target.setAttribute('data-x', x);
-                        target.setAttribute('data-y', y);
-                    },
-                    end(event) {
-                        event.target.style.transform = '';
-                        event.target.style.zIndex = '';
-                        if (!droppedFlag) {
-                            resetPosition(event.target);
-                        }
-                        droppedFlag = false;
+function makeDraggable() {
+    // Make numbers draggable (exact copy from original visual-adding)
+    interact('.number-circle')
+        .draggable({
+            inertia: false,
+            autoScroll: false,
+            listeners: {
+                start(event) {
+                    droppedFlag = false;
+                    event.target.setAttribute('data-x', 0);
+                    event.target.setAttribute('data-y', 0);
+                    event.target.style.transform = 'scale(1.1)';
+                    event.target.style.zIndex = '1000';
+                    event.target.classList.add('dragging');
+                },
+                move(event) {
+                    const target = event.target;
+                    const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                    const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                    target.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
+                    target.setAttribute('data-x', x);
+                    target.setAttribute('data-y', y);
+                },
+                end(event) {
+                    event.target.style.transform = '';
+                    event.target.style.zIndex = '';
+                    event.target.classList.remove('dragging');
+                    if (!droppedFlag) {
+                        resetPosition(event.target);
                     }
                 }
-            });
+            }
+        });
 
-        // Add double-click for splitting
-        const circles = mode4EquationDiv.querySelectorAll('.number-circle');
-        circles.forEach(circle => {
-            circle.addEventListener('dblclick', function(event) {
+    // Add double-tap to split numbers (exact copy from original visual-adding)
+    document.querySelectorAll('.number-circle').forEach(circle => {
+        let tapCount = 0;
+        let tapTimer;
+        
+        const handleTap = function(event) {
+            tapCount++;
+            
+            if (tapCount === 1) {
+                tapTimer = setTimeout(() => {
+                    tapCount = 0;
+                }, 300);
+            } else if (tapCount === 2) {
+                clearTimeout(tapTimer);
+                tapCount = 0;
+                
                 event.preventDefault();
+                event.stopPropagation();
+                
                 const num = parseInt(this.querySelector('.number-value').textContent);
+                
+                // Determine which mode this circle belongs to and handle accordingly
+                if (this.closest('#mode4-equation')) {
+                    const idx = mode4Numbers.indexOf(num);
+                    if (idx !== -1) {
+                        const tens = Math.floor(num / 10) * 10;
+                        const ones = num % 10;
+                        if (tens > 0 && ones > 0) {
+                            mode4Numbers.splice(idx, 1, tens, ones);
+                            renderMode4();
+                        }
+                    }
+                } else if (this.closest('#mode1-equation')) {
+                    const idx = mode1Numbers.indexOf(num);
+                    if (idx !== -1 && idx > 0) { // Don't split first number in mode 1
+                        const tens = Math.floor(num / 10) * 10;
+                        const ones = num % 10;
+                        if (tens > 0 && ones > 0) {
+                            mode1Numbers.splice(idx, 1, tens, ones);
+                            renderMode1();
+                        }
+                    }
+                }
+            }
+        };
+        
+        circle.addEventListener('touchstart', handleTap);
+        
+        circle.addEventListener('dblclick', function(event) {
+            event.preventDefault();
+            const num = parseInt(this.querySelector('.number-value').textContent);
+            
+            // Determine which mode this circle belongs to and handle accordingly
+            if (this.closest('#mode4-equation')) {
                 const idx = mode4Numbers.indexOf(num);
                 if (idx !== -1) {
                     const tens = Math.floor(num / 10) * 10;
@@ -217,35 +265,99 @@ function makeMode4Draggable() {
                         renderMode4();
                     }
                 }
-            });
-        });
-
-        // Make dropzones
-        interact('#mode4-equation .number-circle').dropzone({
-            accept: '#mode4-equation .number-circle',
-            overlap: 'pointer',
-            checker: function(dragEvent, event, dropped, dropzone, dropElement, draggable, draggableElement) {
-                if (!dropped) return false;
-                const droppedNum = parseInt(draggableElement.querySelector('.number-value').textContent);
-                const targetNum = parseInt(dropElement.querySelector('.number-value').textContent);
-                return isAllowedToAdd(droppedNum, targetNum, mode4Numbers.length);
-            },
-            listeners: {
-                drop: function(event) {
-                    const draggableElement = event.relatedTarget;
-                    const dropzoneElement = event.target;
-                    const droppedNum = parseInt(draggableElement.querySelector('.number-value').textContent);
-                    const targetNum = parseInt(dropzoneElement.querySelector('.number-value').textContent);
-                    
-                    if (isAllowedToAdd(droppedNum, targetNum, mode4Numbers.length)) {
-                        currentModalMode = 'mode4';
-                        showModal(droppedNum, targetNum, 'numpad');
-                        droppedFlag = true;
+            } else if (this.closest('#mode1-equation')) {
+                const idx = mode1Numbers.indexOf(num);
+                if (idx !== -1 && idx > 0) { // Don't split first number in mode 1
+                    const tens = Math.floor(num / 10) * 10;
+                    const ones = num % 10;
+                    if (tens > 0 && ones > 0) {
+                        mode1Numbers.splice(idx, 1, tens, ones);
+                        renderMode1();
                     }
                 }
             }
         });
-    }, 100);
+    });
+
+    // Make numbers dropzones for other numbers (exact copy from original visual-adding)
+    interact('.number-circle').dropzone({
+        accept: '.number-circle',
+        overlap: 'pointer',
+        checker: function(dragEvent, event, dropped, dropzone, dropElement, draggable, draggableElement) {
+            if (!dropped) return false;
+            
+            const droppedNum = parseInt(draggableElement.querySelector('.number-value').textContent);
+            const targetNum = parseInt(dropElement.querySelector('.number-value').textContent);
+            
+            // Check if both elements are in the same mode section
+            const draggedInMode4 = draggableElement.closest('#mode4-equation');
+            const targetInMode4 = dropElement.closest('#mode4-equation');
+            const draggedInMode1 = draggableElement.closest('#mode1-equation');
+            const targetInMode1 = dropElement.closest('#mode1-equation');
+            
+            // Only allow drops within the same mode
+            if (draggedInMode4 && targetInMode4) {
+                return isAllowedToAdd(droppedNum, targetNum, mode4Numbers.length);
+            } else if (draggedInMode1 && targetInMode1) {
+                // Mode 1: can't drag the first number (yellow one)
+                const draggedIdx = mode1Numbers.indexOf(droppedNum);
+                return draggedIdx > 0; // Only allow if not the first number
+            }
+            
+            return false;
+        },
+        ondragenter: function(event) {
+            // Add visual feedback when dragging over valid target
+            event.target.classList.add('drag-target');
+        },
+        ondragleave: function(event) {
+            // Remove visual feedback when dragging away
+            event.target.classList.remove('drag-target');
+        },
+        ondrop: function(event) {
+            // Remove visual feedback on drop
+            event.target.classList.remove('drag-target');
+            droppedFlag = true;
+            
+            const droppedNum = parseInt(event.relatedTarget.querySelector('.number-value').textContent);
+            const targetNum = parseInt(event.target.querySelector('.number-value').textContent);
+            if (event.relatedTarget !== event.target) {
+                
+                // Determine which mode we're in
+                if (event.target.closest('#mode4-equation')) {
+                    const droppedIdx = mode4Numbers.indexOf(droppedNum);
+                    let targetIdx = mode4Numbers.indexOf(targetNum);
+                    
+                    if (droppedNum === targetNum && droppedIdx === targetIdx) {
+                        targetIdx = mode4Numbers.indexOf(targetNum, droppedIdx + 1);
+                    }
+                    
+                    if (droppedIdx < targetIdx) {
+                        currentModalMode = 'mode4';
+                        showModal(droppedNum, targetNum, 'numpad');
+                    } else {
+                        currentModalMode = 'mode4';
+                        showModal(targetNum, droppedNum, 'numpad');
+                    }
+                } else if (event.target.closest('#mode1-equation')) {
+                    const droppedIdx = mode1Numbers.indexOf(droppedNum);
+                    let targetIdx = mode1Numbers.indexOf(targetNum);
+                    
+                    if (droppedNum === targetNum && droppedIdx === targetIdx) {
+                        targetIdx = mode1Numbers.indexOf(targetNum, droppedIdx + 1);
+                    }
+                    
+                    if (droppedIdx < targetIdx) {
+                        currentModalMode = 'mode1';
+                        showModal(droppedNum, targetNum, 'numberboard');
+                    } else {
+                        currentModalMode = 'mode1';
+                        showModal(targetNum, droppedNum, 'numberboard');
+                    }
+                }
+            }
+        }
+    });
 }
 
 function isAllowedToAdd(a, b, currentLength) {
@@ -259,78 +371,6 @@ function isAllowedToAdd(a, b, currentLength) {
     return false;
 }
 
-// === MODE 1 (NUMBERBOARD MODAL) ===
-function makeMode1Draggable() {
-    // Clear existing bindings
-    interact('#mode1-equation .number-circle').unset();
-    
-    setTimeout(() => {
-        // Make draggable (except first number)
-        interact('#mode1-equation .number-circle:not(:first-child)')
-            .draggable({
-                inertia: false,
-                autoScroll: false,
-                listeners: {
-                    start(event) {
-                        event.target.style.transform = 'scale(1.1)';
-                        event.target.style.zIndex = '1000';
-                    },
-                    move(event) {
-                        const target = event.target;
-                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                        target.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
-                        target.setAttribute('data-x', x);
-                        target.setAttribute('data-y', y);
-                    },
-                    end(event) {
-                        event.target.style.transform = '';
-                        event.target.style.zIndex = '';
-                        if (!droppedFlag) {
-                            resetPosition(event.target);
-                        }
-                        droppedFlag = false;
-                    }
-                }
-            });
-
-        // Add double-click for splitting (except first number)
-        const circles = mode1EquationDiv.querySelectorAll('.number-circle:not(:first-child)');
-        circles.forEach(circle => {
-            circle.addEventListener('dblclick', function(event) {
-                event.preventDefault();
-                const num = parseInt(this.querySelector('.number-value').textContent);
-                const idx = mode1Numbers.indexOf(num);
-                if (idx !== -1 && idx > 0) { // Don't split first number
-                    const tens = Math.floor(num / 10) * 10;
-                    const ones = num % 10;
-                    if (tens > 0 && ones > 0) {
-                        mode1Numbers.splice(idx, 1, tens, ones);
-                        renderMode1();
-                    }
-                }
-            });
-        });
-
-        // Make dropzones (can drop on any number)
-        interact('#mode1-equation .number-circle').dropzone({
-            accept: '#mode1-equation .number-circle:not(:first-child)',
-            overlap: 'pointer',
-            listeners: {
-                drop: function(event) {
-                    const draggableElement = event.relatedTarget;
-                    const dropzoneElement = event.target;
-                    const droppedNum = parseInt(draggableElement.querySelector('.number-value').textContent);
-                    const targetNum = parseInt(dropzoneElement.querySelector('.number-value').textContent);
-                    
-                    currentModalMode = 'mode1';
-                    showModal(droppedNum, targetNum, 'numberboard');
-                    droppedFlag = true;
-                }
-            }
-        });
-    }, 100);
-}
 
 // === MODAL HANDLING ===
 function showModal(a, b, modalType) {
@@ -486,7 +526,7 @@ function handleSwapNumbers() {
 }
 
 function resetPosition(element) {
-    element.style.transform = '';
+    element.style.transform = 'translate(0px, 0px)';
     element.setAttribute('data-x', 0);
     element.setAttribute('data-y', 0);
 }
