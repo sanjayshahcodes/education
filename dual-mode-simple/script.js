@@ -273,8 +273,11 @@ function startNewProblem() {
     lastMode4Numbers = [];
     lastMode1Numbers = [];
     
-    // Remove any existing checkmarks from previous game
+    // Remove any existing checkmarks and arrows from previous game
     removeAllCheckmarks();
+    
+    // Show arrow pointing to Mode 4 (top section) to start
+    addActiveArrow('mode4');
     
     // Show original equation
     showOriginalEquation();
@@ -729,6 +732,9 @@ function handleCorrectAnswer(a, b) {
                 mode1EquationDiv.parentElement.classList.remove('disabled');
                 removeDisabledOverlay('mode1');
                 
+                // Move arrow to Mode 1 (bottom section)
+                addActiveArrow('mode1');
+                
                 checkBothComplete();
             }
         }
@@ -759,6 +765,9 @@ function handleCorrectAnswer(a, b) {
                     spread: 70,
                     origin: { y: 0.6 }
                 });
+                
+                // Remove arrow since both modes are complete
+                removeActiveArrow();
                 
                 swapBtn.classList.add('hidden');
                 checkBothComplete();
@@ -818,6 +827,23 @@ function removeAllCheckmarks() {
     // Remove all existing checkmarks from both mode sections
     const checkmarks = document.querySelectorAll('.green-checkmark');
     checkmarks.forEach(checkmark => checkmark.remove());
+}
+
+function addActiveArrow(modeId) {
+    // Remove any existing arrows first
+    removeActiveArrow();
+    
+    const equationDiv = document.getElementById(modeId + '-equation');
+    const modeSection = equationDiv.closest('.mode-section');
+    
+    const arrow = document.createElement('div');
+    arrow.className = 'active-arrow';
+    modeSection.appendChild(arrow);
+}
+
+function removeActiveArrow() {
+    const arrows = document.querySelectorAll('.active-arrow');
+    arrows.forEach(arrow => arrow.remove());
 }
 
 function handleSwapNumbers() {

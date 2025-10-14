@@ -123,6 +123,7 @@ input {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 /* Equation Display */
@@ -521,8 +522,23 @@ input {
 }
 
 .mode-section {
-    position: relative; /* For absolute positioned checkmark */
+    position: relative; /* For absolute positioned checkmark and arrow */
 }
+
+/* Active mode arrow indicator */
+.active-arrow {
+    position: absolute;
+    left: -45px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 22px solid transparent;
+    border-bottom: 22px solid transparent;
+    border-left: 30px solid #ffd700; /* Gold triangle pointing right */
+    z-index: 10;
+}
+
 
 .mode-section.disabled {
     opacity: 0.5;
