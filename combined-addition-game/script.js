@@ -1449,8 +1449,8 @@ function showCorrectAnswerAnimation(a, b, callback) {
         answerTile.classList.add('current-position');
     }
     
-    // Wait 1 second then call the callback to close modal
-    setTimeout(callback, 1000);
+    // Wait 0.5 seconds then call the callback to close modal
+    setTimeout(callback, 500);
 }
 
 function handleCorrectModalAnswer(a, b) {
