@@ -226,6 +226,9 @@ function getExpectedNumber() {
 }
 
 function handleCorrectAnswer(tile) {
+    // Combine numbers in the equation display
+    combineNumbersInEquation();
+    
     // Move to next step
     currentStepIndex++;
     
@@ -240,6 +243,21 @@ function handleCorrectAnswer(tile) {
     
     // Update equation display to show next active number
     renderEquationModeEquation();
+}
+
+function combineNumbersInEquation() {
+    // Combine the first number with the current step number
+    if (currentStepIndex >= 1 && currentStepIndex < currentNumbers.length) {
+        const firstNum = currentNumbers[0];
+        const addedNum = currentNumbers[currentStepIndex];
+        const sum = firstNum + addedNum;
+        
+        // Replace the first two numbers with their sum
+        currentNumbers.splice(0, currentStepIndex + 1, sum);
+        
+        // Reset step index since we've combined numbers
+        currentStepIndex = 0;
+    }
 }
 
 function handleIncorrectAnswer(tile) {
@@ -614,7 +632,6 @@ function startVisualMode() {
     const [a, b] = currentProblem;
     visualCurrentNumbers = [a, b];
     
-    document.getElementById('original-equation').textContent = `${a} + ${b} = __`;
     renderVisualEquation();
     makeDraggable();
     
