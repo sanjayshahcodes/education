@@ -366,17 +366,6 @@ input {
     -webkit-user-select: none;
 }
 
-#problem-counter {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 18px;
-    font-weight: bold;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px 15px;
-    border-radius: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
 
 #original-equation {
     position: absolute;
@@ -424,7 +413,7 @@ input {
 }
 
 #equation .number-circle.grayed .number-value {
-    background-color: #999;
+    background-color: #f7f3a7;
     cursor: not-allowed;
 }
 

@@ -768,8 +768,8 @@ function makeDraggable() {
         });
     });
 
-    // Make first number a dropzone for other numbers (restricted combinations)
-    interact('.number-circle.grayed').dropzone({
+    // Make numbers dropzones for other numbers (restricted combinations)
+    interact('.number-circle').dropzone({
         accept: '.number-circle:not(.grayed)',
         overlap: 'pointer',
         checker: function(dragEvent, event, dropped, dropzone, dropElement, draggable, draggableElement) {
@@ -778,8 +778,10 @@ function makeDraggable() {
             const droppedNum = parseInt(draggableElement.querySelector('.number-value').textContent);
             const targetNum = parseInt(dropElement.querySelector('.number-value').textContent);
             
-            // Only allow adding to the first number (which should be grayed)
-            // and only allow specific combinations that follow the pattern
+            // Don't allow dropping onto self
+            if (droppedNum === targetNum && draggableElement === dropElement) return false;
+            
+            // Only allow specific combinations that follow the pattern
             return isAllowedCombination(droppedNum, targetNum);
         },
         ondragenter: function(event) {
@@ -796,7 +798,7 @@ function makeDraggable() {
             const targetNum = parseInt(event.target.querySelector('.number-value').textContent);
             
             if (event.relatedTarget !== event.target) {
-                showPopup(targetNum, droppedNum); // First number + dropped number
+                showPopup(targetNum, droppedNum);
             }
             resetPosition(event.relatedTarget);
         }
@@ -807,18 +809,29 @@ function isAllowedCombination(droppedNum, targetNum) {
     // Only allow combinations that follow the equation-skip-counting pattern:
     // - First number (targetNum) + tens from second number
     // - First number (targetNum) + ones from second number
-    // - Tens + ones (both from second number)
+    // - (First number + tens) + ones from second number
+    // - (First number + ones) + tens from second number
     
     const [originalA, originalB] = currentProblem;
-    
-    // Target should be the first number
-    if (targetNum !== originalA) return false;
-    
-    // Dropped number should be a component of the second number
     const tensB = Math.floor(originalB / 10) * 10;
     const onesB = originalB % 10;
     
-    return droppedNum === tensB || droppedNum === onesB;
+    // Allow dropping tens or ones onto the original first number
+    if (targetNum === originalA) {
+        return droppedNum === tensB || droppedNum === onesB;
+    }
+    
+    // Allow dropping the remaining component onto the intermediate sum
+    // (e.g., if we already added tens to first number, allow adding ones)
+    if (targetNum === originalA + tensB) {
+        return droppedNum === onesB;
+    }
+    
+    if (targetNum === originalA + onesB) {
+        return droppedNum === tensB;
+    }
+    
+    return false;
 }
 
 function resetPosition(element) {
@@ -935,7 +948,6 @@ function checkIfDone() {
         // Increment completed counter
         problemCount++;
         gamesCompleted++;
-        document.getElementById('visual-completed').textContent = gamesCompleted;
         gamesCompletedDisplay.textContent = gamesCompleted;
         
         confetti({
