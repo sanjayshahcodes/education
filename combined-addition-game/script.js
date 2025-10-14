@@ -901,13 +901,7 @@ function renderNumberboardDisplayEquation() {
             circle.appendChild(blocksContainer);
         }
         
-        // Add arrow indicator for active number
-        if (shouldShowNumberboardArrow(idx)) {
-            const arrow = document.createElement('div');
-            arrow.className = 'arrow-indicator';
-            arrow.textContent = '↑';
-            circle.appendChild(arrow);
-        }
+        // Arrow indicators removed for cleaner interface
         
         // Add double-click handler for splittable numbers
         if (idx === 1 && needsNumberboardSplitting() && currentNumbers.length === 2) {
@@ -975,16 +969,7 @@ function renderNumberboardDisplayEquation() {
     }
 }
 
-function shouldShowNumberboardArrow(idx) {
-    // Show arrow for the number that should be clicked next
-    if (currentStepIndex === 0) {
-        // Before any clicks, no arrow (starting position is automatically set)
-        return false;
-    }
-    
-    // Show arrow for the current step we're working on
-    return idx === currentStepIndex;
-}
+// Arrow indicator function removed - arrows disabled for cleaner interface
 
 function handleNumberboardSplitNumber(event) {
     event.preventDefault();
