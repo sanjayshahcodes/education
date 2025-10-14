@@ -27,8 +27,8 @@ let visualCurrentNumbers = [];
 
 // DOM elements
 let equationModeDiv, visualModeDiv;
-let numberGrid, equationDisplay, gamesCompletedDisplay, nextModeBtn, confettiContainer;
-let visualEquationDiv, modal, answerInput, errorMsg, nextProblemBtn;
+let numberGrid, equationDisplay, gamesCompletedDisplay, nextGameBtn, confettiContainer;
+let visualEquationDiv, modal, answerInput, errorMsg;
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -44,7 +44,6 @@ function initializeGame() {
     numberGrid = document.getElementById('number-grid');
     equationDisplay = document.getElementById('equation-display');
     gamesCompletedDisplay = document.getElementById('games-completed');
-    nextModeBtn = document.getElementById('next-mode-btn');
     confettiContainer = document.getElementById('confetti-container');
     
     // Visual mode elements
@@ -52,14 +51,15 @@ function initializeGame() {
     modal = document.getElementById('modal');
     answerInput = document.getElementById('answer-input');
     errorMsg = document.getElementById('error-msg');
-    nextProblemBtn = document.getElementById('next-problem-btn');
+    
+    // Global elements
+    nextGameBtn = document.getElementById('next-game-btn');
     
     // Create the number grid for equation mode
     createNumberGrid();
     
     // Set up event listeners
-    nextModeBtn.addEventListener('click', switchToVisualMode);
-    nextProblemBtn.addEventListener('click', startNewProblem);
+    nextGameBtn.addEventListener('click', handleNextGame);
     
     // Prevent zooming on double tap
     setupZoomPrevention();
@@ -146,6 +146,18 @@ function startNewProblem() {
     startEquationMode();
 }
 
+function handleNextGame() {
+    if (currentMode === 'equation') {
+        // Switch to visual mode
+        currentMode = 'visual';
+        showVisualMode();
+        startVisualMode();
+    } else {
+        // Switch to equation mode with new problem
+        startNewProblem();
+    }
+}
+
 function switchToVisualMode() {
     currentMode = 'visual';
     showVisualMode();
@@ -172,8 +184,8 @@ function startEquationMode() {
     gameComplete = false;
     currentStepIndex = 0;
     
-    // Hide next mode button
-    nextModeBtn.classList.add('hidden');
+    // Hide next game button
+    nextGameBtn.classList.add('hidden');
     
     // Clear confetti
     confettiContainer.classList.add('hidden');
@@ -520,9 +532,9 @@ function completeEquationMode() {
     // Show confetti
     showConfetti();
     
-    // Show next mode button
+    // Show next game button
     setTimeout(() => {
-        nextModeBtn.classList.remove('hidden');
+        nextGameBtn.classList.remove('hidden');
     }, 1000);
 }
 
@@ -603,7 +615,7 @@ function startVisualMode() {
     renderVisualEquation();
     makeDraggable();
     
-    nextProblemBtn.classList.add('hidden');
+    nextGameBtn.classList.add('hidden');
     modal.classList.add('hidden');
 }
 
@@ -947,7 +959,7 @@ function checkIfDone() {
             spread: 70,
             origin: { y: 0.6 }
         });
-        nextProblemBtn.classList.remove('hidden');
+        nextGameBtn.classList.remove('hidden');
     }
 }
 
