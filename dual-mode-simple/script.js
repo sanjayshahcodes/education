@@ -478,7 +478,15 @@ function makeDraggable() {
                 // Mode 1: can't drag the first number (yellow one), and can only drop onto the first number
                 const draggedIdx = mode1Numbers.indexOf(droppedNum);
                 const targetIdx = mode1Numbers.indexOf(targetNum);
-                return draggedIdx > 0 && targetIdx === 0; // Only allow dragging non-first numbers onto the first number
+                
+                // Basic check: can only drag non-first numbers onto the first number
+                if (!(draggedIdx > 0 && targetIdx === 0)) return false;
+                
+                // Additional restriction: only allow multiples of 10 or single digits to be dragged
+                const isMultipleOf10 = droppedNum % 10 === 0 && droppedNum >= 10;
+                const isSingleDigit = droppedNum >= 1 && droppedNum <= 9;
+                
+                return isMultipleOf10 || isSingleDigit;
             }
             
             return false;
