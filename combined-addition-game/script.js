@@ -134,7 +134,8 @@ function generateProblem() {
 // === GAME FLOW CONTROL ===
 function handleNextGameClick() {
     if (currentMode === 2) {
-        // After mode 2 (numpad modal), start a completely new problem
+        // After mode 2 (numpad modal), start a completely new problem at mode 0
+        currentMode = 0; // Reset to mode 0 for new problem
         startNewProblem();
     } else {
         // After mode 0 or 1, switch to next mode with same problem
@@ -146,8 +147,11 @@ function startNewProblem() {
     // Generate new problem
     currentProblem = generateProblem();
     
-    // Determine which mode to start with based on problem count
-    currentMode = problemCount % 3;
+    // Use the currentMode that was set (don't recalculate)
+    // If currentMode wasn't set explicitly, default to mode based on problem count
+    if (currentMode === undefined || currentMode === null) {
+        currentMode = problemCount % 3;
+    }
     
     if (currentMode === 0) {
         startNumberboardDisplayMode();
