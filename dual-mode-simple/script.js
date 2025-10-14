@@ -342,8 +342,6 @@ function renderEquation(targetDiv, numbers, grayFirst) {
 
 // === MODE 4 (FLEXIBLE COMBINING) ===
 function makeDraggable() {
-    const makeStart = performance.now();
-    console.log('🔧 makeDraggable() called');
     // Clear all existing interactions first to avoid conflicts
     interact('.number-circle').unset();
     
@@ -362,17 +360,12 @@ function makeDraggable() {
                     event.target.classList.add('dragging');
                 },
                 move(event) {
-                    const moveStart = performance.now();
                     const target = event.target;
                     const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
                     const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
                     target.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
                     target.setAttribute('data-x', x);
                     target.setAttribute('data-y', y);
-                    const moveEnd = performance.now();
-                    if (moveEnd - moveStart > 1) {
-                        console.log(`🐌 SLOW MOVE: ${(moveEnd - moveStart).toFixed(2)}ms`);
-                    }
                 },
                 end(event) {
                     event.target.style.transform = '';
@@ -467,7 +460,6 @@ function makeDraggable() {
         accept: '.number-circle',
         overlap: 'pointer',
         checker: function(dragEvent, event, dropped, dropzone, dropElement, draggable, draggableElement) {
-            const checkerStart = performance.now();
             if (!dropped) return false;
             
             const droppedNum = parseInt(draggableElement.querySelector('.number-value').textContent);
@@ -475,12 +467,7 @@ function makeDraggable() {
             
             // Quick check: are both elements in Mode 4? (most common case)
             if (mode4Numbers.includes(droppedNum) && mode4Numbers.includes(targetNum)) {
-                const result = isAllowedToAdd(droppedNum, targetNum, mode4Numbers.length);
-                const checkerEnd = performance.now();
-                if (checkerEnd - checkerStart > 0.5) {
-                    console.log(`🐌 SLOW CHECKER: ${(checkerEnd - checkerStart).toFixed(2)}ms`);
-                }
-                return result;
+                return isAllowedToAdd(droppedNum, targetNum, mode4Numbers.length);
             }
             
             // Quick check: are both elements in Mode 1?
@@ -495,17 +482,9 @@ function makeDraggable() {
                 const isMultipleOf10 = droppedNum % 10 === 0 && droppedNum >= 10;
                 const isSingleDigit = droppedNum >= 1 && droppedNum <= 9;
                 
-                const checkerEnd = performance.now();
-                if (checkerEnd - checkerStart > 0.5) {
-                    console.log(`🐌 SLOW CHECKER: ${(checkerEnd - checkerStart).toFixed(2)}ms`);
-                }
                 return isMultipleOf10 || isSingleDigit;
             }
             
-            const checkerEnd = performance.now();
-            if (checkerEnd - checkerStart > 0.5) {
-                console.log(`🐌 SLOW CHECKER: ${(checkerEnd - checkerStart).toFixed(2)}ms`);
-            }
             return false;
         },
         ondragenter: function(event) {
@@ -560,9 +539,6 @@ function makeDraggable() {
             }
         }
     });
-    
-    const makeEnd = performance.now();
-    console.log(`🔧 makeDraggable() completed in ${(makeEnd - makeStart).toFixed(2)}ms`);
 }
 
 function isAllowedToAdd(a, b, currentLength) {
