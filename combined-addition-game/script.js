@@ -28,6 +28,7 @@ let visualCurrentNumbers = [];
 let equationModeDiv, visualModeDiv, numberboardDisplayMode;
 let equationEquationDiv, visualEquationDiv, numberboardEquationDisplay, modal, answerInput, errorMsg, nextGameBtn;
 let gamesCompletedDisplay, modalNumberGrid, numberboardNumberGrid, confettiContainer, originalEquationDisplay;
+let swapNumbersBtnNumberboard, swapNumbersBtnVisual;
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -49,6 +50,8 @@ function initializeGame() {
     gamesCompletedDisplay = document.getElementById('games-completed');
     modalNumberGrid = document.getElementById('modal-number-grid');
     originalEquationDisplay = document.getElementById('original-equation-display');
+    swapNumbersBtnNumberboard = document.getElementById('swap-numbers-btn-numberboard');
+    swapNumbersBtnVisual = document.getElementById('swap-numbers-btn-visual');
     
     // Create the number grids
     createModalNumberGrid();
@@ -56,6 +59,8 @@ function initializeGame() {
     
     // Set up event listeners
     nextGameBtn.addEventListener('click', handleNextGameClick);
+    swapNumbersBtnNumberboard.addEventListener('click', handleSwapNumbers);
+    swapNumbersBtnVisual.addEventListener('click', handleSwapNumbers);
     
     // Prevent zooming on double tap
     setupZoomPrevention();
@@ -162,6 +167,9 @@ function startNewProblem() {
     
     // Show the original equation for the new problem
     showOriginalEquation();
+    
+    // Show swap button for new problems (will be hidden after first split)
+    showSwapButton();
     
     // Use the currentMode that was set (don't recalculate)
     // If currentMode wasn't set explicitly, default to mode based on problem count
@@ -482,6 +490,9 @@ function handleSplitNumber(event) {
         // Split the number
         currentNumbers = [currentNumbers[0], tens, ones];
         
+        // Hide swap button after first split
+        hideSwapButton();
+        
         // Set step index to 1 to show arrow on first split number
         currentStepIndex = 1;
         
@@ -775,6 +786,9 @@ function combineNumberboardNumbers() {
         const addedNum = currentNumbers[currentStepIndex];
         const sum = firstNum + addedNum;
         
+        // Hide swap button after first combination
+        hideSwapButton();
+        
         // Replace the first two numbers with their sum
         currentNumbers.splice(0, currentStepIndex + 1, sum);
         
@@ -960,6 +974,9 @@ function handleNumberboardSplitNumber(event) {
     if (tens > 0 && ones > 0) {
         // Split the number
         currentNumbers = [currentNumbers[0], tens, ones];
+        
+        // Hide swap button after first split
+        hideSwapButton();
         
         // Set step index to 1 to show arrow on first split number
         currentStepIndex = 1;
@@ -1208,6 +1225,7 @@ function makeDraggable() {
                     const tens = Math.floor(num / 10) * 10;
                     const ones = num % 10;
                     if (tens > 0 && ones > 0) {
+                        hideSwapButton();
                         visualCurrentNumbers.splice(idx, 1, tens, ones);
                         renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
                         makeDraggable();
@@ -1226,6 +1244,7 @@ function makeDraggable() {
                 const tens = Math.floor(num / 10) * 10;
                 const ones = num % 10;
                 if (tens > 0 && ones > 0) {
+                    hideSwapButton();
                     visualCurrentNumbers.splice(idx, 1, tens, ones);
                     renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
                     makeDraggable();
@@ -1423,6 +1442,7 @@ function handleCorrectModalAnswer(a, b) {
     }
     
     if (idxA !== -1 && idxB !== -1) {
+        hideSwapButton();
         const minIdx = Math.min(idxA, idxB);
         const maxIdx = Math.max(idxA, idxB);
         visualCurrentNumbers.splice(maxIdx, 1);
@@ -1591,6 +1611,49 @@ function showOriginalEquation() {
 
 function hideOriginalEquation() {
     originalEquationDisplay.classList.add('hidden');
+}
+
+function showSwapButton() {
+    if (currentMode === 0) {
+        // Numberboard display mode
+        swapNumbersBtnNumberboard.classList.remove('hidden');
+        swapNumbersBtnVisual.classList.add('hidden');
+    } else {
+        // Visual modes
+        swapNumbersBtnVisual.classList.remove('hidden');
+        swapNumbersBtnNumberboard.classList.add('hidden');
+    }
+}
+
+function hideSwapButton() {
+    swapNumbersBtnNumberboard.classList.add('hidden');
+    swapNumbersBtnVisual.classList.add('hidden');
+}
+
+function handleSwapNumbers() {
+    // Swap the numbers in the current problem
+    const [a, b] = currentProblem;
+    currentProblem = [b, a];
+    
+    // Update the original equation display
+    showOriginalEquation();
+    
+    // Update the current numbers array
+    if (currentNumbers.length === 2) {
+        currentNumbers = [b, a];
+    }
+    
+    // Re-render the appropriate mode
+    if (currentMode === 0) {
+        // Numberboard display mode
+        renderNumberboardDisplayEquation();
+        updateNumberboardDisplayTileColoring();
+    } else {
+        // Visual modes
+        visualCurrentNumbers = [b, a];
+        renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
+        makeVisualDraggable();
+    }
 }
 
 // === UTILITY FUNCTIONS ===

@@ -148,6 +148,36 @@ input {
     color: #666;
 }
 
+.swap-numbers-btn {
+    background: #d3d3d3;
+    color: #666;
+    border: 1px solid #bbb;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    margin-right: 15px;
+}
+
+.swap-numbers-btn:hover {
+    background: #c0c0c0;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.swap-numbers-btn.hidden {
+    display: none;
+}
+
+.equation-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .game-board {
     flex: 1;
     padding: 0 0 25px 0;
