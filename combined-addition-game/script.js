@@ -1,6 +1,9 @@
 // Combined Addition Game
 // Alternates between equation-skip-counting and visual-adding modes
 
+// Game settings
+const show_blocks = false; // Set to false to hide blocks above numbers
+
 // Game state
 let currentMode = 'equation'; // 'equation' or 'visual'
 let currentProblem = null; // [a, b] - the same problem for both modes
@@ -372,38 +375,40 @@ function renderEquationModeEquation() {
         valueDiv.textContent = num;
         circle.appendChild(valueDiv);
         
-        // Add blocks
-        const blocksContainer = document.createElement('div');
-        blocksContainer.className = 'blocks-container';
+        // Add blocks if enabled
+        if (show_blocks) {
+            const blocksContainer = document.createElement('div');
+            blocksContainer.className = 'blocks-container';
 
-        const tens = Math.floor(num / 10);
-        const ones = num % 10;
+            const tens = Math.floor(num / 10);
+            const ones = num % 10;
 
-        // Add full tens columns
-        for (let i = 0; i < tens; i++) {
-            const column = document.createElement('div');
-            column.className = 'block-column';
-            for (let j = 0; j < 10; j++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                column.appendChild(block);
+            // Add full tens columns
+            for (let i = 0; i < tens; i++) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < 10; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
             }
-            blocksContainer.appendChild(column);
-        }
 
-        // Add ones column if any
-        if (ones > 0) {
-            const column = document.createElement('div');
-            column.className = 'block-column';
-            for (let j = 0; j < ones; j++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                column.appendChild(block);
+            // Add ones column if any
+            if (ones > 0) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < ones; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
             }
-            blocksContainer.appendChild(column);
-        }
 
-        circle.appendChild(blocksContainer);
+            circle.appendChild(blocksContainer);
+        }
         
         // Add arrow indicator for active number
         if (shouldShowArrow(idx)) {
@@ -439,38 +444,40 @@ function renderEquationModeEquation() {
         valueDiv.textContent = finalAnswer;
         answerCircle.appendChild(valueDiv);
         
-        // Add blocks above the answer
-        const blocksContainer = document.createElement('div');
-        blocksContainer.className = 'blocks-container';
-        
-        const tens = Math.floor(finalAnswer / 10);
-        const ones = finalAnswer % 10;
-        
-        // Add ten-columns
-        for (let i = 0; i < tens; i++) {
-            const column = document.createElement('div');
-            column.className = 'block-column';
-            for (let j = 0; j < 10; j++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                column.appendChild(block);
+        // Add blocks above the answer if enabled
+        if (show_blocks) {
+            const blocksContainer = document.createElement('div');
+            blocksContainer.className = 'blocks-container';
+            
+            const tens = Math.floor(finalAnswer / 10);
+            const ones = finalAnswer % 10;
+            
+            // Add ten-columns
+            for (let i = 0; i < tens; i++) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < 10; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
             }
-            blocksContainer.appendChild(column);
-        }
 
-        // Add ones column if any
-        if (ones > 0) {
-            const column = document.createElement('div');
-            column.className = 'block-column';
-            for (let j = 0; j < ones; j++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                column.appendChild(block);
+            // Add ones column if any
+            if (ones > 0) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < ones; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
             }
-            blocksContainer.appendChild(column);
+            
+            answerCircle.appendChild(blocksContainer);
         }
-        
-        answerCircle.appendChild(blocksContainer);
         equationDisplay.appendChild(answerCircle);
     }
 }
@@ -664,38 +671,40 @@ function renderVisualEquation() {
         valueDiv.textContent = num;
         circle.appendChild(valueDiv);
 
-        // Add blocks
-        const blocksContainer = document.createElement('div');
-        blocksContainer.className = 'blocks-container';
+        // Add blocks if enabled
+        if (show_blocks) {
+            const blocksContainer = document.createElement('div');
+            blocksContainer.className = 'blocks-container';
 
-        const tens = Math.floor(num / 10);
-        const ones = num % 10;
+            const tens = Math.floor(num / 10);
+            const ones = num % 10;
 
-        // Add full tens columns
-        for (let i = 0; i < tens; i++) {
-            const column = document.createElement('div');
-            column.className = 'block-column';
-            for (let j = 0; j < 10; j++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                column.appendChild(block);
+            // Add full tens columns
+            for (let i = 0; i < tens; i++) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < 10; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
             }
-            blocksContainer.appendChild(column);
-        }
 
-        // Add ones column if any
-        if (ones > 0) {
-            const column = document.createElement('div');
-            column.className = 'block-column';
-            for (let j = 0; j < ones; j++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                column.appendChild(block);
+            // Add ones column if any
+            if (ones > 0) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < ones; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
             }
-            blocksContainer.appendChild(column);
-        }
 
-        circle.appendChild(blocksContainer);
+            circle.appendChild(blocksContainer);
+        }
         visualEquationDiv.appendChild(circle);
     });
 }
@@ -925,37 +934,40 @@ function renderModalEquation(a, b) {
         valueDiv.textContent = num;
         circle.appendChild(valueDiv);
         
-        const blocksContainer = document.createElement('div');
-        blocksContainer.className = 'blocks-container';
-        
-        const tens = Math.floor(num / 10);
-        const ones = num % 10;
+        // Add blocks if enabled
+        if (show_blocks) {
+            const blocksContainer = document.createElement('div');
+            blocksContainer.className = 'blocks-container';
+            
+            const tens = Math.floor(num / 10);
+            const ones = num % 10;
 
-        // Add full tens columns
-        for (let i = 0; i < tens; i++) {
-            const column = document.createElement('div');
-            column.className = 'block-column';
-            for (let j = 0; j < 10; j++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                column.appendChild(block);
+            // Add full tens columns
+            for (let i = 0; i < tens; i++) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < 10; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
             }
-            blocksContainer.appendChild(column);
-        }
 
-        // Add ones column if any
-        if (ones > 0) {
-            const column = document.createElement('div');
-            column.className = 'block-column';
-            for (let j = 0; j < ones; j++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                column.appendChild(block);
+            // Add ones column if any
+            if (ones > 0) {
+                const column = document.createElement('div');
+                column.className = 'block-column';
+                for (let j = 0; j < ones; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    column.appendChild(block);
+                }
+                blocksContainer.appendChild(column);
             }
-            blocksContainer.appendChild(column);
-        }
 
-        circle.appendChild(blocksContainer);
+            circle.appendChild(blocksContainer);
+        }
         modalEquationDiv.appendChild(circle);
     });
 }
