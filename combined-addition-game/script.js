@@ -147,6 +147,10 @@ function startNewProblem() {
 }
 
 function handleNextGame() {
+    // Increment games completed counter every time Next Game is pressed
+    gamesCompleted++;
+    gamesCompletedDisplay.textContent = gamesCompleted;
+    
     if (currentMode === 'equation') {
         // Switch to visual mode
         currentMode = 'visual';
@@ -178,6 +182,9 @@ function showVisualMode() {
 function startEquationMode() {
     const [a, b] = currentProblem;
     currentNumbers = [a, b];
+    
+    // Clear any draggable interactions from visual mode
+    interact('.number-circle').unset();
     
     // Reset game state
     gameActive = false;
@@ -684,8 +691,11 @@ function renderVisualEquation() {
 }
 
 function makeDraggable() {
-    // Make numbers draggable (except first number which is grayed)
-    interact('.number-circle:not(.grayed)')
+    // Clear any existing draggable interactions
+    interact('.number-circle').unset();
+    
+    // Make numbers draggable only in visual mode (except first number which is grayed)
+    interact('#visual-mode .number-circle:not(.grayed)')
         .draggable({
             inertia: false,
             autoScroll: false,
@@ -717,8 +727,8 @@ function makeDraggable() {
             }
         });
 
-    // Add double-tap to split numbers (only for second number and beyond)
-    document.querySelectorAll('.number-circle:not(.grayed)').forEach(circle => {
+    // Add double-tap to split numbers (only for second number and beyond) - only in visual mode
+    document.querySelectorAll('#visual-mode .number-circle:not(.grayed)').forEach(circle => {
         let tapCount = 0;
         let tapTimer;
         
@@ -768,8 +778,8 @@ function makeDraggable() {
         });
     });
 
-    // Make numbers dropzones for other numbers (restricted combinations)
-    interact('.number-circle').dropzone({
+    // Make numbers dropzones for other numbers (restricted combinations) - only in visual mode
+    interact('#visual-mode .number-circle').dropzone({
         accept: '.number-circle:not(.grayed)',
         overlap: 'pointer',
         checker: function(dragEvent, event, dropped, dropzone, dropElement, draggable, draggableElement) {
@@ -949,10 +959,8 @@ function renderModalEquation(a, b) {
 
 function checkIfDone() {
     if (visualCurrentNumbers.length === 1) {
-        // Increment completed counter
+        // Increment problem counter
         problemCount++;
-        gamesCompleted++;
-        gamesCompletedDisplay.textContent = gamesCompleted;
         
         confetti({
             particleCount: 100,
