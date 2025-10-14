@@ -450,9 +450,14 @@ input {
     opacity: 0.8;
 }
 
-.drag-target {
-    box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+.number-circle.drag-target {
     transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+.number-circle.drag-target .number-value {
+    border: 3px dashed #999;
+    transition: all 0.2s ease;
 }
 
 #modal {
