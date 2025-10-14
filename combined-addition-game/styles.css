@@ -1,0 +1,677 @@
+/* ===== EQUATION SKIP COUNTING STYLES ===== */
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: none;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding: 0px 20px;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    margin: 0;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+/* Allow selection only for input elements */
+input {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+.game-mode {
+    width: 100%;
+    height: 100vh;
+}
+
+.game-mode.hidden {
+    display: none;
+}
+
+/* ===== EQUATION MODE STYLES ===== */
+
+#equation-mode .game-container {
+    width: calc(100vw - 6px);
+    height: calc(100vh - 6px);
+    margin: 0 auto;
+    background: white;
+    border-radius: 8px;
+    overflow: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.next-game-btn {
+    position: absolute;
+    top: 5px;
+    right: 35px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    z-index: 100;
+}
+
+.next-game-btn:hover {
+    background: #ff5252;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.next-game-btn.hidden {
+    display: none;
+}
+
+.games-completed-counter {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #444;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.06);
+    border: 1px solid #ddd;
+    z-index: 100;
+    min-width: 160px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.game-board {
+    flex: 1;
+    padding: 0 0 25px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.grid-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    padding: 0;
+    position: relative;
+}
+
+.equation-display {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    font-size: 48px;
+    margin: 0 0 15px 0;
+    padding: 20px;
+}
+
+.equation-display .number-circle {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    margin: 0 14px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.equation-display .number-value {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: lightblue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.equation-display .number-circle.grayed {
+    cursor: default;
+}
+
+.equation-display .number-circle.grayed .number-value {
+    background-color: #f7f3a7;
+}
+
+.equation-display .number-circle.splittable .number-value {
+    background-color: lightblue;
+    cursor: pointer;
+}
+
+.equation-display .number-circle.blue .number-value {
+    background-color: lightblue;
+}
+
+.equation-display .number-circle.final-answer .number-value {
+    background-color: #d3d3d3;
+    color: #000;
+}
+
+.equation-display .plus {
+    margin: 0 14px;
+    margin-bottom: 16px;
+    align-self: flex-end;
+}
+
+.equation-display .equals {
+    margin: 0 14px;
+    margin-bottom: 26px;
+    align-self: flex-end;
+}
+
+.arrow-indicator {
+    position: absolute;
+    bottom: -30px;
+    font-size: 24px;
+    color: #ff6b6b;
+    font-weight: bold;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.equation-display .blocks-container {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 14px;
+    align-items: flex-end;
+}
+
+.equation-display .block-column {
+    display: flex;
+    flex-direction: column-reverse;
+    margin: 0 3px;
+    min-height: 0;
+}
+
+.equation-display .block {
+    width: 11px;
+    height: 11px;
+    background-color: #9932CC;
+    border: 1px solid #999;
+    margin: 1px 0;
+}
+
+.grid-wrapper {
+    position: relative;
+}
+
+.number-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 0;
+    width: min(72vw, calc(100vh - 120px));
+    height: min(72vw, calc(100vh - 120px));
+    max-width: 520px;
+    max-height: 520px;
+    border: 3px solid #333;
+    background: #333;
+    box-sizing: border-box;
+}
+
+.number-tile {
+    background: #f0f0f0;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: normal;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.number-tile.starting-blocks {
+    background: #f7f3a7;
+    color: #333;
+    font-weight: normal;
+    border-color: #333;
+}
+
+.number-tile.first-addition {
+    background: lightblue;
+    color: #333;
+    font-weight: normal;
+    border-color: #333;
+}
+
+.number-tile.second-addition {
+    background: lightblue;
+    color: #333;
+    font-weight: normal;
+    border-color: #333;
+}
+
+.number-tile.current-position {
+    color: #333;
+    font-weight: bold !important;
+    font-size: 1.3rem !important;
+}
+
+.number-tile.incorrect {
+    background: #f44336;
+    border-color: #d32f2f;
+}
+
+.error-x {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: none;
+    animation: errorPop 1s ease-out;
+}
+
+@keyframes errorPop {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+.confetti-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.confetti-container.hidden {
+    display: none;
+}
+
+.confetti-piece {
+    position: absolute;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    animation: confetti-burst 2.5s ease-out forwards;
+}
+
+@keyframes confetti-burst {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--end-x), var(--end-y)) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* ===== VISUAL ADDING MODE STYLES ===== */
+
+#visual-mode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+}
+
+#problem-counter {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 15px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#original-equation {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 15px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#equation {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+#equation .number-circle {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    margin: 0 14px;
+    cursor: move;
+    user-select: none;
+    position: relative;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+#equation .number-value {
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    background-color: lightblue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+#equation .number-circle.grayed .number-value {
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+#equation .number-circle.answer-circle .number-value {
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+#equation .blocks-container {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 14px;
+    align-items: flex-end;
+}
+
+#equation .block-column {
+    display: flex;
+    flex-direction: column-reverse;
+    margin: 0 3px;
+    min-height: 0;
+}
+
+#equation .block {
+    width: 11px;
+    height: 11px;
+    background-color: #9932CC;
+    border: 1px solid #999;
+    margin: 1px 0;
+}
+
+#equation .plus {
+    margin: 0 14px;
+    margin-bottom: 26px;
+    align-self: flex-end;
+}
+
+#equation .equals {
+    margin: 0 14px;
+    margin-bottom: 26px;
+    align-self: flex-end;
+}
+
+.dragging {
+    z-index: 1000;
+    opacity: 0.8;
+}
+
+.drag-target {
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+    transform: scale(1.05);
+}
+
+#modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#modal.hidden {
+    display: none;
+}
+
+.popup {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+}
+
+#cancel {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+#modal-equation-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+#modal-equation {
+    display: flex;
+    align-items: flex-end;
+    margin-right: 10px;
+}
+
+#modal-equation .number-circle {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    margin: 0 8px;
+}
+
+#modal-equation .number-value {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: lightblue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#modal-equation .blocks-container {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 8px;
+    align-items: flex-end;
+}
+
+#modal-equation .block-column {
+    display: flex;
+    flex-direction: column-reverse;
+    margin: 0 2px;
+}
+
+#modal-equation .block {
+    width: 6px;
+    height: 6px;
+    background-color: #9932CC;
+    border: 1px solid #999;
+    margin: 0.5px 0;
+}
+
+#modal-equation .plus {
+    margin: 0 8px;
+    margin-bottom: 15px;
+    font-size: 24px;
+    align-self: flex-end;
+}
+
+#equals-sign {
+    font-size: 24px;
+    margin: 0 10px;
+    align-self: flex-end;
+    margin-bottom: 15px;
+}
+
+#answer-input {
+    font-size: 24px;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    text-align: center;
+    width: 100px;
+    margin-bottom: 15px;
+}
+
+#error-msg {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+#error-msg.hidden {
+    display: none;
+}
+
+#numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.num-btn, #backspace, #submit {
+    padding: 15px;
+    font-size: 18px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.num-btn:hover, #backspace:hover, #submit:hover {
+    background: #f0f0f0;
+    border-color: #999;
+}
+
+#next-problem-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+#next-problem-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+#next-problem-btn.hidden {
+    display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .number-grid {
+        gap: 1px;
+    }
+    
+    .number-tile {
+        font-size: clamp(10px, 3vw, 14px);
+    }
+    
+    .equation-display .number-value {
+        width: 60px;
+        height: 60px;
+        font-size: 18px;
+    }
+    
+    #equation .number-value {
+        width: 80px;
+        height: 80px;
+        font-size: 24px;
+    }
+}
