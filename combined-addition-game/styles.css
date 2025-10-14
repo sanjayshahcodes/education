@@ -28,7 +28,7 @@ body {
     -webkit-touch-callout: none;
     margin: 0;
     overflow: hidden;
-    background-color: #f0f0f0;
+    background-color: white;
 }
 
 /* Allow selection only for input elements */

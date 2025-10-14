@@ -426,60 +426,6 @@ function renderEquationModeEquation() {
         
         equationDisplay.appendChild(circle);
     });
-    
-    // Add equals and answer if game is complete
-    if (gameComplete) {
-        const equals = document.createElement('div');
-        equals.className = 'equals';
-        equals.textContent = '=';
-        equationDisplay.appendChild(equals);
-        
-        // Create answer circle (gray background)
-        const answerCircle = document.createElement('div');
-        answerCircle.className = 'number-circle final-answer';
-        const finalAnswer = currentNumbers.reduce((sum, num) => sum + num, 0);
-        
-        const valueDiv = document.createElement('div');
-        valueDiv.className = 'number-value';
-        valueDiv.textContent = finalAnswer;
-        answerCircle.appendChild(valueDiv);
-        
-        // Add blocks above the answer if enabled
-        if (show_blocks) {
-            const blocksContainer = document.createElement('div');
-            blocksContainer.className = 'blocks-container';
-            
-            const tens = Math.floor(finalAnswer / 10);
-            const ones = finalAnswer % 10;
-            
-            // Add ten-columns
-            for (let i = 0; i < tens; i++) {
-                const column = document.createElement('div');
-                column.className = 'block-column';
-                for (let j = 0; j < 10; j++) {
-                    const block = document.createElement('div');
-                    block.className = 'block';
-                    column.appendChild(block);
-                }
-                blocksContainer.appendChild(column);
-            }
-
-            // Add ones column if any
-            if (ones > 0) {
-                const column = document.createElement('div');
-                column.className = 'block-column';
-                for (let j = 0; j < ones; j++) {
-                    const block = document.createElement('div');
-                    block.className = 'block';
-                    column.appendChild(block);
-                }
-                blocksContainer.appendChild(column);
-            }
-            
-            answerCircle.appendChild(blocksContainer);
-        }
-        equationDisplay.appendChild(answerCircle);
-    }
 }
 
 function needsSplitting() {
