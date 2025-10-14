@@ -85,10 +85,6 @@ function generateRandomBothDoubleDigits() {
         [a, b] = generateRandomNumbers();
     } while (a < 10 || b < 10);
 
-    if (a<b){
-        [a, b] = [b, a];
-    }
-
     return [a, b];
 }
 
