@@ -96,6 +96,156 @@ function setupNumpad() {
 }
 
 // === PROBLEM GENERATION ===
+// Question format array - each element is just the generator function name
+let question_format = [
+    "generateDoublePlusDoubleWithCarry",
+    "generateDoublePlusDoubleWithCarry"
+];
+
+// Mapping of generator function names to actual functions
+const generatorFunctions = {
+    "generateRandomNumbers": generateRandomNumbers,
+    "generateRandomBothDoubleDigits": generateRandomBothDoubleDigits,
+    "generateDoubleDigitsNoCarry": generateDoubleDigitsNoCarry,
+    "generateBothMultiplesOfTen": generateBothMultiplesOfTen,
+    "generateOneMultipleOfTenPlusNonMultiple": generateOneMultipleOfTenPlusNonMultiple,
+    "generateDoublePlusSingleWithCarry": generateDoublePlusSingleWithCarry,
+    "generateDoublePlusSingleNoCarry": generateDoublePlusSingleNoCarry,
+    "generateDoublePlusDoubleWithCarry": generateDoublePlusDoubleWithCarry,
+    "generateRandomBothDoubleDigitsNoMultiplesOfTen": generateRandomBothDoubleDigitsNoMultiplesOfTen
+};
+
+// Function to get current generator based on problem count
+function getCurrentGenerator() {
+    const index = gamesCompleted % question_format.length;
+    const generator_name = question_format[index];
+    return generatorFunctions[generator_name];
+}
+
+// === GENERATOR FUNCTIONS (copied from original visual-adding) ===
+function generateRandomNumbers() {
+    const targetSum = Math.floor(Math.random() * 98) + 2;
+    const minA = Math.max(1, targetSum - 98);
+    const maxA = Math.min(98, targetSum - 1);
+    const a = Math.floor(Math.random() * (maxA - minA + 1)) + minA;
+    const b = targetSum - a;
+    return [a, b];
+}
+
+function generateRandomBothDoubleDigits() {
+    let a, b;
+    do {
+        [a, b] = generateRandomNumbers();
+    } while (a < 10 || b < 10);
+    
+    return [a, b];
+}
+
+function generateDoubleDigitsNoCarry() {
+    let a, b;
+    do {
+        [a, b] = generateRandomBothDoubleDigits();
+    } while ((a % 10) + (b % 10) > 10);
+    return [a, b];
+}
+
+function generateBothMultiplesOfTen() {
+    const possibleSums = [20, 30, 40, 50, 60, 70, 80, 90];
+    const targetSum = possibleSums[Math.floor(Math.random() * possibleSums.length)];
+    
+    const validSplits = [];
+    for (let a = 10; a <= 90; a += 10) {
+        const b = targetSum - a;
+        if (b >= 10 && b <= 90 && b % 10 === 0) {
+            validSplits.push([a, b]);
+        }
+    }
+    
+    return validSplits[Math.floor(Math.random() * validSplits.length)];
+}
+
+function generateOneMultipleOfTenPlusNonMultiple() {
+    let a, b;
+    do {
+        [a, b] = generateRandomNumbers();
+    } while (
+        (a % 10 === 0 && b % 10 === 0) || 
+        (a % 10 !== 0 && b % 10 !== 0) ||
+        a < 10 || 
+        b < 10
+    );
+    return [a, b];
+}
+
+function generateDoublePlusSingleWithCarry() {
+    let a, b;
+    do {
+        // Generate a number > 10 that's not a multiple of 10
+        a = Math.floor(Math.random() * 89) + 11; // 11-99
+        while (a % 10 === 0) {
+            a = Math.floor(Math.random() * 89) + 11;
+        }
+        
+        // Generate a single digit
+        b = Math.floor(Math.random() * 9) + 1; // 1-9
+        
+        // Check if adding them crosses to the next ten (includes cases that equal 10)
+        const onesDigitA = a % 10;
+        const crossesTen = (onesDigitA + b) >= 10;
+        
+        // Accept if there's a carry AND sum is <= 100
+        if (crossesTen && (a + b) <= 100) {
+            break;
+        }
+    } while (true);
+    
+    return [a, b];
+}
+
+function generateDoublePlusSingleNoCarry() {
+    let a, b;
+    do {
+        // Generate a number > 10 that's not a multiple of 10
+        a = Math.floor(Math.random() * 89) + 11; // 11-99
+        while (a % 10 === 0) {
+            a = Math.floor(Math.random() * 89) + 11;
+        }
+        
+        // Generate a single digit
+        b = Math.floor(Math.random() * 9) + 1; // 1-9
+        
+        // Check if adding them does NOT cross to the next ten AND sum is less than 100
+        const onesDigitA = a % 10;
+        const crossesTen = (onesDigitA + b) > 10;
+        const sumLessThan100 = (a + b) < 100;
+        
+        if (!crossesTen && sumLessThan100) {
+            break;
+        }
+    } while (true);
+    
+    return [a, b];
+}
+
+function generateDoublePlusDoubleWithCarry() {
+    let a, b;
+    do {
+        [a, b] = generateRandomBothDoubleDigits();
+        
+        // Check if adding them results in a carry
+        const onesDigitA = a % 10;
+        const onesDigitB = b % 10;
+        const hasCarry = (onesDigitA + onesDigitB) >= 10;
+        
+        // Accept if there's a carry AND sum is <= 100
+        if (hasCarry && (a + b) <= 100) {
+            break;
+        }
+    } while (true);
+    
+    return [a, b];
+}
+
 function generateRandomBothDoubleDigitsNoMultiplesOfTen() {
     let a, b;
     do {
@@ -107,8 +257,9 @@ function generateRandomBothDoubleDigitsNoMultiplesOfTen() {
 }
 
 function startNewProblem() {
-    // Generate new problem
-    currentProblem = generateRandomBothDoubleDigitsNoMultiplesOfTen();
+    // Generate new problem using current generator
+    const generator = getCurrentGenerator();
+    currentProblem = generator();
     
     // Reset states
     mode4Numbers = [...currentProblem];
