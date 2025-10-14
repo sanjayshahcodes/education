@@ -718,6 +718,17 @@ function handleCorrectAnswer(a, b) {
             
             if (mode1Numbers.length === 1) {
                 mode1Complete = true;
+                
+                // Add green checkmark to Mode 1
+                addGreenCheckmark('mode1-equation');
+                
+                // Show confetti burst
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                
                 swapBtn.classList.add('hidden');
                 checkBothComplete();
             }
