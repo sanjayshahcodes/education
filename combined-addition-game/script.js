@@ -10,8 +10,7 @@ let question_format = [
 ];
 
 // Game state
-let currentMode = 'equation'; // 'equation' or 'visual'
-let currentProblem = null; // [a, b] - the same problem for both modes
+let currentProblem = null; // [a, b] - the current problem
 let problemCount = 0;
 let gamesCompleted = 0;
 
@@ -27,8 +26,8 @@ let visualCurrentNumbers = [];
 
 // DOM elements
 let equationModeDiv, visualModeDiv;
-let numberGrid, equationDisplay, gamesCompletedDisplay, nextModeBtn, confettiContainer;
-let visualEquationDiv, modal, answerInput, errorMsg, nextProblemBtn;
+let equationEquationDiv, visualEquationDiv, modal, answerInput, errorMsg, nextProblemBtn, nextModeBtn;
+let gamesCompletedDisplay, modalNumberGrid;
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -37,28 +36,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeGame() {
     // Get DOM elements
-    equationModeDiv = document.getElementById('equation-mode');
     visualModeDiv = document.getElementById('visual-mode');
-    
-    // Equation mode elements
-    numberGrid = document.getElementById('number-grid');
-    equationDisplay = document.getElementById('equation-display');
-    gamesCompletedDisplay = document.getElementById('games-completed');
-    nextModeBtn = document.getElementById('next-mode-btn');
-    confettiContainer = document.getElementById('confetti-container');
-    
-    // Visual mode elements
     visualEquationDiv = document.getElementById('equation');
     modal = document.getElementById('modal');
     answerInput = document.getElementById('answer-input');
     errorMsg = document.getElementById('error-msg');
     nextProblemBtn = document.getElementById('next-problem-btn');
+    gamesCompletedDisplay = document.getElementById('games-completed');
+    modalNumberGrid = document.getElementById('modal-number-grid');
     
-    // Create the number grid for equation mode
-    createNumberGrid();
+    // Create the modal number grid
+    createModalNumberGrid();
     
     // Set up event listeners
-    nextModeBtn.addEventListener('click', switchToVisualMode);
     nextProblemBtn.addEventListener('click', startNewProblem);
     
     // Prevent zooming on double tap
@@ -140,26 +130,8 @@ function startNewProblem() {
     // Generate new problem
     currentProblem = generateProblem();
     
-    // Start with equation mode
-    currentMode = 'equation';
-    showEquationMode();
-    startEquationMode();
-}
-
-function switchToVisualMode() {
-    currentMode = 'visual';
-    showVisualMode();
+    // Always start in visual mode (now the only mode)
     startVisualMode();
-}
-
-function showEquationMode() {
-    equationModeDiv.classList.remove('hidden');
-    visualModeDiv.classList.add('hidden');
-}
-
-function showVisualMode() {
-    equationModeDiv.classList.add('hidden');
-    visualModeDiv.classList.remove('hidden');
 }
 
 // === EQUATION MODE IMPLEMENTATION ===
@@ -167,39 +139,16 @@ function startEquationMode() {
     const [a, b] = currentProblem;
     currentNumbers = [a, b];
     
-    // Reset game state
-    gameActive = false;
-    gameComplete = false;
-    currentStepIndex = 0;
+    // Equation mode removed - redirecting to visual mode
+    startVisualMode();
+    return;
     
     // Hide next mode button
     nextModeBtn.classList.add('hidden');
-    
-    // Clear confetti
-    confettiContainer.classList.add('hidden');
-    confettiContainer.innerHTML = '';
-    
-    // Reset all tiles
-    document.querySelectorAll('.number-tile').forEach(tile => {
-        tile.classList.remove('correct', 'current', 'incorrect', 'completed', 'current-sequence', 'current-position', 'current-completed', 'starting-blocks', 'first-addition', 'second-addition');
-    });
-    
-    // Render initial equation
-    renderEquationModeEquation();
-    
-    // Set up initial board state
-    updateTileColoring();
-    
-    // If no splitting is needed, enable game immediately and set up first step
-    if (!needsSplitting()) {
-        gameActive = true;
-        currentStepIndex = 1; // Ready for first addition
-        renderEquationModeEquation(); // Update to show arrow
-    }
 }
 
-function createNumberGrid() {
-    numberGrid.innerHTML = '';
+function createModalNumberGrid() {
+    modalNumberGrid.innerHTML = '';
     
     // Create tiles for numbers 1-100
     for (let i = 1; i <= 100; i++) {
@@ -208,11 +157,7 @@ function createNumberGrid() {
         tile.textContent = i;
         tile.dataset.number = i;
         
-        // Add touch event listeners
-        tile.addEventListener('click', handleTileClick);
-        tile.addEventListener('touchstart', handleTileClick, { passive: false });
-        
-        numberGrid.appendChild(tile);
+        modalNumberGrid.appendChild(tile);
     }
 }
 
@@ -595,27 +540,16 @@ function createConfettiPiece() {
     }, 2500);
 }
 
-// === VISUAL MODE IMPLEMENTATION ===
-function startVisualMode() {
-    const [a, b] = currentProblem;
-    visualCurrentNumbers = [a, b];
+// === SHARED RENDERING FUNCTIONS ===
+function renderEquationInDiv(targetDiv, numbers) {
+    targetDiv.innerHTML = '';
     
-    renderVisualEquation();
-    makeDraggable();
-    
-    nextProblemBtn.classList.add('hidden');
-    modal.classList.add('hidden');
-}
-
-function renderVisualEquation() {
-    visualEquationDiv.innerHTML = '';
-    
-    visualCurrentNumbers.forEach((num, idx) => {
+    numbers.forEach((num, idx) => {
         if (idx > 0) {
             const plus = document.createElement('div');
             plus.className = 'plus';
             plus.textContent = '+';
-            visualEquationDiv.appendChild(plus);
+            targetDiv.appendChild(plus);
         }
         
         const circle = document.createElement('div');
@@ -667,9 +601,28 @@ function renderVisualEquation() {
 
             circle.appendChild(blocksContainer);
         }
-        visualEquationDiv.appendChild(circle);
+        targetDiv.appendChild(circle);
     });
 }
+
+// Equation mode functions removed - game now uses visual mode only
+
+function makeVisualDraggable() {
+    makeDraggable(); // Use the existing makeDraggable function
+}
+
+// === VISUAL MODE IMPLEMENTATION ===
+function startVisualMode() {
+    const [a, b] = currentProblem;
+    visualCurrentNumbers = [a, b];
+    
+    renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
+    makeVisualDraggable();
+    
+    nextProblemBtn.classList.add('hidden');
+    modal.classList.add('hidden');
+}
+
 
 function makeDraggable() {
     // Make numbers draggable (except first number which is grayed)
@@ -731,7 +684,7 @@ function makeDraggable() {
                     const ones = num % 10;
                     if (tens > 0 && ones > 0) {
                         visualCurrentNumbers.splice(idx, 1, tens, ones);
-                        renderVisualEquation();
+                        renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
                         makeDraggable();
                     }
                 }
@@ -749,7 +702,7 @@ function makeDraggable() {
                 const ones = num % 10;
                 if (tens > 0 && ones > 0) {
                     visualCurrentNumbers.splice(idx, 1, tens, ones);
-                    renderVisualEquation();
+                    renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
                     makeDraggable();
                 }
             }
@@ -834,6 +787,31 @@ function showPopup(a, b) {
     errorMsg.classList.add('hidden');
     modal.classList.remove('hidden');
     
+    // Switch between numpad and numberboard based on problem count
+    const numpad = document.getElementById('numpad');
+    const numberboard = document.getElementById('numberboard');
+    
+    // Use numberboard for even problems, numpad for odd problems (or vice versa)
+    if (problemCount % 2 === 0) {
+        // Show numberboard
+        numpad.classList.add('hidden');
+        numberboard.classList.remove('hidden');
+        answerInput.style.display = 'none'; // Hide input field
+        setupNumberboardModal(a, b);
+    } else {
+        // Show numpad
+        numpad.classList.remove('hidden');
+        numberboard.classList.add('hidden');
+        answerInput.style.display = 'block'; // Show input field
+        setupNumpadModal(a, b);
+    }
+    
+    document.getElementById('cancel').onclick = () => {
+        modal.classList.add('hidden');
+    };
+}
+
+function setupNumpadModal(a, b) {
     const numBtns = document.querySelectorAll('.num-btn');
     numBtns.forEach(btn => {
         btn.onclick = () => {
@@ -845,35 +823,123 @@ function showPopup(a, b) {
         answerInput.value = answerInput.value.slice(0, -1);
     };
     
-    document.getElementById('cancel').onclick = () => {
-        modal.classList.add('hidden');
-    };
-    
     document.getElementById('submit').onclick = () => {
         const ans = parseInt(answerInput.value);
         if (isNaN(ans) || ans !== a + b) {
             errorMsg.classList.remove('hidden');
         } else {
-            const sum = a + b;
-            const idxA = visualCurrentNumbers.indexOf(a);
-            let idxB = visualCurrentNumbers.indexOf(b);
-            
-            if (a === b && idxA === idxB) {
-                idxB = visualCurrentNumbers.indexOf(b, idxA + 1);
-            }
-            
-            if (idxA !== -1 && idxB !== -1) {
-                const minIdx = Math.min(idxA, idxB);
-                const maxIdx = Math.max(idxA, idxB);
-                visualCurrentNumbers.splice(maxIdx, 1);
-                visualCurrentNumbers.splice(minIdx, 1, sum);
-                renderVisualEquation();
-                makeDraggable();
-            }
-            modal.classList.add('hidden');
-            checkIfDone();
+            handleCorrectModalAnswer(a, b);
         }
     };
+}
+
+function setupNumberboardModal(a, b) {
+    // Update modal numberboard with current state
+    updateModalTileColoring(a, b);
+    
+    // Add click handlers to numberboard tiles
+    const tiles = modalNumberGrid.querySelectorAll('.number-tile');
+    tiles.forEach(tile => {
+        tile.onclick = () => {
+            const clickedNumber = parseInt(tile.dataset.number);
+            if (clickedNumber === a + b) {
+                showCorrectAnswerAnimation(a, b, () => {
+                    handleCorrectModalAnswer(a, b);
+                });
+            } else {
+                errorMsg.classList.remove('hidden');
+                setTimeout(() => {
+                    errorMsg.classList.add('hidden');
+                }, 2000);
+            }
+        };
+    });
+}
+
+function showCorrectAnswerAnimation(a, b, callback) {
+    const sum = a + b;
+    
+    // Clear all previous coloring
+    modalNumberGrid.querySelectorAll('.number-tile').forEach(tile => {
+        tile.classList.remove('starting-blocks', 'first-addition', 'second-addition', 'current-position');
+    });
+    
+    // Show all squares from 1 to the answer (sum) in yellow
+    for (let i = 1; i <= sum; i++) {
+        const tile = modalNumberGrid.querySelector(`[data-number="${i}"]`);
+        if (tile) {
+            tile.classList.add('starting-blocks');
+        }
+    }
+    
+    // Make the starting number (a) normal again (remove bold/large)
+    const startTile = modalNumberGrid.querySelector(`[data-number="${a}"]`);
+    if (startTile) {
+        startTile.classList.remove('current-position');
+    }
+    
+    // Make the answer (sum) bold and large to indicate final position
+    const answerTile = modalNumberGrid.querySelector(`[data-number="${sum}"]`);
+    if (answerTile) {
+        answerTile.classList.add('current-position');
+    }
+    
+    // Wait 1 second then call the callback to close modal
+    setTimeout(callback, 1000);
+}
+
+function handleCorrectModalAnswer(a, b) {
+    const sum = a + b;
+    const idxA = visualCurrentNumbers.indexOf(a);
+    let idxB = visualCurrentNumbers.indexOf(b);
+    
+    if (a === b && idxA === idxB) {
+        idxB = visualCurrentNumbers.indexOf(b, idxA + 1);
+    }
+    
+    if (idxA !== -1 && idxB !== -1) {
+        const minIdx = Math.min(idxA, idxB);
+        const maxIdx = Math.max(idxA, idxB);
+        visualCurrentNumbers.splice(maxIdx, 1);
+        visualCurrentNumbers.splice(minIdx, 1, sum);
+        renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
+        makeDraggable();
+    }
+    modal.classList.add('hidden');
+    checkIfDone();
+}
+
+function updateModalTileColoring(a, b) {
+    // Clear all previous coloring
+    modalNumberGrid.querySelectorAll('.number-tile').forEach(tile => {
+        tile.classList.remove('starting-blocks', 'first-addition', 'second-addition', 'current-position');
+    });
+    
+    // Highlight all squares from 1 to the first number (a) in yellow
+    for (let i = 1; i <= a; i++) {
+        const tile = modalNumberGrid.querySelector(`[data-number="${i}"]`);
+        if (tile) {
+            tile.classList.add('starting-blocks');
+        }
+    }
+    
+    // Make the starting number (a) bold and large to indicate current position
+    const startTile = modalNumberGrid.querySelector(`[data-number="${a}"]`);
+    if (startTile) {
+        startTile.classList.add('current-position');
+    }
+}
+
+function checkIfEquationDone() {
+    if (currentNumbers.length === 1) {
+        // Show confetti and next mode button
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+        nextModeBtn.classList.remove('hidden');
+    }
 }
 
 function renderModalEquation(a, b) {
@@ -890,6 +956,11 @@ function renderModalEquation(a, b) {
         
         const circle = document.createElement('div');
         circle.className = 'number-circle';
+        
+        // First number should be yellow (grayed class gives yellow color)
+        if (idx === 0) {
+            circle.classList.add('grayed');
+        }
         
         const valueDiv = document.createElement('div');
         valueDiv.className = 'number-value';
