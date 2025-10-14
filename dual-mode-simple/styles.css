@@ -396,23 +396,22 @@ input {
 }
 
 .number-tile.first-addition {
-    background: #f7f3a7;
+    background: lightblue;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
 .number-tile.second-addition {
-    background: #f7f3a7;
+    background: lightblue;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
 .number-tile.current-position {
-    color: #333;
     font-weight: bold !important;
-    font-size: 1.1rem !important;
+    font-size: 1.2em !important;
 }
 
 #error-msg {

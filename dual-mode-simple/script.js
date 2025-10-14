@@ -605,6 +605,20 @@ function handleNumberboardTileClick(clickedNumber) {
     const correctAnswer = modalNumbers.reduce((sum, num) => sum + num, 0);
     
     if (clickedNumber === correctAnswer) {
+        // Remove current-position from all tiles
+        const allTiles = document.querySelectorAll('#modal-number-grid .number-tile');
+        allTiles.forEach(tile => tile.classList.remove('current-position'));
+        
+        // Color all tiles from 1 to the clicked number light blue
+        for (let i = 1; i <= clickedNumber; i++) {
+            const tile = document.querySelector(`#modal-number-grid [data-number="${i}"]`);
+            if (tile) tile.classList.add('first-addition');
+        }
+        
+        // Add current-position to the clicked tile (make it bold and larger)
+        const clickedTile = document.querySelector(`#modal-number-grid [data-number="${clickedNumber}"]`);
+        if (clickedTile) clickedTile.classList.add('current-position');
+        
         setTimeout(() => {
             handleCorrectAnswer(modalNumbers[0], modalNumbers[1]);
         }, 500);
@@ -622,11 +636,15 @@ function showFirstNumberOnly(a) {
     // Clear all coloring first
     clearModalTileColoring();
     
-    // Show only the first number highlighted in light yellow
+    // Show the first number highlighted in light blue
     for (let i = 1; i <= a; i++) {
         const tile = document.querySelector(`#modal-number-grid [data-number="${i}"]`);
         if (tile) tile.classList.add('first-addition');
     }
+    
+    // Mark the last tile (a) as current position (bold and larger)
+    const currentTile = document.querySelector(`#modal-number-grid [data-number="${a}"]`);
+    if (currentTile) currentTile.classList.add('current-position');
 }
 
 function updateModalTileColoring(a, b) {
