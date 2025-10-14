@@ -398,14 +398,14 @@ input {
 }
 
 .number-tile.first-addition {
-    background: lightblue;
+    background: #f7f3a7;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
 .number-tile.second-addition {
-    background: lightblue;
+    background: #f7f3a7;
     color: #333;
     font-weight: normal;
     border-color: #333;
