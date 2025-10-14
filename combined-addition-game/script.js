@@ -2,7 +2,12 @@
 // Alternates between equation-skip-counting and visual-adding modes
 
 // Game settings
-const show_blocks = false; // Set to false to hide blocks above numbers
+// Question format configuration - cycle through these combinations
+// Each array element is [show_blocks, generator_function_name]
+let question_format = [
+    [0, "generateDoubleDigitsNoCarry"],
+    [0, "generateDoublePlusDoubleWithCarry"]
+];
 
 // Game state
 let currentMode = 'equation'; // 'equation' or 'visual'
@@ -108,10 +113,25 @@ function generateDoublePlusDoubleWithCarry() {
     return [a, b];
 }
 
+// Mapping of generator function names to actual functions
+const generatorFunctions = {
+    "generateRandomNumbers": generateRandomNumbers,
+    "generateRandomBothDoubleDigits": generateRandomBothDoubleDigits,
+    "generateDoubleDigitsNoCarry": generateDoubleDigitsNoCarry,
+    "generateDoublePlusDoubleWithCarry": generateDoublePlusDoubleWithCarry
+};
+
+// Function to get current settings based on problem count
+function getCurrentSettings() {
+    const index = problemCount % question_format.length;
+    const [show_blocks, generator_name] = question_format[index];
+    const generator = generatorFunctions[generator_name];
+    return { show_blocks, generator };
+}
+
 // Problem generator selection
 function generateProblem() {
-    const generators = [generateDoubleDigitsNoCarry, generateDoublePlusDoubleWithCarry];
-    const generator = generators[problemCount % generators.length];
+    const { generator } = getCurrentSettings();
     return generator();
 }
 
@@ -385,6 +405,7 @@ function renderEquationModeEquation() {
         circle.appendChild(valueDiv);
         
         // Add blocks if enabled
+        const { show_blocks } = getCurrentSettings();
         if (show_blocks) {
             const blocksContainer = document.createElement('div');
             blocksContainer.className = 'blocks-container';
@@ -612,6 +633,7 @@ function renderVisualEquation() {
         circle.appendChild(valueDiv);
 
         // Add blocks if enabled
+        const { show_blocks } = getCurrentSettings();
         if (show_blocks) {
             const blocksContainer = document.createElement('div');
             blocksContainer.className = 'blocks-container';
@@ -875,6 +897,7 @@ function renderModalEquation(a, b) {
         circle.appendChild(valueDiv);
         
         // Add blocks if enabled
+        const { show_blocks } = getCurrentSettings();
         if (show_blocks) {
             const blocksContainer = document.createElement('div');
             blocksContainer.className = 'blocks-container';
