@@ -414,6 +414,47 @@ input {
     font-size: 1.2em !important;
 }
 
+.mode-section {
+    position: relative; /* For absolute positioned checkmark */
+}
+
+.mode-section.disabled {
+    opacity: 0.5;
+    filter: grayscale(50%);
+}
+
+.disabled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    z-index: 1000;
+    cursor: not-allowed;
+}
+
+.green-checkmark {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 48px;
+    color: #28a745;
+    font-weight: bold;
+    animation: checkmarkAppear 0.5s ease-in-out;
+}
+
+@keyframes checkmarkAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 #error-msg {
     color: #dc3545;
     font-weight: bold;

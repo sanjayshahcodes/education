@@ -283,6 +283,10 @@ function startNewProblem() {
     renderMode4();
     renderMode1();
     
+    // Disable Mode 1 initially - it will be enabled after Mode 4 is complete
+    mode1EquationDiv.parentElement.classList.add('disabled');
+    addDisabledOverlay('mode1');
+    
     // Hide next game button and modal
     nextGameBtn.classList.add('hidden');
     modal.classList.add('hidden');
@@ -686,6 +690,14 @@ function handleCorrectAnswer(a, b) {
             
             if (mode4Numbers.length === 1) {
                 mode4Complete = true;
+                
+                // Add green checkmark to Mode 4
+                addGreenCheckmark('mode4-equation');
+                
+                // Enable Mode 1 now that Mode 4 is complete
+                mode1EquationDiv.parentElement.classList.remove('disabled');
+                removeDisabledOverlay('mode1');
+                
                 checkBothComplete();
             }
         }
@@ -724,6 +736,42 @@ function checkBothComplete() {
 }
 
 // === UTILITY FUNCTIONS ===
+function addGreenCheckmark(equationId) {
+    const equationDiv = document.getElementById(equationId);
+    const modeSection = equationDiv.closest('.mode-section');
+    const existingCheckmark = modeSection.querySelector('.green-checkmark');
+    
+    // Don't add if already exists
+    if (existingCheckmark) return;
+    
+    const checkmark = document.createElement('div');
+    checkmark.className = 'green-checkmark';
+    checkmark.innerHTML = '✓';
+    modeSection.appendChild(checkmark);
+}
+
+function addDisabledOverlay(modeId) {
+    const equationDiv = document.getElementById(modeId + '-equation');
+    const modeSection = equationDiv.parentElement;
+    
+    // Don't add if already exists
+    if (modeSection.querySelector('.disabled-overlay')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'disabled-overlay';
+    modeSection.appendChild(overlay);
+}
+
+function removeDisabledOverlay(modeId) {
+    const equationDiv = document.getElementById(modeId + '-equation');
+    const modeSection = equationDiv.parentElement;
+    const overlay = modeSection.querySelector('.disabled-overlay');
+    
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
 function handleSwapNumbers() {
     if (mode1Numbers.length >= 2) {
         [mode1Numbers[0], mode1Numbers[1]] = [mode1Numbers[1], mode1Numbers[0]];
