@@ -1690,8 +1690,8 @@ function renderModalEquation(a, b) {
         const circle = document.createElement('div');
         circle.className = 'number-circle';
         
-        // First number should be yellow (grayed class gives yellow color)
-        if (idx === 0) {
+        // First number should be yellow (grayed class gives yellow color) except in Mode 4
+        if (idx === 0 && currentMode !== 4) {
             circle.classList.add('grayed');
         }
         
