@@ -629,17 +629,25 @@ function handleNumpadSubmit() {
 
 function handleNumberboardTileClick(clickedNumber) {
     const modalNumbers = Array.from(modalEquationDiv.querySelectorAll('.number-value')).map(el => parseInt(el.textContent));
-    const correctAnswer = modalNumbers.reduce((sum, num) => sum + num, 0);
+    const firstNumber = modalNumbers[0];
+    const secondNumber = modalNumbers[1];
+    const correctAnswer = firstNumber + secondNumber;
     
     if (clickedNumber === correctAnswer) {
         // Remove current-position from all tiles
         const allTiles = document.querySelectorAll('#modal-number-grid .number-tile');
         allTiles.forEach(tile => tile.classList.remove('current-position'));
         
-        // Color all tiles from 1 to the clicked number light blue
-        for (let i = 1; i <= clickedNumber; i++) {
+        // Color the first number's tiles in yellow (first-addition)
+        for (let i = 1; i <= firstNumber; i++) {
             const tile = document.querySelector(`#modal-number-grid [data-number="${i}"]`);
             if (tile) tile.classList.add('first-addition');
+        }
+        
+        // Color the second number's tiles in purple (second-addition)
+        for (let i = firstNumber + 1; i <= correctAnswer; i++) {
+            const tile = document.querySelector(`#modal-number-grid [data-number="${i}"]`);
+            if (tile) tile.classList.add('second-addition');
         }
         
         // Add current-position to the clicked tile (make it bold and larger)
@@ -649,6 +657,10 @@ function handleNumberboardTileClick(clickedNumber) {
         setTimeout(() => {
             handleCorrectAnswer(modalNumbers[0], modalNumbers[1]);
         }, 500);
+    } else {
+        errorMsg.textContent = 'Try again!';
+        errorMsg.classList.remove('hidden');
+        setTimeout(() => errorMsg.classList.add('hidden'), 2000);
     }
 }
 

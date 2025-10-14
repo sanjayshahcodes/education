@@ -501,7 +501,7 @@ input {
 }
 
 .number-tile.second-addition {
-    background: #f7f3a7;
+    background: #d8a2d8; /* Purple color */
     color: #333;
     font-weight: normal;
     border-color: #333;
