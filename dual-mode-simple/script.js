@@ -118,6 +118,10 @@ function startNewProblem() {
     currentModalMode = null;
     droppedFlag = false;
     
+    // Force fresh render by resetting tracking arrays
+    lastMode4Numbers = [];
+    lastMode1Numbers = [];
+    
     // Show original equation
     showOriginalEquation();
     
@@ -133,14 +137,25 @@ function startNewProblem() {
     modal.classList.add('hidden');
 }
 
+let lastMode4Numbers = [];
+let lastMode1Numbers = [];
+
 function renderMode4() {
-    renderEquation(mode4EquationDiv, mode4Numbers, false); // No grayed first number
-    makeDraggable();
+    // Only re-render and re-bind if numbers actually changed
+    if (JSON.stringify(mode4Numbers) !== JSON.stringify(lastMode4Numbers)) {
+        renderEquation(mode4EquationDiv, mode4Numbers, false);
+        lastMode4Numbers = [...mode4Numbers];
+        makeDraggable();
+    }
 }
 
 function renderMode1() {
-    renderEquation(mode1EquationDiv, mode1Numbers, true); // Grayed first number
-    makeDraggable();
+    // Only re-render and re-bind if numbers actually changed
+    if (JSON.stringify(mode1Numbers) !== JSON.stringify(lastMode1Numbers)) {
+        renderEquation(mode1EquationDiv, mode1Numbers, true);
+        lastMode1Numbers = [...mode1Numbers];
+        makeDraggable();
+    }
 }
 
 function renderEquation(targetDiv, numbers, grayFirst) {
@@ -169,7 +184,10 @@ function renderEquation(targetDiv, numbers, grayFirst) {
 
 // === MODE 4 (FLEXIBLE COMBINING) ===
 function makeDraggable() {
-    // Make numbers draggable (exact copy from original visual-adding)
+    // Clear all existing interactions first to avoid conflicts
+    interact('.number-circle').unset();
+    
+    // Make numbers draggable - EXACTLY like the working test file
     interact('.number-circle')
         .draggable({
             inertia: false,
@@ -299,9 +317,10 @@ function makeDraggable() {
             if (draggedInMode4 && targetInMode4) {
                 return isAllowedToAdd(droppedNum, targetNum, mode4Numbers.length);
             } else if (draggedInMode1 && targetInMode1) {
-                // Mode 1: can't drag the first number (yellow one)
+                // Mode 1: can't drag the first number (yellow one), and can only drop onto the first number
                 const draggedIdx = mode1Numbers.indexOf(droppedNum);
-                return draggedIdx > 0; // Only allow if not the first number
+                const targetIdx = mode1Numbers.indexOf(targetNum);
+                return draggedIdx > 0 && targetIdx === 0; // Only allow dragging non-first numbers onto the first number
             }
             
             return false;
