@@ -273,6 +273,9 @@ function startNewProblem() {
     lastMode4Numbers = [];
     lastMode1Numbers = [];
     
+    // Remove any existing checkmarks from previous game
+    removeAllCheckmarks();
+    
     // Show original equation
     showOriginalEquation();
     
@@ -790,6 +793,12 @@ function removeDisabledOverlay(modeId) {
     if (overlay) {
         overlay.remove();
     }
+}
+
+function removeAllCheckmarks() {
+    // Remove all existing checkmarks from both mode sections
+    const checkmarks = document.querySelectorAll('.green-checkmark');
+    checkmarks.forEach(checkmark => checkmark.remove());
 }
 
 function handleSwapNumbers() {
