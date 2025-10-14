@@ -5,7 +5,7 @@
 // Question format configuration - cycle through these combinations
 // Each array element is [show_blocks, generator_function_name]
 let question_format = [
-    [0, "generateDoublePlusDoubleWithCarry", [0,1]] // [weight, generator_function, [modes]]
+    [0, "generateDoublePlusDoubleWithCarry", [4,1]] // [weight, generator_function, [modes]]
 ];
 
 // Game state
@@ -185,8 +185,10 @@ function startNewProblem() {
         startNumberboardDisplayMode();
     } else if (currentMode === 1) {
         startVisualModeWithNumberboardModal();
-    } else {
+    } else if (currentMode === 2) {
         startVisualModeWithNumpadModal();
+    } else if (currentMode === 4) {
+        startVisualModeWithFlexibleCombining();
     }
 }
 
@@ -633,8 +635,8 @@ function renderEquationInDiv(targetDiv, numbers) {
         circle.className = 'number-circle';
         circle.dataset.value = num;
 
-        // First number is always grayed out (non-draggable)
-        if (idx === 0) {
+        // First number is grayed out (non-draggable) except in Mode 4
+        if (idx === 0 && currentMode !== 4) {
             circle.classList.add('grayed');
         }
 
@@ -1138,6 +1140,12 @@ function switchToNextMode() {
         visualModeDiv.classList.remove('hidden');
         showSwapButton(); // Show swap button for visual mode
         startVisualModeWithNumpadModal();
+    } else if (currentMode === 4) {
+        // Switch to visual mode with flexible combining
+        numberboardDisplayMode.classList.add('hidden');
+        visualModeDiv.classList.remove('hidden');
+        showSwapButton(); // Show swap button for visual mode
+        startVisualModeWithFlexibleCombining();
     }
 }
 
@@ -1183,6 +1191,160 @@ function startVisualModeWithNumpadModal() {
     modal.classList.add('hidden');
 }
 
+function startVisualModeWithFlexibleCombining() {
+    console.log('Starting Mode 4 - Flexible Combining'); // Debug log
+    
+    // Hide numberboard display mode, show visual mode
+    numberboardDisplayMode.classList.add('hidden');
+    visualModeDiv.classList.remove('hidden');
+    
+    // Clear any existing interact bindings from other modes
+    interact('.number-circle').unset();
+    
+    const [a, b] = currentProblem;
+    visualCurrentNumbers = [a, b];
+    console.log('Visual current numbers:', visualCurrentNumbers); // Debug log
+    
+    renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
+    makeFlexibleDraggable();
+    
+    nextGameBtn.classList.add('hidden');
+    modal.classList.add('hidden');
+}
+
+
+function isAllowedToAdd(a, b, currentLength) {
+    const isMult10 = (n) => n % 10 === 0 && n >= 10;
+    const isSingle = (n) => n >= 1 && n <= 9;
+    
+    // Tens can combine with tens
+    if (isMult10(a) && isMult10(b)) return true;
+    
+    // Ones can combine with ones
+    if (isSingle(a) && isSingle(b)) return true;
+    
+    // Tens can combine with ones only when there are no more splits possible (length = 2)
+    if (currentLength === 2 && ((isMult10(a) && isSingle(b)) || (isMult10(b) && isSingle(a)))) return true;
+    
+    return false;
+}
+
+function makeFlexibleDraggable() {
+    console.log('Setting up flexible draggable for Mode 4'); // Debug log
+    
+    // Clear any existing interact bindings more thoroughly
+    interact('#visual-mode .number-circle').unset();
+    interact('.number-circle').unset();
+    
+    // Add a small delay to ensure DOM is ready
+    setTimeout(() => {
+        const circles = visualEquationDiv.querySelectorAll('.number-circle');
+        console.log(`Found ${circles.length} circles to make draggable`); // Debug log
+        
+        // Make all numbers draggable in Mode 4
+        interact('#visual-mode .number-circle')
+            .draggable({
+                inertia: false,
+                autoScroll: false,
+                listeners: {
+                    start(event) {
+                        console.log('Drag started'); // Debug log
+                        event.target.setAttribute('data-x', 0);
+                        event.target.setAttribute('data-y', 0);
+                        event.target.style.transform = 'scale(1.1)';
+                        event.target.style.zIndex = '1000';
+                        event.target.classList.add('dragging');
+                    },
+                    move(event) {
+                        const target = event.target;
+                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        target.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
+                        target.setAttribute('data-x', x);
+                        target.setAttribute('data-y', y);
+                    },
+                    end: function(event) {
+                        console.log('Drag ended'); // Debug log
+                        event.target.style.transform = '';
+                        event.target.style.zIndex = '';
+                        event.target.classList.remove('dragging');
+                        
+                        // Reset position if not dropped on a valid target
+                        if (!droppedFlag) {
+                            resetPosition(event.target);
+                        }
+                        droppedFlag = false;
+                    }
+                }
+            });
+
+        // Handle double-click for splitting numbers
+        circles.forEach((circle, index) => {
+            console.log(`Adding dblclick listener to circle ${index}`); // Debug log
+            
+            // Remove any existing listeners first
+            circle.removeEventListener('dblclick', circle._dblClickHandler);
+            
+            // Create and store the handler
+            circle._dblClickHandler = function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const num = parseInt(this.querySelector('.number-value').textContent);
+                console.log(`Double-clicked on ${num}`); // Debug log
+                
+                const idx = visualCurrentNumbers.indexOf(num);
+                if (idx !== -1) {
+                    const tens = Math.floor(num / 10) * 10;
+                    const ones = num % 10;
+                    if (tens > 0 && ones > 0) {
+                        console.log(`Splitting ${num} into ${tens} + ${ones}`);
+                        visualCurrentNumbers.splice(idx, 1, tens, ones);
+                        renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
+                        makeFlexibleDraggable();
+                    } else {
+                        console.log(`Cannot split ${num} - no tens or ones`);
+                    }
+                } else {
+                    console.log(`Number ${num} not found in array`);
+                }
+            };
+            
+            circle.addEventListener('dblclick', circle._dblClickHandler);
+        });
+
+        // Make numbers dropzones for other numbers with flexible combining rules
+        interact('#visual-mode .number-circle').dropzone({
+            accept: '#visual-mode .number-circle',
+            overlap: 'pointer',
+            checker: function(dragEvent, event, dropped, dropzone, dropElement, draggable, draggableElement) {
+                if (!dropped) return false;
+                
+                const droppedNum = parseInt(draggableElement.querySelector('.number-value').textContent);
+                const targetNum = parseInt(dropElement.querySelector('.number-value').textContent);
+                const allowed = isAllowedToAdd(droppedNum, targetNum, visualCurrentNumbers.length);
+                console.log(`Checking if ${droppedNum} + ${targetNum} is allowed: ${allowed}`); // Debug log
+                return allowed;
+            },
+            listeners: {
+                drop: function(event) {
+                    console.log('Drop detected'); // Debug log
+                    const draggableElement = event.relatedTarget;
+                    const dropzoneElement = event.target;
+                    
+                    const droppedNum = parseInt(draggableElement.querySelector('.number-value').textContent);
+                    const targetNum = parseInt(dropzoneElement.querySelector('.number-value').textContent);
+                    
+                    if (isAllowedToAdd(droppedNum, targetNum, visualCurrentNumbers.length)) {
+                        console.log(`Showing popup for ${droppedNum} + ${targetNum}`);
+                        showPopup(droppedNum, targetNum);
+                        droppedFlag = true;
+                    }
+                }
+            }
+        });
+    }, 100);
+}
 
 function makeDraggable() {
     // Make numbers draggable (except first number which is grayed) - only in visual mode
@@ -1361,8 +1523,9 @@ function showPopup(a, b) {
         answerInput.style.display = 'none'; // Hide input field
         equalsSign.style.display = 'none'; // Hide equals sign
         setupNumberboardModal(a, b);
-    } else if (currentMode === 2) {
+    } else if (currentMode === 2 || currentMode === 4) {
         // Mode 2: Numpad modal (visual mode with numpad modal)
+        // Mode 4: Flexible combining (also uses numpad modal)
         numpad.classList.remove('hidden');
         numberboard.classList.add('hidden');
         answerInput.style.display = 'block'; // Show input field
@@ -1469,7 +1632,11 @@ function handleCorrectModalAnswer(a, b) {
         visualCurrentNumbers.splice(maxIdx, 1);
         visualCurrentNumbers.splice(minIdx, 1, sum);
         renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
-        makeDraggable();
+        if (currentMode === 4) {
+            makeFlexibleDraggable();
+        } else {
+            makeDraggable();
+        }
     }
     modal.classList.add('hidden');
     checkIfDone();
@@ -1639,8 +1806,12 @@ function showSwapButton() {
         // Numberboard display mode
         swapNumbersBtnNumberboard.classList.remove('hidden');
         swapNumbersBtnVisual.classList.add('hidden');
+    } else if (currentMode === 4) {
+        // Mode 4: No swap button (flexible combining mode)
+        swapNumbersBtnNumberboard.classList.add('hidden');
+        swapNumbersBtnVisual.classList.add('hidden');
     } else {
-        // Visual modes
+        // Other visual modes (1, 2)
         swapNumbersBtnVisual.classList.remove('hidden');
         swapNumbersBtnNumberboard.classList.add('hidden');
     }
@@ -1673,7 +1844,11 @@ function handleSwapNumbers() {
         // Visual modes
         visualCurrentNumbers = [b, a];
         renderEquationInDiv(visualEquationDiv, visualCurrentNumbers);
-        makeVisualDraggable();
+        if (currentMode === 4) {
+            makeFlexibleDraggable();
+        } else {
+            makeVisualDraggable();
+        }
     }
 }
 
