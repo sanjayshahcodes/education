@@ -1336,18 +1336,21 @@ function showPopup(a, b) {
     // Switch between different modal types based on the current mode
     const numpad = document.getElementById('numpad');
     const numberboard = document.getElementById('numberboard');
+    const equalsSign = document.getElementById('equals-sign');
     
     if (currentMode === 1) {
         // Mode 1: Numberboard modal (visual mode with numberboard modal)
         numpad.classList.add('hidden');
         numberboard.classList.remove('hidden');
         answerInput.style.display = 'none'; // Hide input field
+        equalsSign.style.display = 'none'; // Hide equals sign
         setupNumberboardModal(a, b);
     } else if (currentMode === 2) {
         // Mode 2: Numpad modal (visual mode with numpad modal)
         numpad.classList.remove('hidden');
         numberboard.classList.add('hidden');
         answerInput.style.display = 'block'; // Show input field
+        equalsSign.style.display = 'block'; // Show equals sign
         setupNumpadModal(a, b);
     }
     // Mode 0 (numberboard display) doesn't use modals, so no else case needed
