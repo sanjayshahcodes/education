@@ -310,10 +310,6 @@ function updateTileColoring() {
         const tile = document.querySelector(`[data-number="${i}"]`);
         if (tile) {
             tile.classList.add('starting-blocks');
-            // Make the starting position (final gray square) big/bold if no steps completed yet
-            if (i === currentNumbers[0] && currentStepIndex === 0) {
-                tile.classList.add('current-position');
-            }
         }
     }
     
@@ -332,13 +328,26 @@ function updateTileColoring() {
             if (tile) {
                 // Always add the semantic class
                 tile.classList.add(stepClass);
-                
-                // Add bold/bigger styling to the end position of the most recently completed step
-                if (i === endPos && step === maxStep) {
-                    tile.classList.add('current-position');
-                }
             }
         }
+    }
+    
+    // Highlight the current position (where we are on the number board)
+    let currentPosition;
+    if (currentStepIndex === 0) {
+        // At the beginning, current position is the first number
+        currentPosition = currentNumbers[0];
+    } else {
+        // Calculate current position based on completed steps
+        currentPosition = currentNumbers[0];
+        for (let i = 1; i <= Math.min(currentStepIndex - 1, currentNumbers.length - 1); i++) {
+            currentPosition += currentNumbers[i];
+        }
+    }
+    
+    const currentTile = document.querySelector(`[data-number="${currentPosition}"]`);
+    if (currentTile) {
+        currentTile.classList.add('current-position');
     }
 }
 
@@ -410,13 +419,7 @@ function renderEquationModeEquation() {
             circle.appendChild(blocksContainer);
         }
         
-        // Add arrow indicator for active number
-        if (shouldShowArrow(idx)) {
-            const arrow = document.createElement('div');
-            arrow.className = 'arrow-indicator';
-            arrow.textContent = '↑';
-            circle.appendChild(arrow);
-        }
+        // Arrow indicators removed for cleaner interface
         
         // Add double-click handler for splittable numbers
         if (idx === 1 && needsSplitting() && currentNumbers.length === 2) {
@@ -437,16 +440,7 @@ function needsSplitting() {
     return tens > 0 && ones > 0;
 }
 
-function shouldShowArrow(idx) {
-    // Show arrow for the number that should be clicked next
-    if (currentStepIndex === 0) {
-        // Before any clicks, no arrow (starting position is automatically set)
-        return false;
-    }
-    
-    // Show arrow for the current step we're working on
-    return idx === currentStepIndex;
-}
+// Arrow indicators removed for cleaner interface
 
 function handleSplitNumber(event) {
     event.preventDefault();
