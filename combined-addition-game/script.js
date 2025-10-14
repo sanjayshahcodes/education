@@ -27,7 +27,7 @@ let visualCurrentNumbers = [];
 // DOM elements
 let equationModeDiv, visualModeDiv, numberboardDisplayMode;
 let equationEquationDiv, visualEquationDiv, numberboardEquationDisplay, modal, answerInput, errorMsg, nextGameBtn;
-let gamesCompletedDisplay, modalNumberGrid, numberboardNumberGrid, confettiContainer;
+let gamesCompletedDisplay, modalNumberGrid, numberboardNumberGrid, confettiContainer, originalEquationDisplay;
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -48,6 +48,7 @@ function initializeGame() {
     nextGameBtn = document.getElementById('next-game-btn');
     gamesCompletedDisplay = document.getElementById('games-completed');
     modalNumberGrid = document.getElementById('modal-number-grid');
+    originalEquationDisplay = document.getElementById('original-equation-display');
     
     // Create the number grids
     createModalNumberGrid();
@@ -153,6 +154,9 @@ function handleNextGameClick() {
 function startNewProblem() {
     // Generate new problem
     currentProblem = generateProblem();
+    
+    // Show the original equation for the new problem
+    showOriginalEquation();
     
     // Use the currentMode that was set (don't recalculate)
     // If currentMode wasn't set explicitly, default to mode based on problem count
@@ -670,6 +674,9 @@ function startNumberboardDisplayMode() {
     visualModeDiv.classList.add('hidden');
     numberboardDisplayMode.classList.remove('hidden');
     
+    // Clear any existing interact.js bindings to prevent conflicts
+    interact('.number-circle').unset();
+    
     const [a, b] = currentProblem;
     currentNumbers = [a, b];
     
@@ -737,6 +744,9 @@ function getNumberboardExpectedNumber() {
 }
 
 function handleNumberboardCorrectAnswer(tile) {
+    // Combine numbers in the equation display
+    combineNumberboardNumbers();
+    
     // Move to next step
     currentStepIndex++;
     
@@ -751,6 +761,21 @@ function handleNumberboardCorrectAnswer(tile) {
     
     // Update equation display to show next active number
     renderNumberboardDisplayEquation();
+}
+
+function combineNumberboardNumbers() {
+    // Combine the first number with the current step number
+    if (currentStepIndex >= 1 && currentStepIndex < currentNumbers.length) {
+        const firstNum = currentNumbers[0];
+        const addedNum = currentNumbers[currentStepIndex];
+        const sum = firstNum + addedNum;
+        
+        // Replace the first two numbers with their sum
+        currentNumbers.splice(0, currentStepIndex + 1, sum);
+        
+        // Reset step index since we've combined numbers
+        currentStepIndex = 0;
+    }
 }
 
 function handleNumberboardIncorrectAnswer(tile) {
@@ -795,16 +820,18 @@ function updateNumberboardDisplayTileColoring() {
     // Calculate how many steps to color
     const maxStep = gameComplete ? currentNumbers.length - 1 : currentStepIndex - 1;
     
-    // Color starting position (1 to first number) as gray
+    // Color starting position (1 to first number) as yellow
     for (let i = 1; i <= currentNumbers[0]; i++) {
         const tile = numberboardNumberGrid.querySelector(`[data-number=\"${i}\"]`);
         if (tile) {
             tile.classList.add('starting-blocks');
-            // Make the starting position (final gray square) big/bold if no steps completed yet
-            if (i === currentNumbers[0] && currentStepIndex === 0) {
-                tile.classList.add('current-position');
-            }
         }
+    }
+    
+    // Always highlight the current position (first number) as bold/large
+    const currentPositionTile = numberboardNumberGrid.querySelector(`[data-number=\"${currentNumbers[0]}\"]`);
+    if (currentPositionTile) {
+        currentPositionTile.classList.add('current-position');
     }
     
     // Color each addition step
@@ -912,61 +939,7 @@ function renderNumberboardDisplayEquation() {
         numberboardEquationDisplay.appendChild(circle);
     });
     
-    // Add equals and answer if game is complete
-    if (gameComplete) {
-        const equals = document.createElement('div');
-        equals.className = 'equals';
-        equals.textContent = '=';
-        numberboardEquationDisplay.appendChild(equals);
-        
-        // Create answer circle (gray background)
-        const answerCircle = document.createElement('div');
-        answerCircle.className = 'number-circle final-answer';
-        const finalAnswer = currentNumbers.reduce((sum, num) => sum + num, 0);
-        
-        const valueDiv = document.createElement('div');
-        valueDiv.className = 'number-value';
-        valueDiv.textContent = finalAnswer;
-        answerCircle.appendChild(valueDiv);
-        
-        // Add blocks above the answer if show_blocks is true
-        const { show_blocks } = getCurrentSettings();
-        if (show_blocks) {
-            const blocksContainer = document.createElement('div');
-            blocksContainer.className = 'blocks-container';
-            
-            const tens = Math.floor(finalAnswer / 10);
-            const ones = finalAnswer % 10;
-            
-            // Add ten-columns
-            for (let i = 0; i < tens; i++) {
-                const column = document.createElement('div');
-                column.className = 'block-column';
-                for (let j = 0; j < 10; j++) {
-                    const block = document.createElement('div');
-                    block.className = 'block';
-                    column.appendChild(block);
-                }
-                blocksContainer.appendChild(column);
-            }
-
-            // Add ones column if any
-            if (ones > 0) {
-                const column = document.createElement('div');
-                column.className = 'block-column';
-                for (let j = 0; j < ones; j++) {
-                    const block = document.createElement('div');
-                    block.className = 'block';
-                    column.appendChild(block);
-                }
-                blocksContainer.appendChild(column);
-            }
-            
-            answerCircle.appendChild(blocksContainer);
-        }
-        
-        numberboardEquationDisplay.appendChild(answerCircle);
-    }
+    // Final answer display removed for cleaner interface
 }
 
 // Arrow indicator function removed - arrows disabled for cleaner interface
@@ -1172,8 +1145,8 @@ function startVisualModeWithNumpadModal() {
 
 
 function makeDraggable() {
-    // Make numbers draggable (except first number which is grayed)
-    interact('.number-circle:not(.grayed)')
+    // Make numbers draggable (except first number which is grayed) - only in visual mode
+    interact('#visual-mode .number-circle:not(.grayed)')
         .draggable({
             inertia: false,
             autoScroll: false,
@@ -1205,8 +1178,8 @@ function makeDraggable() {
             }
         });
 
-    // Add double-tap to split numbers (only for second number and beyond)
-    document.querySelectorAll('.number-circle:not(.grayed)').forEach(circle => {
+    // Add double-tap to split numbers (only for second number and beyond) - only in visual mode
+    document.querySelectorAll('#visual-mode .number-circle:not(.grayed)').forEach(circle => {
         let tapCount = 0;
         let tapTimer;
         
@@ -1256,9 +1229,9 @@ function makeDraggable() {
         });
     });
 
-    // Make numbers dropzones for other numbers (restricted combinations)
-    interact('.number-circle').dropzone({
-        accept: '.number-circle:not(.grayed)',
+    // Make numbers dropzones for other numbers (restricted combinations) - only in visual mode
+    interact('#visual-mode .number-circle').dropzone({
+        accept: '#visual-mode .number-circle:not(.grayed)',
         overlap: 'pointer',
         checker: function(dragEvent, event, dropped, dropzone, dropElement, draggable, draggableElement) {
             if (!dropped) return false;
@@ -1577,6 +1550,42 @@ function checkIfDone() {
             }, 1500);
         }
     }
+}
+
+function showOriginalEquation() {
+    const [a, b] = currentProblem;
+    originalEquationDisplay.innerHTML = '';
+    
+    // Create first number circle
+    const circle1 = document.createElement('div');
+    circle1.className = 'number-circle';
+    const value1 = document.createElement('div');
+    value1.className = 'number-value';
+    value1.textContent = a;
+    circle1.appendChild(value1);
+    originalEquationDisplay.appendChild(circle1);
+    
+    // Create plus sign
+    const plus = document.createElement('div');
+    plus.className = 'plus';
+    plus.textContent = '+';
+    originalEquationDisplay.appendChild(plus);
+    
+    // Create second number circle
+    const circle2 = document.createElement('div');
+    circle2.className = 'number-circle';
+    const value2 = document.createElement('div');
+    value2.className = 'number-value';
+    value2.textContent = b;
+    circle2.appendChild(value2);
+    originalEquationDisplay.appendChild(circle2);
+    
+    // Show the display
+    originalEquationDisplay.classList.remove('hidden');
+}
+
+function hideOriginalEquation() {
+    originalEquationDisplay.classList.add('hidden');
 }
 
 // === UTILITY FUNCTIONS ===

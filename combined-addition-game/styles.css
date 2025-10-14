@@ -106,6 +106,48 @@ input {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.original-equation-display {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 4px 8px;
+}
+
+.original-equation-display.hidden {
+    display: none;
+}
+
+.original-equation-display .number-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+}
+
+.original-equation-display .number-value {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #d3d3d3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+}
+
+.original-equation-display .plus {
+    margin: 0 4px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+}
+
 .game-board {
     flex: 1;
     padding: 0 0 25px 0;
@@ -281,14 +323,14 @@ input {
 }
 
 .number-tile.first-addition {
-    background: lightblue;
+    background: #f7f3a7;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
 .number-tile.second-addition {
-    background: lightblue;
+    background: #f7f3a7;
     color: #333;
     font-weight: normal;
     border-color: #333;
@@ -547,6 +589,10 @@ input {
     font-weight: bold;
 }
 
+#modal-equation .number-circle.grayed .number-value {
+    background-color: #f7f3a7;
+}
+
 #modal-equation .blocks-container {
     display: flex;
     flex-direction: row;
@@ -728,14 +774,14 @@ input {
 }
 
 #modal-number-grid .number-tile.first-addition {
-    background: lightblue;
+    background: #f7f3a7;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
 #modal-number-grid .number-tile.second-addition {
-    background: lightblue;
+    background: #f7f3a7;
     color: #333;
     font-weight: normal;
     border-color: #333;
