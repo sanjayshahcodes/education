@@ -548,11 +548,14 @@ function isAllowedToAdd(a, b, currentLength) {
     // Ones can combine with ones
     if (isSingle(a) && isSingle(b)) return true;
     
-    // After ones have been combined, allow tens + double-digit numbers (like 70 + 13)
-    if ((isMult10(a) && isDoubleDigit(b)) || (isDoubleDigit(a) && isMult10(b))) return true;
-    
-    // Tens can combine with ones only when there are no more splits possible (length = 2)
-    if (currentLength === 2 && ((isMult10(a) && isSingle(b)) || (isMult10(b) && isSingle(a)))) return true;
+    // Only when down to 2 numbers total, allow these combinations:
+    if (currentLength === 2) {
+        // Tens + double-digit numbers (like 70 + 13)
+        if ((isMult10(a) && isDoubleDigit(b)) || (isDoubleDigit(a) && isMult10(b))) return true;
+        
+        // Tens + ones (like 70 + 3)
+        if ((isMult10(a) && isSingle(b)) || (isMult10(b) && isSingle(a))) return true;
+    }
     
     return false;
 }
