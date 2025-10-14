@@ -5,7 +5,6 @@
 // Question format configuration - cycle through these combinations
 // Each array element is [show_blocks, generator_function_name]
 let question_format = [
-    [0, "generateDoubleDigitsNoCarry"],
     [0, "generateDoublePlusDoubleWithCarry"]
 ];
 
@@ -82,10 +81,18 @@ function generateRandomBothDoubleDigits() {
     return [a, b];
 }
 
-function generateDoubleDigitsNoCarry() {
+function generateRandomBothDoubleDigitsNoMultiplesOfTen() {
     let a, b;
     do {
         [a, b] = generateRandomBothDoubleDigits();
+    } while (a % 10 === 0 || b % 10 === 0);
+    return [a, b];
+}
+
+function generateDoubleDigitsNoCarry() {
+    let a, b;
+    do {
+        [a, b] = generateRandomBothDoubleDigitsNoMultiplesOfTen();
     } while ((a % 10) + (b % 10) > 10);
     return [a, b];
 }
@@ -93,7 +100,7 @@ function generateDoubleDigitsNoCarry() {
 function generateDoublePlusDoubleWithCarry() {
     let a, b;
     do {
-        [a, b] = generateRandomBothDoubleDigits();
+        [a, b] = generateRandomBothDoubleDigitsNoMultiplesOfTen();
         
         // Check if adding them results in a carry
         const onesDigitA = a % 10;
