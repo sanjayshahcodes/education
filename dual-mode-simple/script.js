@@ -290,11 +290,11 @@ function startNewProblem() {
     renderMode1();
     
     // Disable Mode 1 initially - it will be enabled after Mode 4 is complete
-    mode1EquationDiv.parentElement.classList.add('disabled');
+    mode1EquationDiv.closest('.mode-section').classList.add('disabled');
     addDisabledOverlay('mode1');
     
     // Ensure Mode 4 is enabled at start of new game
-    mode4EquationDiv.parentElement.classList.remove('disabled');
+    mode4EquationDiv.closest('.mode-section').classList.remove('disabled');
     removeDisabledOverlay('mode4');
     
     // Hide next game button and modal
@@ -737,11 +737,11 @@ function handleCorrectAnswer(a, b) {
                 addGreenCheckmark('mode4-equation');
                 
                 // Enable Mode 1 now that Mode 4 is complete
-                mode1EquationDiv.parentElement.classList.remove('disabled');
+                mode1EquationDiv.closest('.mode-section').classList.remove('disabled');
                 removeDisabledOverlay('mode1');
                 
                 // Disable Mode 4 now that student should focus on Mode 1
-                mode4EquationDiv.parentElement.classList.add('disabled');
+                mode4EquationDiv.closest('.mode-section').classList.add('disabled');
                 addDisabledOverlay('mode4');
                 
                 // Move arrow to Mode 1 (bottom section)
@@ -815,7 +815,7 @@ function addGreenCheckmark(equationId) {
 
 function addDisabledOverlay(modeId) {
     const equationDiv = document.getElementById(modeId + '-equation');
-    const modeSection = equationDiv.parentElement;
+    const modeSection = equationDiv.closest('.mode-section');
     
     // Don't add if already exists
     if (modeSection.querySelector('.disabled-overlay')) return;
@@ -827,7 +827,7 @@ function addDisabledOverlay(modeId) {
 
 function removeDisabledOverlay(modeId) {
     const equationDiv = document.getElementById(modeId + '-equation');
-    const modeSection = equationDiv.parentElement;
+    const modeSection = equationDiv.closest('.mode-section');
     const overlay = modeSection.querySelector('.disabled-overlay');
     
     if (overlay) {
