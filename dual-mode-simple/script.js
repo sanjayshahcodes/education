@@ -293,6 +293,10 @@ function startNewProblem() {
     mode1EquationDiv.parentElement.classList.add('disabled');
     addDisabledOverlay('mode1');
     
+    // Ensure Mode 4 is enabled at start of new game
+    mode4EquationDiv.parentElement.classList.remove('disabled');
+    removeDisabledOverlay('mode4');
+    
     // Hide next game button and modal
     nextGameBtn.classList.add('hidden');
     modal.classList.add('hidden');
@@ -735,6 +739,10 @@ function handleCorrectAnswer(a, b) {
                 // Enable Mode 1 now that Mode 4 is complete
                 mode1EquationDiv.parentElement.classList.remove('disabled');
                 removeDisabledOverlay('mode1');
+                
+                // Disable Mode 4 now that student should focus on Mode 1
+                mode4EquationDiv.parentElement.classList.add('disabled');
+                addDisabledOverlay('mode4');
                 
                 // Move arrow to Mode 1 (bottom section)
                 addActiveArrow('mode1');

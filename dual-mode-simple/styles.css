@@ -545,8 +545,8 @@ input {
 
 
 .mode-section.disabled {
-    opacity: 0.5;
-    filter: grayscale(50%);
+    opacity: 0.8;
+    /*filter: grayscale(50%);*/
 }
 
 .disabled-overlay {
