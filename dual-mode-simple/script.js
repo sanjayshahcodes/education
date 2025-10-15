@@ -421,6 +421,8 @@ function makeDraggable() {
                         if (tens > 0 && ones > 0) {
                             mode1Numbers.splice(idx, 1, tens, ones);
                             renderMode1();
+                            // Hide swap button after first split in Mode 1
+                            swapBtn.classList.add('hidden');
                         }
                     }
                 }
@@ -452,6 +454,8 @@ function makeDraggable() {
                     if (tens > 0 && ones > 0) {
                         mode1Numbers.splice(idx, 1, tens, ones);
                         renderMode1();
+                        // Hide swap button after first split in Mode 1
+                        swapBtn.classList.add('hidden');
                     }
                 }
             }
