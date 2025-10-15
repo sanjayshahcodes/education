@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Question format configuration - cycle through these combinations
     // Each array element is [show_blocks, allow_splitting, generator_function_name]
     let question_format = [
-        [1, 1, "generateDoubleDigitsNoCarry"],
+        [0, 1, "generateDoubleDigitsNoCarry"],
         [1, 1, "generateDoublePlusDoubleWithCarry"]
         
         ];
