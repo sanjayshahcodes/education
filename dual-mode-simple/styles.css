@@ -496,21 +496,21 @@ input {
 }
 
 .number-tile.starting-blocks {
-    background: #f7f3a7;
+    background: #e9c6e9;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
 .number-tile.first-addition {
-    background: #f7f3a7;
+    background: #e9c6e9;
     color: #333;
     font-weight: normal;
     border-color: #333;
 }
 
 .number-tile.second-addition {
-    background: #d8a2d8; /* Purple color */
+    background: #d79ad7; /* Purple color */
     color: #333;
     font-weight: normal;
     border-color: #333;
