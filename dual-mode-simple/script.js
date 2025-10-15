@@ -408,8 +408,10 @@ function makeDraggable() {
                 
                 // Determine which mode this circle belongs to and handle accordingly
                 if (this.closest('#mode4-equation')) {
-                    const idx = mode4Numbers.indexOf(num);
-                    if (idx !== -1) {
+                    // Find the actual index of this specific circle element
+                    const circles = this.closest('#mode4-equation').querySelectorAll('.number-circle');
+                    const idx = Array.from(circles).indexOf(this);
+                    if (idx !== -1 && idx < mode4Numbers.length) {
                         const tens = Math.floor(num / 10) * 10;
                         const ones = num % 10;
                         if (tens > 0 && ones > 0) {
@@ -418,8 +420,10 @@ function makeDraggable() {
                         }
                     }
                 } else if (this.closest('#mode1-equation')) {
-                    const idx = mode1Numbers.indexOf(num);
-                    if (idx !== -1 && idx > 0) { // Don't split first number in mode 1
+                    // Find the actual index of this specific circle element
+                    const circles = this.closest('#mode1-equation').querySelectorAll('.number-circle');
+                    const idx = Array.from(circles).indexOf(this);
+                    if (idx !== -1 && idx > 0 && idx < mode1Numbers.length) { // Don't split first number in mode 1
                         const tens = Math.floor(num / 10) * 10;
                         const ones = num % 10;
                         if (tens > 0 && ones > 0) {
@@ -441,8 +445,10 @@ function makeDraggable() {
             
             // Determine which mode this circle belongs to and handle accordingly
             if (this.closest('#mode4-equation')) {
-                const idx = mode4Numbers.indexOf(num);
-                if (idx !== -1) {
+                // Find the actual index of this specific circle element
+                const circles = this.closest('#mode4-equation').querySelectorAll('.number-circle');
+                const idx = Array.from(circles).indexOf(this);
+                if (idx !== -1 && idx < mode4Numbers.length) {
                     const tens = Math.floor(num / 10) * 10;
                     const ones = num % 10;
                     if (tens > 0 && ones > 0) {
@@ -451,8 +457,10 @@ function makeDraggable() {
                     }
                 }
             } else if (this.closest('#mode1-equation')) {
-                const idx = mode1Numbers.indexOf(num);
-                if (idx !== -1 && idx > 0) { // Don't split first number in mode 1
+                // Find the actual index of this specific circle element
+                const circles = this.closest('#mode1-equation').querySelectorAll('.number-circle');
+                const idx = Array.from(circles).indexOf(this);
+                if (idx !== -1 && idx > 0 && idx < mode1Numbers.length) { // Don't split first number in mode 1
                     const tens = Math.floor(num / 10) * 10;
                     const ones = num % 10;
                     if (tens > 0 && ones > 0) {
