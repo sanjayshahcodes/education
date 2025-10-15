@@ -779,6 +779,10 @@ function handleCorrectAnswer(a, b) {
                 // Add green checkmark to Mode 1
                 addGreenCheckmark('mode1-equation');
                 
+                // Disable Mode 1 now that it's complete
+                mode1EquationDiv.closest('.mode-section').classList.add('disabled');
+                addDisabledOverlay('mode1');
+                
                 // Show confetti burst
                 confetti({
                     particleCount: 100,
