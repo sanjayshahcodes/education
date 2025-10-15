@@ -148,6 +148,10 @@ input {
     align-items: center;
     cursor: move;
     transition: transform 0.2s ease;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    position: relative;
 }
 
 .number-circle.dragging {
