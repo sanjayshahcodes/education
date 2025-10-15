@@ -469,7 +469,7 @@ function makeDraggable() {
     // Make numbers dropzones for other numbers (exact copy from original visual-adding)
     interact('.number-circle').dropzone({
         accept: '.number-circle',
-        overlap: 'pointer',
+        overlap: 0.25,
         checker: function(dragEvent, event, dropped, dropzone, dropElement, draggable, draggableElement) {
             if (!dropped) return false;
             
