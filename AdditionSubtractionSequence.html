@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addition & Subtraction Sequence Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f9f9f9;
+            position: relative; /* Added for positioning Next button and timer */
+        }
+        #problem {
+            font-size: 48px;
+            margin: 20px;
+            color: #333;
+        }
+        #problem .answer {
+            text-decoration: underline;
+        }
+        #score {
+            font-size: 24px;
+            margin: 10px;
+            color: #555;
+        }
+        #feedback {
+            font-size: 32px;
+            margin: 20px;
+            color: green;
+        }
+        #visualization {
+            width: 720px; /* Increased from 600px to 720px */
+            margin: 20px auto;
+            padding: 18px;
+            background-color: transparent; /* Remove background from entire visualization */
+        }
+        .main-grid {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            padding: 18px;
+            margin-bottom: 10px;
+        }
+        .staging-row {
+            padding: 0 18px; /* Match the main grid's horizontal padding */
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+        }
+        .cell {
+            width: 66px;
+            height: 66px;
+            margin: 4.8px;
+            border: 1px solid #eee;
+        }
+        .block {
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .block.sliding {
+            transition: all 0.6s ease-in-out;
+            transform: translateX(800px);
+        }
+        .block.sliding.slide-in {
+            transform: translateX(0);
+        }
+        #staging-area {
+            display: flex;
+            justify-content: flex-start;
+            width: 720px;
+            margin: 10px auto;
+            height: 66px;
+            position: relative;
+        }
+        .staging-block {
+            width: 66px;
+            height: 66px;
+            margin: 4.8px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            background-color: teal;
+            transition: all 0.8s ease-in-out;
+            transform: translateX(800px);
+        }
+        .staging-block.slide-in {
+            transform: translateX(0);
+        }
+        .staging-block.moving-to-final {
+            transition: all 1.0s ease-in-out;
+        }
+        #label-row {
+            display: flex;
+            justify-content: space-around;
+            width: 720px;
+            margin: 0 auto 6px;
+        }
+        #label-row span {
+            width: 66px;
+            text-align: center;
+            font-size: 21.6px;
+            color: #333;
+        }
+        #buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            margin: 5px 0;
+        }
+        button {
+            width: 90px;
+            height: 90px;
+            font-size: 28px;
+            margin: 5px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(#ffecd1, #fcb69f);
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background 0.2s;
+        }
+        button:hover {
+            background: linear-gradient(#fcb69f, #ffecd1);
+            transform: scale(1.05);
+        }
+        #next {
+            position: absolute;
+            top: 20px;
+            right: 20px; /* Reset to original position */
+            width: auto;
+            font-size: 24px;
+            padding: 15px 60px;
+            margin: 0;
+            border-radius: 10px;
+            background: linear-gradient(#a1c4fd, #c2e9fb);
+            color: #333;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background 0.2s;
+            white-space: normal;
+            display: none; /* Controlled by JavaScript */
+        }
+        #next:hover {
+            background: linear-gradient(#c2e9fb, #a1c4fd);
+            transform: scale(1.05);
+        }
+        #timer {
+            position: absolute;
+            top: 20px;
+            left: 20px; /* Moved to upper left-hand corner */
+            font-size: 24px;
+            color: #333;
+            background: linear-gradient(#e0e0e0, #ffffff);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="problem"></div>
+    <div id="score">0/0</div>
+    <div id="visualization"></div>
+    <div id="feedback"></div>
+    <button id="next" style="display:none;">Next</button>
+    <div id="buttons"></div>
+    <div id="timer">0:00</div>
+
+    <script>
+        let correct = 0;
+        let total = 0;
+        let a, b, sum;
+        let currentStep = 'addition'; // 'addition', 'subtraction1', 'subtraction2'
+        const vis = document.getElementById('visualization');
+        const nextBtn = document.getElementById('next');
+        const buttonsDiv = document.getElementById('buttons');
+        const timerDisplay = document.getElementById('timer');
+        let startTime = Date.now();
+        let timer;
+
+        nextBtn.onclick = function() {
+            newProblem();
+            nextBtn.style.display = 'none';
+            buttonsDiv.style.display = '';
+        };
+
+        // Define the 20 specific addition pairs that sum to more than 10
+        const additionPairs = [
+            [9, 2], [8, 3], [7, 4], [6, 5],
+            [9, 3], [8, 4], [7, 5], [6, 6],
+            [9, 4], [8, 5], [7, 6],
+            [9, 5], [8, 6], [7, 7],
+            [8, 7], [9, 6],
+            [8, 8],
+            [9, 7],
+            [9, 8],
+            [9, 9]
+        ];
+
+        let currentCycle = [];
+        let cycleIndex = 0;
+
+        function initializeNewCycle() {
+            // Create a copy of all pairs and shuffle them
+            currentCycle = [...additionPairs];
+            // Fisher-Yates shuffle
+            for (let i = currentCycle.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentCycle[i], currentCycle[j]] = [currentCycle[j], currentCycle[i]];
+            }
+            cycleIndex = 0;
+        }
+
+        function getNextPair() {
+            if (cycleIndex >= currentCycle.length) {
+                initializeNewCycle();
+            }
+            const pair = currentCycle[cycleIndex];
+            cycleIndex++;
+            return pair;
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000); // Time in seconds
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        function startTimer() {
+            timer = setInterval(updateTimer, 1000);
+            updateTimer(); // Initial call to set timer immediately
+        }
+
+        function newProblem() {
+            // Get the next pair from our systematic cycle
+            const pair = getNextPair();
+            a = pair[0];
+            b = pair[1];
+            sum = a + b;
+            currentStep = 'addition';
+            
+            document.getElementById('problem').innerText = a + ' + ' + b + ' = __';
+            document.getElementById('visualization').innerHTML = '';
+            document.getElementById('feedback').innerText = '';
+            
+            // Reset button states
+            buttonsDiv.style.display = '';
+            buttonsDiv.style.pointerEvents = 'auto';
+            
+            // Show the blocks initially before user answers
+            showInitialBlocks();
+        }
+
+        function checkAnswer(guess) {
+            console.log(`checkAnswer called with guess: ${guess}, step: ${currentStep}`);
+            
+            let correctAnswer;
+            let isCorrect;
+            
+            if (currentStep === 'addition') {
+                correctAnswer = sum;
+                isCorrect = guess === correctAnswer;
+                
+                if (isCorrect) {
+                    // Start the animated visualization for addition
+                    animatedVisualize(isCorrect, correctAnswer, guess);
+                } else {
+                    // Wrong answer - end sequence
+                    handleWrongAnswer(correctAnswer, guess);
+                }
+            } else if (currentStep === 'subtraction1') {
+                correctAnswer = a; // sum - b = a
+                isCorrect = guess === correctAnswer;
+                
+                if (isCorrect) {
+                    // Move to next subtraction step
+                    showSubtractionFeedback(true, correctAnswer);
+                    setTimeout(() => {
+                        currentStep = 'subtraction2';
+                        document.getElementById('problem').innerText = sum + ' - ' + a + ' = __';
+                        document.getElementById('feedback').innerText = '';
+                        showStaticVisualization();
+                        buttonsDiv.style.display = '';
+                    }, 2000);
+                } else {
+                    // Wrong answer - end sequence
+                    handleWrongAnswer(correctAnswer, guess);
+                }
+            } else if (currentStep === 'subtraction2') {
+                correctAnswer = b; // sum - a = b
+                isCorrect = guess === correctAnswer;
+                
+                if (isCorrect) {
+                    // Sequence complete - increment score
+                    total++;
+                    correct++;
+                    showSubtractionFeedback(true, correctAnswer);
+                    document.getElementById('score').innerText = correct + '/' + total;
+                    
+                    // Show next button after delay
+                    setTimeout(() => {
+                        nextBtn.style.display = 'block';
+                    }, 2000);
+                } else {
+                    // Wrong answer - end sequence
+                    handleWrongAnswer(correctAnswer, guess);
+                }
+            }
+        }
+
+        function handleWrongAnswer(correctAnswer, guess) {
+            total++;
+            document.getElementById('feedback').innerText = `Wrong! The answer is ${correctAnswer} (not ${guess})`;
+            document.getElementById('feedback').style.color = 'red';
+            document.getElementById('score').innerText = correct + '/' + total;
+            
+            // Update problem display with correct answer
+            if (currentStep === 'addition') {
+                document.getElementById('problem').innerHTML = a + ' + ' + b + ' = <span class="answer">' + correctAnswer + '</span>';
+            } else if (currentStep === 'subtraction1') {
+                document.getElementById('problem').innerHTML = sum + ' - ' + b + ' = <span class="answer">' + correctAnswer + '</span>';
+            } else if (currentStep === 'subtraction2') {
+                document.getElementById('problem').innerHTML = sum + ' - ' + a + ' = <span class="answer">' + correctAnswer + '</span>';
+            }
+            
+            // Show next button
+            setTimeout(() => {
+                nextBtn.style.display = 'block';
+            }, 2000);
+            buttonsDiv.style.display = 'none';
+        }
+
+        function showSubtractionFeedback(isCorrect, correctAnswer) {
+            buttonsDiv.style.display = 'none';
+            
+            if (isCorrect) {
+                document.getElementById('feedback').innerText = 'Correct!';
+                document.getElementById('feedback').style.color = 'green';
+                
+                // Update problem display with correct answer
+                if (currentStep === 'subtraction1') {
+                    document.getElementById('problem').innerHTML = sum + ' - ' + b + ' = <span class="answer">' + correctAnswer + '</span>';
+                } else if (currentStep === 'subtraction2') {
+                    document.getElementById('problem').innerHTML = sum + ' - ' + a + ' = <span class="answer">' + correctAnswer + '</span>';
+                }
+            }
+        }
+
+        function showInitialBlocks() {
+            const vis = document.getElementById('visualization');
+            
+            // Create label row
+            let labelRow = document.createElement('div');
+            labelRow.id = 'label-row';
+            for (let i = 1; i <= 10; i++) {
+                let label = document.createElement('span');
+                label.innerText = i;
+                labelRow.appendChild(label);
+            }
+            vis.appendChild(labelRow);
+
+            // Create main grid container for first two rows
+            let mainGrid = document.createElement('div');
+            mainGrid.className = 'main-grid';
+
+            // Create main grid rows
+            let row1 = document.createElement('div');
+            row1.className = 'row';
+            let row2 = document.createElement('div');
+            row2.className = 'row';
+            
+            // Create row 1 cells - purple blocks fill first 'a' positions
+            for (let c = 0; c < 10; c++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                if (c < a) {
+                    cell.style.backgroundColor = 'purple';
+                    cell.classList.add('block');
+                }
+                row1.appendChild(cell);
+            }
+            
+            // Create row 2 cells - all empty initially
+            for (let c = 0; c < 10; c++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                row2.appendChild(cell);
+            }
+
+            // Create row 3 as staging area - teal blocks with invisible borders
+            let row3 = document.createElement('div');
+            row3.className = 'row staging-row';
+            row3.id = 'staging-row';
+            
+            // Create row 3 cells - teal blocks for first 'b' positions, invisible borders
+            for (let c = 0; c < 10; c++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                if (c < b) {
+                    cell.style.backgroundColor = 'teal';
+                    cell.classList.add('block');
+                    cell.style.border = 'none'; // Make border invisible
+                } else {
+                    cell.style.border = 'none'; // Make empty cells invisible too
+                }
+                row3.appendChild(cell);
+            }
+
+            mainGrid.appendChild(row1);
+            mainGrid.appendChild(row2);
+            
+            vis.appendChild(mainGrid);
+            vis.appendChild(row3);
+        }
+
+        function showStaticVisualization() {
+            vis.innerHTML = '';
+            
+            // Create label row
+            let labelRow = document.createElement('div');
+            labelRow.id = 'label-row';
+            for (let i = 1; i <= 10; i++) {
+                let label = document.createElement('span');
+                label.innerText = i;
+                labelRow.appendChild(label);
+            }
+            vis.appendChild(labelRow);
+
+            // Create main grid container
+            let mainGrid = document.createElement('div');
+            mainGrid.className = 'main-grid';
+
+            let row1 = document.createElement('div');
+            row1.className = 'row';
+            let row2 = document.createElement('div');
+            row2.className = 'row';
+            let pos = 1;
+
+            // Fill row 1
+            for (let c = 0; c < 10; c++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                if (pos <= sum) {
+                    cell.style.backgroundColor = pos <= a ? 'purple' : 'teal';
+                    cell.classList.add('block');
+                }
+                row1.appendChild(cell);
+                pos++;
+            }
+
+            // Fill row 2
+            for (let c = 0; c < 10; c++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                if (pos <= sum) {
+                    cell.style.backgroundColor = pos <= a ? 'purple' : 'teal';
+                    cell.classList.add('block');
+                }
+                row2.appendChild(cell);
+                pos++;
+            }
+
+            mainGrid.appendChild(row1);
+            mainGrid.appendChild(row2);
+            vis.appendChild(mainGrid);
+        }
+
+        function animatedVisualize(isCorrect, correctAnswer, guess) {
+            console.log(`animatedVisualize called with isCorrect: ${isCorrect}, correctAnswer: ${correctAnswer}, guess: ${guess}`);
+            // Hide number pad during animation
+            buttonsDiv.style.display = 'none';
+            
+            // Get existing elements
+            const rows = vis.querySelectorAll('.row');
+            
+            console.log('Found rows:', rows.length);
+            
+            if (rows.length < 3) {
+                console.error('Could not find enough rows in visualization');
+                return;
+            }
+            
+            const row1 = rows[0]; // First row
+            const row2 = rows[1]; // Second row
+            const row3 = rows[2]; // Staging row
+            
+            const row1Cells = Array.from(row1.children);
+            const row2Cells = Array.from(row2.children);
+            const row3Cells = Array.from(row3.children);
+            
+            // Calculate how many teal blocks should go to row 1 vs row 2
+            let remainingInRow1 = 10 - a; // How many spaces left in row 1
+            let blocksForRow1 = Math.min(b, remainingInRow1);
+            let blocksForRow2 = b - blocksForRow1;
+            
+            console.log(`Animation: a=${a}, b=${b}, blocksForRow1=${blocksForRow1}, blocksForRow2=${blocksForRow2}`);
+            
+            // Animation sequence
+            setTimeout(() => {
+                // Step 1: Move first 'blocksForRow1' blocks from row 3 diagonally up and RIGHT to row 1
+                for (let i = 0; i < blocksForRow1; i++) {
+                    let sourceCell = row3Cells[i];
+                    let targetCell = row1Cells[a + i];
+                    
+                    // Get actual positions of source and target cells
+                    let sourceRect = sourceCell.getBoundingClientRect();
+                    let targetRect = targetCell.getBoundingClientRect();
+                    
+                    // Calculate exact movement needed
+                    let horizontalDistance = targetRect.left - sourceRect.left;
+                    let verticalDistance = targetRect.top - sourceRect.top;
+                    
+                    sourceCell.style.transition = 'transform 1.4s linear';
+                    sourceCell.style.transform = `translateY(${verticalDistance}px) translateX(${horizontalDistance}px)`;
+                    
+                    // After animation completes, transfer to grid
+                    setTimeout(() => {
+                        targetCell.style.backgroundColor = 'teal';
+                        targetCell.classList.add('block');
+                        sourceCell.style.backgroundColor = '';
+                        sourceCell.classList.remove('block');
+                        sourceCell.style.transform = '';
+                        sourceCell.style.transition = '';
+                    }, 1400);
+                }
+                
+                // Step 2: Move remaining blocks from row 3 diagonally up and LEFT to row 2
+                setTimeout(() => {
+                    for (let i = 0; i < blocksForRow2; i++) {
+                        let sourceCell = row3Cells[blocksForRow1 + i];
+                        let targetCell = row2Cells[i];
+                        
+                        // Get actual positions of source and target cells
+                        let sourceRect = sourceCell.getBoundingClientRect();
+                        let targetRect = targetCell.getBoundingClientRect();
+                        
+                        // Calculate exact movement needed
+                        let horizontalDistance = targetRect.left - sourceRect.left;
+                        let verticalDistance = targetRect.top - sourceRect.top;
+                        
+                        sourceCell.style.transition = 'transform 1.4s linear';
+                        sourceCell.style.transform = `translateY(${verticalDistance}px) translateX(${horizontalDistance}px)`;
+                        
+                        // After animation completes, transfer to grid
+                        setTimeout(() => {
+                            targetCell.style.backgroundColor = 'teal';
+                            targetCell.classList.add('block');
+                            sourceCell.style.backgroundColor = '';
+                            sourceCell.classList.remove('block');
+                            sourceCell.style.transform = '';
+                            sourceCell.style.transition = '';
+                        }, 1400);
+                    }
+                }, 1500); // Wait for first animation to complete (1.4s + buffer)
+                
+                // Clean up transforms after all animations
+                setTimeout(() => {
+                    [...row1Cells, ...row2Cells, ...row3Cells].forEach(cell => {
+                        cell.style.transform = '';
+                        cell.style.transition = '';
+                    });
+                }, 3500); // 1.4s + 1.5s + 0.6s buffer
+                
+            }, 500); // Start animation after brief pause
+            
+            setTimeout(() => {
+                // Show feedback and handle result after all animations complete
+                if (isCorrect) {
+                    document.getElementById('feedback').innerText = 'Correct!';
+                    document.getElementById('feedback').style.color = 'green';
+                    
+                    // Update problem display with correct answer
+                    document.getElementById('problem').innerHTML = a + ' + ' + b + ' = <span class="answer">' + correctAnswer + '</span>';
+                    
+                    // Move to first subtraction step after delay
+                    setTimeout(() => {
+                        currentStep = 'subtraction1';
+                        document.getElementById('problem').innerText = sum + ' - ' + b + ' = __';
+                        document.getElementById('feedback').innerText = '';
+                        showStaticVisualization();
+                        buttonsDiv.style.display = '';
+                    }, 2000);
+                }
+            }, 4000); // Show feedback after all animations complete (1.4s + 1.5s + 1.4s + buffer)
+        }
+
+        // Create buttons 1-18 in three rows
+        const buttonsContainer = document.getElementById('buttons');
+        
+        // Row 1: buttons 1-6
+        const buttonRow1 = document.createElement('div');
+        buttonRow1.className = 'button-row';
+        for (let i = 1; i <= 6; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.onclick = () => checkAnswer(i);
+            buttonRow1.appendChild(btn);
+        }
+        buttonsContainer.appendChild(buttonRow1);
+        
+        // Row 2: buttons 7-12
+        const buttonRow2 = document.createElement('div');
+        buttonRow2.className = 'button-row';
+        for (let i = 7; i <= 12; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.onclick = () => checkAnswer(i);
+            buttonRow2.appendChild(btn);
+        }
+        buttonsContainer.appendChild(buttonRow2);
+        
+        // Row 3: buttons 13-18
+        const buttonRow3 = document.createElement('div');
+        buttonRow3.className = 'button-row';
+        for (let i = 13; i <= 18; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.onclick = () => checkAnswer(i);
+            buttonRow3.appendChild(btn);
+        }
+        buttonsContainer.appendChild(buttonRow3);
+
+        // Start the game and timer
+        initializeNewCycle(); // Initialize the first cycle of pairs
+        newProblem();
+        startTimer();
+    </script>
+</body>
+</html>
