@@ -219,7 +219,14 @@ input {
 }
 
 .number-tile.subtracted-range {
-    background: #d3d3d3; /* Gray for subtracted amounts */
+    background: #d3d3d3; /* Dark gray for currently subtracted amount */
+    color: #333;
+    font-weight: normal;
+    border-color: #333;
+}
+
+.number-tile.previous-subtracted {
+    background: #f5f5f5; /* Light gray for previously subtracted amounts */
     color: #333;
     font-weight: normal;
     border-color: #333;

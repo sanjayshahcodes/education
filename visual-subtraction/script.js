@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let gameComplete = false;
     let currentStepIndex = 0; // Which subtraction step we're on
     let droppedFlag = false;
+    let subtractionHistory = []; // Track each subtraction step for grid highlighting
 
     // DOM elements
     let numberGrid;
@@ -121,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gameActive = false; // Will be enabled after splitting (if needed) or immediately
         gameComplete = false;
         currentStepIndex = 0;
+        subtractionHistory = []; // Reset subtraction history
         
         // Hide next game button
         nextGameBtn.classList.add('hidden');
@@ -131,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reset all tiles
         document.querySelectorAll('.number-tile').forEach(tile => {
-            tile.classList.remove('minuend-range', 'subtracted-range', 'current-result', 'current-position', 'incorrect');
+            tile.classList.remove('minuend-range', 'subtracted-range', 'previous-subtracted', 'current-result', 'current-position', 'incorrect');
         });
         
         // Render initial equation
@@ -384,6 +386,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleCorrectSubtraction(minuend, subtrahend, result) {
+        // Record this subtraction step in history
+        subtractionHistory.push({
+            from: minuend,
+            subtracted: subtrahend,
+            to: result
+        });
+        
         // Remove the subtrahend from currentNumbers and update minuend
         const subtrahendIdx = currentNumbers.findIndex(num => num === subtrahend);
         if (subtrahendIdx !== -1) {
@@ -410,46 +419,48 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateGridHighlighting() {
         // Clear all previous highlighting
         document.querySelectorAll('.number-tile').forEach(tile => {
-            tile.classList.remove('minuend-range', 'subtracted-range', 'current-result', 'current-position');
+            tile.classList.remove('minuend-range', 'subtracted-range', 'previous-subtracted', 'current-result', 'current-position');
         });
         
         if (currentNumbers.length === 0) return;
         
         const currentMinuend = currentNumbers[0];
         
-        // Highlight current result position
+        // Highlight current result position with thick border
         const resultTile = document.querySelector(`[data-number="${currentMinuend}"]`);
         if (resultTile) {
             resultTile.classList.add('current-result');
         }
         
-        // Calculate total subtracted so far
-        const totalSubtracted = originalMinuend - currentMinuend;
-        
-        if (totalSubtracted > 0) {
-            // Highlight subtracted range (from current result + 1 to original minuend)
-            for (let i = currentMinuend + 1; i <= originalMinuend; i++) {
-                const tile = document.querySelector(`[data-number="${i}"]`);
-                if (tile) {
-                    tile.classList.add('subtracted-range');
-                }
+        // Highlight remaining minuend range (1 to current result)
+        for (let i = 1; i <= currentMinuend; i++) {
+            const tile = document.querySelector(`[data-number="${i}"]`);
+            if (tile && i !== currentMinuend) { // Don't double-apply to result tile
+                tile.classList.add('minuend-range');
             }
         }
         
-        // Highlight original minuend range (1 to original minuend) if no subtractions yet
-        if (currentMinuend === originalMinuend) {
-            for (let i = 1; i <= originalMinuend; i++) {
-                const tile = document.querySelector(`[data-number="${i}"]`);
-                if (tile) {
-                    tile.classList.add('minuend-range');
+        // Handle step-by-step subtraction highlighting
+        if (subtractionHistory.length > 0) {
+            // Show previous steps as light gray
+            for (let i = 0; i < subtractionHistory.length - 1; i++) {
+                const step = subtractionHistory[i];
+                for (let j = step.to + 1; j <= step.from; j++) {
+                    const tile = document.querySelector(`[data-number="${j}"]`);
+                    if (tile) {
+                        tile.classList.remove('minuend-range'); // Remove light blue
+                        tile.classList.add('previous-subtracted'); // Add light gray
+                    }
                 }
             }
-        } else {
-            // Highlight remaining range (1 to current result)
-            for (let i = 1; i <= currentMinuend; i++) {
-                const tile = document.querySelector(`[data-number="${i}"]`);
+            
+            // Show current step as dark gray (only the most recent subtraction)
+            const currentStep = subtractionHistory[subtractionHistory.length - 1];
+            for (let j = currentStep.to + 1; j <= currentStep.from; j++) {
+                const tile = document.querySelector(`[data-number="${j}"]`);
                 if (tile) {
-                    tile.classList.add('minuend-range');
+                    tile.classList.remove('minuend-range', 'previous-subtracted'); // Remove other colors
+                    tile.classList.add('subtracted-range'); // Add dark gray
                 }
             }
         }
