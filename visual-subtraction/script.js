@@ -439,9 +439,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // === GRID HIGHLIGHTING ===
     function updateGridHighlighting() {
-        // Clear all previous highlighting
+        // Clear all previous highlighting and X overlays
         document.querySelectorAll('.number-tile').forEach(tile => {
             tile.classList.remove('minuend-range', 'subtracted-range', 'previous-subtracted', 'current-result', 'current-position');
+            // Remove any existing X overlays
+            const existingX = tile.querySelector('.subtracted-x');
+            if (existingX) {
+                tile.removeChild(existingX);
+            }
         });
         
         if (currentNumbers.length === 0) return;
@@ -464,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Handle step-by-step subtraction highlighting
         if (subtractionHistory.length > 0) {
-            // Show previous steps as light gray
+            // Show previous steps as light gray with X overlay
             for (let i = 0; i < subtractionHistory.length - 1; i++) {
                 const step = subtractionHistory[i];
                 for (let j = step.to + 1; j <= step.from; j++) {
@@ -472,17 +477,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (tile) {
                         tile.classList.remove('minuend-range'); // Remove light blue
                         tile.classList.add('previous-subtracted'); // Add light gray
+                        
+                        // Add X overlay
+                        const xOverlay = document.createElement('div');
+                        xOverlay.className = 'subtracted-x';
+                        xOverlay.textContent = '✗';
+                        tile.appendChild(xOverlay);
                     }
                 }
             }
             
-            // Show current step as dark gray (only the most recent subtraction)
+            // Show current step as dark gray with X overlay (only the most recent subtraction)
             const currentStep = subtractionHistory[subtractionHistory.length - 1];
             for (let j = currentStep.to + 1; j <= currentStep.from; j++) {
                 const tile = document.querySelector(`[data-number="${j}"]`);
                 if (tile) {
                     tile.classList.remove('minuend-range', 'previous-subtracted'); // Remove other colors
                     tile.classList.add('subtracted-range'); // Add dark gray
+                    
+                    // Add X overlay
+                    const xOverlay = document.createElement('div');
+                    xOverlay.className = 'subtracted-x';
+                    xOverlay.textContent = '✗';
+                    tile.appendChild(xOverlay);
                 }
             }
         }
