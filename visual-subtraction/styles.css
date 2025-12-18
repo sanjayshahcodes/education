@@ -146,7 +146,7 @@ input {
 }
 
 .number-circle.grayed .number-value {
-    background-color: #f7f3a7;
+    background-color: lightblue;
 }
 
 .number-circle.splittable .number-value {
@@ -212,7 +212,7 @@ input {
 
 /* Subtraction-specific tile colors */
 .number-tile.minuend-range {
-    background: #f7f3a7; /* Yellow for the original minuend range */
+    background: lightblue; /* Light blue for the original minuend range */
     color: #333;
     font-weight: normal;
     border-color: #333;
@@ -226,7 +226,7 @@ input {
 }
 
 .number-tile.current-result {
-    background: #f7f3a7; /* Same yellow as minuend-range */
+    background: lightblue; /* Same light blue as minuend-range */
     color: #333;
     font-weight: bold;
     font-size: 1.3rem;

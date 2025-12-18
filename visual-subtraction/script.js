@@ -85,11 +85,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function generateSubtractionProblem() {
         let minuend, subtrahend;
         
-        // Generate problems where result is positive and both numbers < 100
+        // Generate problems where subtrahend is at most 63% of minuend
+        // This encourages decomposition strategy rather than counting up
         do {
             minuend = Math.floor(Math.random() * 89) + 11; // 11-99
-            subtrahend = Math.floor(Math.random() * Math.min(minuend - 1, 89)) + 11; // 11 to min(minuend-1, 99)
-        } while (minuend - subtrahend <= 0 || subtrahend >= minuend);
+            // Subtrahend should be at most 63% of minuend, but at least 11
+            const maxSubtrahend = Math.floor(minuend * 0.63);
+            const minSubtrahend = Math.max(11, Math.floor(minuend * 0.2)); // At least 20% to ensure meaningful subtraction
+            subtrahend = Math.floor(Math.random() * (maxSubtrahend - minSubtrahend + 1)) + minSubtrahend;
+        } while (subtrahend >= minuend || minuend - subtrahend <= 0 || subtrahend > 99);
         
         return [minuend, subtrahend];
     }
