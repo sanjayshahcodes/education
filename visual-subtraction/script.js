@@ -151,6 +151,9 @@ document.addEventListener('DOMContentLoaded', function() {
             gameActive = true;
             currentStepIndex = 1; // Ready for first subtraction
             renderEquation(); // Update to show draggable state
+        } else {
+            // If splitting is needed, disable dragging until split
+            gameActive = false;
         }
     }
 
@@ -220,10 +223,8 @@ document.addEventListener('DOMContentLoaded', function() {
             equationDisplay.appendChild(circle);
         });
         
-        // Set up drag and drop if game is active
-        if (gameActive || !needsSplitting()) {
-            makeDraggable();
-        }
+        // Always set up dragging, but dropzone availability depends on game state
+        makeDraggable();
     }
 
     // === SPLITTING FUNCTIONALITY ===
@@ -304,28 +305,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-        // Make minuend (grayed circle) a dropzone
-        interact('.number-circle.grayed').dropzone({
-            accept: '.number-circle:not(.grayed)',
-            overlap: 'pointer',
-            ondragenter: function(event) {
-                event.target.classList.add('drag-target');
-            },
-            ondragleave: function(event) {
-                event.target.classList.remove('drag-target');
-            },
-            ondrop: function(event) {
-                event.target.classList.remove('drag-target');
-                droppedFlag = true;
-                
-                const droppedNum = parseInt(event.relatedTarget.querySelector('.number-value').textContent);
-                const targetNum = parseInt(event.target.querySelector('.number-value').textContent);
-                
-                // Show modal for subtraction
-                showSubtractionModal(targetNum, droppedNum);
-                resetPosition(event.relatedTarget);
-            }
-        });
+        // Make minuend (grayed circle) a dropzone only if game is active
+        if (gameActive) {
+            interact('.number-circle.grayed').dropzone({
+                accept: '.number-circle:not(.grayed)',
+                overlap: 'pointer',
+                ondragenter: function(event) {
+                    event.target.classList.add('drag-target');
+                },
+                ondragleave: function(event) {
+                    event.target.classList.remove('drag-target');
+                },
+                ondrop: function(event) {
+                    event.target.classList.remove('drag-target');
+                    droppedFlag = true;
+                    
+                    const droppedNum = parseInt(event.relatedTarget.querySelector('.number-value').textContent);
+                    const targetNum = parseInt(event.target.querySelector('.number-value').textContent);
+                    
+                    // Show modal for subtraction
+                    showSubtractionModal(targetNum, droppedNum);
+                    resetPosition(event.relatedTarget);
+                }
+            });
+        }
     }
 
     function resetPosition(element) {
