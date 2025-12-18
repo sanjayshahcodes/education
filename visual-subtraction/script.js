@@ -118,6 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
         [originalMinuend, currentNumbers[1]] = generateSubtractionProblem();
         currentNumbers = [originalMinuend, currentNumbers[1]];
         
+        // Update original equation display
+        const originalEquationDiv = document.getElementById('original-equation');
+        originalEquationDiv.textContent = `${originalMinuend} − ${currentNumbers[1]} = __`;
+        
         // Reset game state
         gameActive = false; // Will be enabled after splitting (if needed) or immediately
         gameComplete = false;
@@ -162,6 +166,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // === EQUATION RENDERING ===
     function renderEquation() {
         equationDisplay.innerHTML = '';
+        
+        // If game is complete, just show the final result
+        if (gameComplete) {
+            const circle = document.createElement('div');
+            circle.className = 'number-circle blue';
+            circle.dataset.value = currentNumbers[0];
+            
+            const valueDiv = document.createElement('div');
+            valueDiv.className = 'number-value';
+            valueDiv.textContent = currentNumbers[0];
+            circle.appendChild(valueDiv);
+            
+            equationDisplay.appendChild(circle);
+            return;
+        }
         
         currentNumbers.forEach((num, idx) => {
             if (idx > 0) {
@@ -470,8 +489,16 @@ document.addEventListener('DOMContentLoaded', function() {
         gameActive = false;
         gameComplete = true;
         
+        // Update original equation to show the answer
+        const originalEquationDiv = document.getElementById('original-equation');
+        const originalSubtrahend = subtractionHistory.reduce((sum, step) => sum + step.subtracted, 0);
+        originalEquationDiv.textContent = `${originalMinuend} − ${originalSubtrahend} = ${currentNumbers[0]}`;
+        
         // Update grid highlighting with final state
         updateGridHighlighting();
+        
+        // Re-render equation to show just the result
+        renderEquation();
         
         // Increment problems completed counter
         problemsCompleted++;
