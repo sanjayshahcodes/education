@@ -47,6 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentStepIndex = 0; // Which subtraction step we're on
     let droppedFlag = false;
     let subtractionHistory = []; // Track each subtraction step for grid highlighting
+    
+    // Question format configuration - cycle through these difficulty types
+    // 0 = Easy: like 89-42 (ones digit subtraction stays in same row)
+    // 1 = Medium: like 50-22 (cross into previous tens)  
+    // 2 = Hard: like 52-24 (ones subtraction crosses rows)
+    let question_format = [0, 1, 2, 1, 2];
+    
+    // Problem count for cycling through formats
+    let problemCount = 0;
 
     // DOM elements
     let numberGrid;
@@ -83,20 +92,105 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // === PROBLEM GENERATION ===
-    function generateSubtractionProblem() {
+    function getCurrentDifficultyType() {
+        const index = problemCount % question_format.length;
+        return question_format[index];
+    }
+    
+    function generateType0Problem() {
+        // Type 0: Easy - ones digit subtraction stays in same row (like 89-42)
         let minuend, subtrahend;
+        let attempts = 0;
+        let isValidSize, noOnesBorrow;
         
-        // Generate problems where subtrahend is at most 63% of minuend
-        // This encourages decomposition strategy rather than counting up
         do {
-            minuend = Math.floor(Math.random() * 89) + 11; // 11-99
-            // Subtrahend should be at most 63% of minuend, but at least 11
-            const maxSubtrahend = Math.floor(minuend * 0.63);
-            const minSubtrahend = Math.max(11, Math.floor(minuend * 0.2)); // At least 20% to ensure meaningful subtraction
-            subtrahend = Math.floor(Math.random() * (maxSubtrahend - minSubtrahend + 1)) + minSubtrahend;
-        } while (subtrahend >= minuend || minuend - subtrahend <= 0 || subtrahend > 99);
+            minuend = Math.floor(Math.random() * 89) + 11; // 11-99 (ensure 2 digits)
+            subtrahend = Math.floor(Math.random() * 89) + 11; // 11-99 (ensure 2 digits)
+            
+            const minuendOnes = minuend % 10;
+            const subtrahendOnes = subtrahend % 10;
+            
+            // Ensure subtrahend ≤ 63% of minuend and ones subtraction doesn't borrow
+            isValidSize = subtrahend <= Math.floor(minuend * 0.63);
+            noOnesBorrow = minuendOnes >= subtrahendOnes;
+            
+            attempts++;
+            if (attempts > 100) {
+                // Fallback to prevent infinite loop
+                return [89, 42];
+            }
+            
+        } while (!isValidSize || !noOnesBorrow || minuend - subtrahend <= 0);
         
         return [minuend, subtrahend];
+    }
+    
+    function generateType1Problem() {
+        // Type 1: Medium - like 50-22 (cross into previous tens)
+        let minuend, subtrahend;
+        let attempts = 0;
+        let isValidSize;
+        
+        do {
+            // Generate minuend that's a multiple of 10
+            minuend = (Math.floor(Math.random() * 9) + 1) * 10; // 10, 20, 30...90
+            subtrahend = Math.floor(Math.random() * 89) + 11; // 11-99 (ensure 2 digits)
+            
+            // Ensure subtrahend ≤ 63% of minuend
+            isValidSize = subtrahend <= Math.floor(minuend * 0.63);
+            
+            attempts++;
+            if (attempts > 100) {
+                // Fallback to prevent infinite loop
+                return [50, 22];
+            }
+            
+        } while (!isValidSize || minuend - subtrahend <= 0);
+        
+        return [minuend, subtrahend];
+    }
+    
+    function generateType2Problem() {
+        // Type 2: Hard - like 52-24 (ones subtraction crosses rows)
+        let minuend, subtrahend;
+        let attempts = 0;
+        let isValidSize, requiresBorrow;
+        
+        do {
+            minuend = Math.floor(Math.random() * 89) + 11; // 11-99 (ensure 2 digits)
+            subtrahend = Math.floor(Math.random() * 89) + 11; // 11-99 (ensure 2 digits)
+            
+            const minuendOnes = minuend % 10;
+            const subtrahendOnes = subtrahend % 10;
+            
+            // Ensure subtrahend ≤ 63% of minuend and ones subtraction requires borrowing
+            isValidSize = subtrahend <= Math.floor(minuend * 0.63);
+            requiresBorrow = minuendOnes < subtrahendOnes;
+            
+            attempts++;
+            if (attempts > 100) {
+                // Fallback to prevent infinite loop
+                return [52, 24];
+            }
+            
+        } while (!isValidSize || !requiresBorrow || minuend - subtrahend <= 0);
+        
+        return [minuend, subtrahend];
+    }
+    
+    function generateSubtractionProblem() {
+        const difficultyType = getCurrentDifficultyType();
+        
+        switch(difficultyType) {
+            case 0:
+                return generateType0Problem();
+            case 1:
+                return generateType1Problem();
+            case 2:
+                return generateType2Problem();
+            default:
+                return generateType0Problem();
+        }
     }
 
     function createNumberGrid() {
@@ -114,13 +208,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function startNewProblem() {
-        // Generate new problem
-        [originalMinuend, currentNumbers[1]] = generateSubtractionProblem();
-        currentNumbers = [originalMinuend, currentNumbers[1]];
+        console.log('startNewProblem called');
         
-        // Update original equation display
-        const originalEquationDiv = document.getElementById('original-equation');
-        originalEquationDiv.textContent = `${originalMinuend} − ${currentNumbers[1]} = __`;
+        try {
+            // Generate new problem
+            const [minuend, subtrahend] = generateSubtractionProblem();
+            console.log('Generated problem:', minuend, '-', subtrahend);
+            
+            originalMinuend = minuend;
+            currentNumbers = [minuend, subtrahend];
+            
+            // Update original equation display
+            const originalEquationDiv = document.getElementById('original-equation');
+            if (originalEquationDiv) {
+                originalEquationDiv.textContent = `${originalMinuend} − ${currentNumbers[1]} = __`;
+                console.log('Updated equation display');
+            } else {
+                console.error('Could not find original-equation element');
+            }
+        } catch (error) {
+            console.error('Error in startNewProblem:', error);
+            // Fallback
+            originalMinuend = 89;
+            currentNumbers = [89, 42];
+            const originalEquationDiv = document.getElementById('original-equation');
+            if (originalEquationDiv) {
+                originalEquationDiv.textContent = `89 − 42 = __`;
+            }
+        }
         
         // Reset game state
         gameActive = false; // Will be enabled after splitting (if needed) or immediately
@@ -155,6 +270,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // If splitting is needed, disable dragging until split
             gameActive = false;
         }
+        
+        // Increment problem count for next problem
+        problemCount++;
     }
 
     function needsSplitting() {
