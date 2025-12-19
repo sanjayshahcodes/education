@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Type 2: Hard - like 52-24 (ones subtraction crosses rows)
         let minuend, subtrahend;
         let attempts = 0;
-        let isValidSize, requiresBorrow;
+        let isValidSize, requiresBorrow, minuendNotMultipleOf10;
         
         do {
             minuend = Math.floor(Math.random() * 89) + 11; // 11-99 (ensure 2 digits)
@@ -164,8 +164,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const subtrahendOnes = subtrahend % 10;
             
             // Ensure subtrahend ≤ 63% of minuend and ones subtraction requires borrowing
+            // Also ensure minuend is NOT a multiple of 10 (that would be Type 1)
             isValidSize = subtrahend <= Math.floor(minuend * 0.63);
-            requiresBorrow = minuendOnes < subtrahendOnes;
+            requiresBorrow = minuendOnes < subtrahendOnes && minuendOnes > 0;
+            minuendNotMultipleOf10 = minuend % 10 !== 0;
             
             attempts++;
             if (attempts > 100) {
@@ -173,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return [52, 24];
             }
             
-        } while (!isValidSize || !requiresBorrow || minuend - subtrahend <= 0);
+        } while (!isValidSize || !requiresBorrow || !minuendNotMultipleOf10 || minuend - subtrahend <= 0);
         
         return [minuend, subtrahend];
     }
@@ -213,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Generate new problem
             const [minuend, subtrahend] = generateSubtractionProblem();
-            console.log('Generated problem:', minuend, '-', subtrahend);
+            console.log('Generated problem:', minuend, '-', subtrahend, 'Type:', getCurrentDifficultyType());
             
             originalMinuend = minuend;
             currentNumbers = [minuend, subtrahend];
