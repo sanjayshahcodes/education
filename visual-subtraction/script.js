@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 0 = Easy: like 89-42 (ones digit subtraction stays in same row)
     // 1 = Medium: like 50-22 (cross into previous tens)  
     // 2 = Hard: like 52-24 (ones subtraction crosses rows)
-    let question_format = [0, 1, 2, 1, 2];
+    let question_format = [0, 1, 2, 2, 2];
     
     // Problem count for cycling through formats
     let problemCount = 0;
