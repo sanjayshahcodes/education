@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Block Counter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Header with stats -->
+        <div id="stats-header">
+            <div id="total-games">
+                <div class="stat-label">Total Games</div>
+                <div class="stat-value" id="total-count">0</div>
+            </div>
+            <div id="first-try-correct">
+                <div class="stat-label">First Try Correct</div>
+                <div class="stat-value" id="first-try-count">0</div>
+            </div>
+            <div id="accuracy-rate">
+                <div class="stat-label">Accuracy</div>
+                <div class="stat-value" id="accuracy-percent">0%</div>
+            </div>
+        </div>
+
+        <!-- Main counting area -->
+        <div id="counting-area">
+            <h1>Count the Blocks</h1>
+            <div id="blocks-container"></div>
+        </div>
+
+        <!-- Answer buttons -->
+        <div id="answer-section">
+            <h2>How many blocks do you see?</h2>
+            <div id="number-buttons">
+                <button class="answer-btn" data-number="1">1</button>
+                <button class="answer-btn" data-number="2">2</button>
+                <button class="answer-btn" data-number="3">3</button>
+                <button class="answer-btn" data-number="4">4</button>
+                <button class="answer-btn" data-number="5">5</button>
+                <button class="answer-btn" data-number="6">6</button>
+                <button class="answer-btn" data-number="7">7</button>
+                <button class="answer-btn" data-number="8">8</button>
+                <button class="answer-btn" data-number="9">9</button>
+                <button class="answer-btn" data-number="10">10</button>
+            </div>
+        </div>
+
+        <!-- Feedback overlay -->
+        <div id="feedback-overlay" class="hidden">
+            <div id="feedback-message"></div>
+        </div>
+
+        <!-- Celebration particles -->
+        <div id="particles-container"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
