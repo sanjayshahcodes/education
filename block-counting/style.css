@@ -145,9 +145,10 @@ body {
     display: flex;
     justify-content: center;
     gap: 15px;
-    flex-wrap: wrap;
-    max-width: 600px;
+    flex-wrap: nowrap;
+    max-width: 100%;
     margin: 0 auto;
+    overflow-x: auto;
 }
 
 .answer-btn {

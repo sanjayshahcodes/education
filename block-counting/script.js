@@ -76,30 +76,14 @@ class BlockCountingGame {
     }
 
     init() {
-        this.loadStats();
         this.updateStatsDisplay();
         this.setupEventListeners();
         this.startNewRound();
     }
 
-    loadStats() {
-        // Load stats from localStorage
-        this.totalGames = parseInt(localStorage.getItem('blockCounter_totalGames') || '0');
-        this.firstTryCorrect = parseInt(localStorage.getItem('blockCounter_firstTryCorrect') || '0');
-    }
-
-    saveStats() {
-        // Save stats to localStorage
-        localStorage.setItem('blockCounter_totalGames', this.totalGames.toString());
-        localStorage.setItem('blockCounter_firstTryCorrect', this.firstTryCorrect.toString());
-    }
-
     updateStatsDisplay() {
         document.getElementById('total-count').textContent = this.totalGames;
         document.getElementById('first-try-count').textContent = this.firstTryCorrect;
-        
-        const accuracy = this.totalGames > 0 ? Math.round((this.firstTryCorrect / this.totalGames) * 100) : 0;
-        document.getElementById('accuracy-percent').textContent = accuracy + '%';
     }
 
     setupEventListeners() {
@@ -213,7 +197,6 @@ class BlockCountingGame {
             }, 1500);
         }
         
-        this.saveStats();
         this.updateStatsDisplay();
     }
 
