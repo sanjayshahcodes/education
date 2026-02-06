@@ -19,6 +19,7 @@ body {
     padding: 20px;
     padding-right: 160px; /* Make room for sidebar */
     position: relative;
+    gap: 0;
 }
 
 /* Stats Sidebar */
@@ -60,7 +61,6 @@ body {
 
 /* Main counting area */
 #counting-area {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -90,8 +90,8 @@ body {
 #blocks-container {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 20px;
-    padding: 40px;
-    min-height: 300px;
+    padding: 30px;
+    min-height: 200px;
     min-width: 400px;
     display: flex;
     align-items: center;
@@ -135,7 +135,7 @@ body {
 /* Answer section */
 #answer-section {
     text-align: center;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 #answer-section h2 {
