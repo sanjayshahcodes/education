@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Learn Numbers 1-10</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #fff;
+    height: 100dvh;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ===== HOME SCREEN ===== */
+  #home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    gap: 40px;
+  }
+
+  #home h1 {
+    font-size: 3rem;
+    text-align: center;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+  }
+
+  #home .start-btn {
+    font-size: 2rem;
+    padding: 20px 60px;
+    border: none;
+    border-radius: 50px;
+    background: #fff;
+    color: #764ba2;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    transition: transform 0.15s;
+  }
+
+  #home .start-btn:active { transform: scale(0.95); }
+
+  .emoji-bounce {
+    font-size: 4rem;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  /* ===== SLIDESHOW SCREEN ===== */
+  #slideshow {
+    display: none;
+    flex-direction: column;
+    height: 100dvh;
+    background: #f8f9fa;
+  }
+
+  /* Top bar */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    z-index: 10;
+    min-height: 50px;
+  }
+
+  .home-btn {
+    font-size: 1.6rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.1rem;
+    padding: 6px 14px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    color: #555;
+  }
+
+  .toggle-btn.active {
+    border-color: #667eea;
+    background: #eef0ff;
+    color: #667eea;
+  }
+
+  .toggle-icon { font-size: 1.3rem; }
+
+  /* Main slide area */
+  .slide-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 10px;
+  }
+
+  .slide-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .slide-content.fade-out {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  .slide-number {
+    font-size: clamp(10rem, 35vmin, 22rem);
+    font-weight: 800;
+    color: #333;
+    line-height: 1;
+    text-shadow: 4px 4px 0px rgba(0,0,0,0.06);
+  }
+
+  /* Nav arrows */
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2.5rem;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    transition: transform 0.15s;
+    z-index: 5;
+    color: #555;
+  }
+
+  .nav-arrow:active { transform: translateY(-50%) scale(0.9); }
+  .nav-arrow.left { left: 12px; }
+  .nav-arrow.right { right: 12px; }
+  .nav-arrow:disabled { opacity: 0.3; pointer-events: none; }
+
+  /* Bottom number bar */
+  .number-bar {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    background: #fff;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+    flex-wrap: nowrap;
+  }
+
+  .number-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 3px solid #ddd;
+    background: #fff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .number-dot.active {
+    border-color: #667eea;
+    background: #667eea;
+    color: #fff;
+    transform: scale(1.15);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+  }
+
+  /* ===== CELEBRATION SCREEN ===== */
+  #celebration {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #fda085 100%);
+    gap: 30px;
+  }
+
+  #celebration h1 {
+    font-size: 3rem;
+    text-align: center;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  }
+
+  #celebration .emoji-big { font-size: 5rem; }
+
+  .restart-btn {
+    font-size: 1.8rem;
+    padding: 18px 50px;
+    border: none;
+    border-radius: 50px;
+    background: #fff;
+    color: #f5576c;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    transition: transform 0.15s;
+  }
+
+  .restart-btn:active { transform: scale(0.95); }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    z-index: 100;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 500px) {
+    #home h1 { font-size: 2.2rem; }
+    .number-dot { width: 34px; height: 34px; font-size: 1rem; }
+    .nav-arrow { width: 44px; height: 44px; font-size: 1.8rem; }
+    .toggle-btn { font-size: 0.9rem; padding: 5px 10px; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="home">
+  <div class="emoji-bounce">🔢</div>
+  <h1>Let's Learn<br>Numbers!</h1>
+  <button class="start-btn" onclick="startSlideshow()">Let's Go!</button>
+</div>
+
+<!-- SLIDESHOW SCREEN -->
+<div id="slideshow">
+  <div class="top-bar">
+    <button class="home-btn" onclick="goHome()" aria-label="Home">🏠</button>
+    <button class="toggle-btn active" id="audioToggle" onclick="toggleAudio()">
+      <span class="toggle-icon">🔊</span>
+      <span class="toggle-label">Sound</span>
+    </button>
+  </div>
+
+  <div class="slide-area">
+    <button class="nav-arrow left" id="prevBtn" onclick="prevSlide()" aria-label="Previous">‹</button>
+
+    <div class="slide-content" id="slideContent">
+      <div class="slide-number" id="slideNumber"></div>
+    </div>
+
+    <button class="nav-arrow right" id="nextBtn" onclick="nextSlide()" aria-label="Next">›</button>
+  </div>
+
+  <div class="number-bar" id="numberBar"></div>
+</div>
+
+<!-- CELEBRATION SCREEN -->
+<div id="celebration">
+  <div class="emoji-big">⭐</div>
+  <h1>Amazing Job!</h1>
+  <div class="emoji-big">🎉</div>
+  <button class="restart-btn" onclick="startSlideshow()">Again!</button>
+  <button class="restart-btn" onclick="goHome()" style="background:rgba(255,255,255,0.3);color:#fff;font-size:1.3rem;padding:14px 40px;">Home</button>
+</div>
+
+<script>
+// ===== DATA =====
+const slides = [
+  { number: 1, audio: 'SunOne.mp3' },
+  { number: 2, audio: 'TulipTwo.mp3' },
+  { number: 3, audio: 'TreeThree.mp3' },
+  { number: 4, audio: 'ForkFour.mp3' },
+  { number: 5, audio: 'FireflyFive.mp3' },
+  { number: 6, audio: 'SippyCupSix.mp3' },
+  { number: 7, audio: 'SealSeven.mp3' },
+  { number: 8, audio: 'ApeEight.mp3' },
+  { number: 9, audio: 'KnifeNine.mp3' },
+  { number: 10, audio: 'TentaclesTen.mp3' },
+];
+
+// ===== STATE =====
+let currentSlide = 0;
+let audioEnabled = true;
+let currentAudio = null;
+
+// ===== SCREENS =====
+function showScreen(screenId) {
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('slideshow').style.display = 'none';
+  document.getElementById('celebration').style.display = 'none';
+  document.getElementById(screenId).style.display = 'flex';
+}
+
+function goHome() {
+  stopAudio();
+  showScreen('home');
+}
+
+function startSlideshow() {
+  currentSlide = 0;
+  showScreen('slideshow');
+  buildNumberBar();
+  renderSlide();
+}
+
+// ===== SLIDESHOW =====
+function buildNumberBar() {
+  const bar = document.getElementById('numberBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'number-dot';
+    dot.textContent = i + 1;
+    dot.onclick = () => goToSlide(i);
+    bar.appendChild(dot);
+  }
+}
+
+function renderSlide() {
+  const slide = slides[currentSlide];
+  const content = document.getElementById('slideContent');
+  const numEl = document.getElementById('slideNumber');
+
+  // Fade out
+  content.classList.add('fade-out');
+
+  setTimeout(() => {
+    numEl.textContent = slide.number;
+
+    // Update number bar
+    document.querySelectorAll('.number-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === currentSlide);
+    });
+
+    // Update arrows
+    document.getElementById('prevBtn').disabled = currentSlide === 0;
+    document.getElementById('nextBtn').textContent = currentSlide === 9 ? '★' : '›';
+
+    // Fade in
+    content.classList.remove('fade-out');
+
+    // Play audio
+    if (audioEnabled) {
+      playAudio(slide.audio);
+    }
+  }, 200);
+}
+
+function nextSlide() {
+  stopAudio();
+  if (currentSlide < 9) {
+    currentSlide++;
+    renderSlide();
+  } else {
+    showCelebration();
+  }
+}
+
+function prevSlide() {
+  stopAudio();
+  if (currentSlide > 0) {
+    currentSlide--;
+    renderSlide();
+  }
+}
+
+function goToSlide(index) {
+  stopAudio();
+  currentSlide = index;
+  renderSlide();
+}
+
+// ===== AUDIO =====
+function playAudio(filename) {
+  stopAudio();
+  currentAudio = new Audio(filename);
+  currentAudio.play().catch(() => {});
+}
+
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+}
+
+// ===== TOGGLE =====
+function toggleAudio() {
+  audioEnabled = !audioEnabled;
+  const btn = document.getElementById('audioToggle');
+  btn.classList.toggle('active', audioEnabled);
+  btn.querySelector('.toggle-icon').textContent = audioEnabled ? '🔊' : '🔇';
+  if (!audioEnabled) stopAudio();
+}
+
+// ===== CELEBRATION =====
+function showCelebration() {
+  stopAudio();
+  showScreen('celebration');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF85B3', '#845EC2'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+    piece.style.animationDelay = (Math.random() * 1.5) + 's';
+    piece.style.width = (Math.random() * 8 + 6) + 'px';
+    piece.style.height = (Math.random() * 8 + 6) + 'px';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+
+// ===== SWIPE SUPPORT =====
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+  if (document.getElementById('slideshow').style.display !== 'flex') return;
+  const diff = touchStartX - touchEndX;
+  if (Math.abs(diff) > 60) {
+    if (diff > 0) nextSlide();
+    else prevSlide();
+  }
+}
+</script>
+</body>
+</html>
