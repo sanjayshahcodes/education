@@ -125,11 +125,17 @@ class BlockCountingGame {
         // Hide feedback overlay
         this.hideFeedback();
         
-        // Clear any previous button states
-        document.querySelectorAll('.answer-btn').forEach(btn => {
-            btn.classList.remove('correct', 'incorrect');
-        });
-        
+        // Clear any previous button states and shuffle
+        const container = document.getElementById('number-buttons');
+        const buttons = [...container.querySelectorAll('.answer-btn')];
+        buttons.forEach(btn => btn.classList.remove('correct', 'incorrect'));
+        // Fisher-Yates shuffle
+        for (let i = buttons.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            container.appendChild(buttons[j]);
+            buttons.splice(j, 1);
+        }
+
         this.createBlocks();
     }
 
