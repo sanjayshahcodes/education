@@ -73,6 +73,21 @@
   tr.intro { border-left: 4px solid #4a2c8a; }
   tr.ending { border-left: 4px solid #e86ca0; }
   .empty-img { width: 100px; }
+  tr { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  td.col-text {
+    transition: opacity 0.25s ease, color 0.25s ease;
+  }
+  tr.hidden td.col-text {
+    color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .hint {
+    text-align: center;
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
 </style>
 </head>
 <body>
@@ -192,6 +207,14 @@
 </tr>
 
 </table>
+
+<script>
+document.querySelectorAll('tr').forEach(function(row) {
+  row.addEventListener('click', function() {
+    row.classList.toggle('hidden');
+  });
+});
+</script>
 
 </body>
 </html>
