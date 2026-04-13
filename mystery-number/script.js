@@ -11,6 +11,8 @@ class MysteryNumberGame {
         // Current problem state
         this.mysteryNumber = 0;
         this.operation = ''; // 'added' or 'subtracted'
+        this.lastOperation = '';
+        this.sameOpCount = 0;
         this.operand = 0;
         this.result = 0;
 
@@ -65,7 +67,19 @@ class MysteryNumberGame {
     }
 
     generateProblem() {
-        this.operation = Math.random() < 0.5 ? 'added' : 'subtracted';
+        // Force switch after 2 in a row of the same operation
+        if (this.sameOpCount >= 2) {
+            this.operation = this.lastOperation === 'added' ? 'subtracted' : 'added';
+        } else {
+            this.operation = Math.random() < 0.5 ? 'added' : 'subtracted';
+        }
+
+        if (this.operation === this.lastOperation) {
+            this.sameOpCount++;
+        } else {
+            this.sameOpCount = 1;
+        }
+        this.lastOperation = this.operation;
 
         if (this.mode === 1) {
             // Within 30
