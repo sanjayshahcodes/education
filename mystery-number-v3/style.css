@@ -157,8 +157,27 @@ body {
     75% { transform: translateX(8px); }
 }
 
-/* Step 1: Check button */
+/* Step 1: Translate sentence to equation */
 #step1-area {
+    text-align: center;
+    margin-top: 16px;
+}
+
+#step1-prompt {
+    font-size: 24px;
+    margin-bottom: 14px;
+    color: #00d4ff;
+}
+
+#translate-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Step 2: Check diagram button */
+#step2-area {
     margin-top: 16px;
 }
 
@@ -185,13 +204,13 @@ body {
     transform: scale(0.95);
 }
 
-/* Step 2: Equation choices */
-#step2-area {
+/* Step 3: Rearrange equation choices */
+#step3-area {
     text-align: center;
     margin-top: 16px;
 }
 
-#step2-prompt {
+#step3-prompt {
     font-size: 24px;
     margin-bottom: 14px;
     color: #00d4ff;
@@ -244,13 +263,13 @@ body {
     animation: incorrectShake 0.6s ease-in-out;
 }
 
-/* Step 3: Number pad */
-#step3-area {
+/* Step 4: Number pad solve */
+#step4-area {
     text-align: center;
     margin-top: 16px;
 }
 
-#step3-prompt {
+#step4-prompt {
     font-size: 24px;
     margin-bottom: 10px;
     color: #00d4ff;
