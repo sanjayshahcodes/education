@@ -10,6 +10,9 @@ body {
     min-height: 100vh;
     color: white;
     overflow-x: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #game-container {
@@ -147,7 +150,7 @@ body {
 #number-buttons {
     display: flex;
     justify-content: center;
-    gap: 38px;
+    gap: 37px;
     flex-wrap: nowrap;
     max-width: 100%;
     margin: 0 auto;
