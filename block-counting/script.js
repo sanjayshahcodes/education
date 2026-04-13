@@ -1,70 +1,25 @@
 class BlockCountingGame {
     constructor() {
         // Probability weights - higher numbers appear more often
-        // Easy numbers (1-3) have low probability, harder numbers (6-9) have high probability
         this.numberProbabilities = [
-            { number: 1, weight: 1 },   // Very rare
-            { number: 2, weight: 1 },   // Very rare  
-            { number: 3, weight: 2 },   // Rare
-            { number: 4, weight: 3 },   // Uncommon
-            { number: 5, weight: 4 },   // Moderate
-            { number: 6, weight: 6 },   // Common
-            { number: 7, weight: 8 },   // Very common
-            { number: 8, weight: 8 },   // Very common
-            { number: 9, weight: 6 },   // Common
-            { number: 10, weight: 4 }   // Moderate
+            { number: 1, weight: 1 },
+            { number: 2, weight: 1 },
+            { number: 3, weight: 2 },
+            { number: 4, weight: 3 },
+            { number: 5, weight: 4 },
+            { number: 6, weight: 6 },
+            { number: 7, weight: 8 },
+            { number: 8, weight: 8 },
+            { number: 9, weight: 6 },
+            { number: 10, weight: 4 }
         ];
 
-        // Different arrangements for each number - structured and symmetric layouts
-        this.arrangements = {
-            1: [
-                { positions: [{x: 0, y: 0}] }
-            ],
-            2: [
-                { positions: [{x: -30, y: 0}, {x: 30, y: 0}] },
-                { positions: [{x: 0, y: -30}, {x: 0, y: 30}] }
-            ],
-            3: [
-                { positions: [{x: -60, y: 0}, {x: 0, y: 0}, {x: 60, y: 0}] },
-                { positions: [{x: 0, y: -40}, {x: -30, y: 20}, {x: 30, y: 20}] },
-                { positions: [{x: -30, y: -30}, {x: 30, y: -30}, {x: 0, y: 30}] }
-            ],
-            4: [
-                { positions: [{x: -30, y: -30}, {x: 30, y: -30}, {x: -30, y: 30}, {x: 30, y: 30}] },
-                { positions: [{x: -90, y: 0}, {x: -30, y: 0}, {x: 30, y: 0}, {x: 90, y: 0}] },
-                { positions: [{x: -30, y: -30}, {x: 30, y: -30}, {x: 0, y: 30}, {x: 0, y: 90}] }
-            ],
-            5: [
-                { positions: [{x: 0, y: -60}, {x: -30, y: -20}, {x: 30, y: -20}, {x: -30, y: 20}, {x: 30, y: 20}] },
-                { positions: [{x: -60, y: -30}, {x: 0, y: -30}, {x: 60, y: -30}, {x: -30, y: 30}, {x: 30, y: 30}] },
-                { positions: [{x: -120, y: 0}, {x: -60, y: 0}, {x: 0, y: 0}, {x: 60, y: 0}, {x: 120, y: 0}] }
-            ],
-            6: [
-                { positions: [{x: -30, y: -60}, {x: 30, y: -60}, {x: -30, y: 0}, {x: 30, y: 0}, {x: -30, y: 60}, {x: 30, y: 60}] },
-                { positions: [{x: -60, y: -30}, {x: 0, y: -30}, {x: 60, y: -30}, {x: -60, y: 30}, {x: 0, y: 30}, {x: 60, y: 30}] },
-                { positions: [{x: -60, y: -40}, {x: 0, y: -40}, {x: 60, y: -40}, {x: -30, y: 20}, {x: 30, y: 20}, {x: 0, y: 60}] }
-            ],
-            7: [
-                { positions: [{x: -60, y: -40}, {x: 0, y: -40}, {x: 60, y: -40}, {x: -60, y: 20}, {x: 0, y: 20}, {x: 60, y: 20}, {x: 0, y: 80}] },
-                { positions: [{x: -60, y: -60}, {x: 0, y: -60}, {x: 60, y: -60}, {x: -30, y: 0}, {x: 30, y: 0}, {x: -60, y: 60}, {x: 60, y: 60}] },
-                { positions: [{x: -90, y: 0}, {x: -30, y: 0}, {x: 30, y: 0}, {x: 90, y: 0}, {x: -60, y: 60}, {x: 0, y: 60}, {x: 60, y: 60}] }
-            ],
-            8: [
-                { positions: [{x: -30, y: -90}, {x: 30, y: -90}, {x: -30, y: -30}, {x: 30, y: -30}, {x: -30, y: 30}, {x: 30, y: 30}, {x: -30, y: 90}, {x: 30, y: 90}] },
-                { positions: [{x: -90, y: -30}, {x: -30, y: -30}, {x: 30, y: -30}, {x: 90, y: -30}, {x: -90, y: 30}, {x: -30, y: 30}, {x: 30, y: 30}, {x: 90, y: 30}] },
-                { positions: [{x: -60, y: -60}, {x: 0, y: -60}, {x: 60, y: -60}, {x: -90, y: 0}, {x: 90, y: 0}, {x: -60, y: 60}, {x: 0, y: 60}, {x: 60, y: 60}] }
-            ],
-            9: [
-                { positions: [{x: -60, y: -60}, {x: 0, y: -60}, {x: 60, y: -60}, {x: -60, y: 0}, {x: 0, y: 0}, {x: 60, y: 0}, {x: -60, y: 60}, {x: 0, y: 60}, {x: 60, y: 60}] },
-                { positions: [{x: -90, y: -60}, {x: 0, y: -60}, {x: 90, y: -60}, {x: -90, y: 0}, {x: 0, y: 0}, {x: 90, y: 0}, {x: -45, y: 60}, {x: 0, y: 60}, {x: 45, y: 60}] },
-                { positions: [{x: -120, y: -30}, {x: -60, y: -30}, {x: 0, y: -30}, {x: 60, y: -30}, {x: 120, y: -30}, {x: -60, y: 30}, {x: 0, y: 30}, {x: 60, y: 30}, {x: 0, y: 90}] }
-            ],
-            10: [
-                { positions: [{x: -90, y: -60}, {x: -30, y: -60}, {x: 30, y: -60}, {x: 90, y: -60}, {x: -60, y: 0}, {x: 0, y: 0}, {x: 60, y: 0}, {x: -90, y: 60}, {x: 30, y: 60}, {x: 0, y: 120}] },
-                { positions: [{x: -30, y: -120}, {x: 30, y: -120}, {x: -30, y: -60}, {x: 30, y: -60}, {x: -30, y: 0}, {x: 30, y: 0}, {x: -30, y: 60}, {x: 30, y: 60}, {x: -30, y: 120}, {x: 30, y: 120}] },
-                { positions: [{x: -120, y: -30}, {x: -60, y: -30}, {x: 0, y: -30}, {x: 60, y: -30}, {x: 120, y: -30}, {x: -120, y: 30}, {x: -60, y: 30}, {x: 0, y: 30}, {x: 60, y: 30}, {x: 120, y: 30}] }
-            ]
-        };
+        // Max blocks per row for arrangement generation
+        this.MAX_ROW_WIDTH = 6;
+
+        // Cell spacing in pixels. Each "cell unit" in the arrangements above
+        // is half this value, so adjacent cells (cell distance 2) sit CELL_SPACING apart.
+        this.CELL_SPACING = 75;
 
         this.currentNumber = 0;
         this.totalGames = 0;
@@ -91,29 +46,22 @@ class BlockCountingGame {
         answerButtons.forEach(button => {
             button.addEventListener('click', (e) => {
                 if (this.gameActive) {
-                    const selectedNumber = parseInt(e.target.dataset.number);
-                    this.checkAnswer(selectedNumber, e.target);
+                    const selectedNumber = parseInt(e.currentTarget.dataset.number);
+                    this.checkAnswer(selectedNumber, e.currentTarget);
                 }
             });
         });
     }
 
     getWeightedRandomNumber() {
-        // Calculate total weight
         const totalWeight = this.numberProbabilities.reduce((sum, item) => sum + item.weight, 0);
-        
-        // Generate random number between 0 and totalWeight
         let random = Math.random() * totalWeight;
-        
-        // Find the number that corresponds to this random value
         for (const item of this.numberProbabilities) {
             random -= item.weight;
             if (random <= 0) {
                 return item.number;
             }
         }
-        
-        // Fallback (shouldn't happen)
         return this.numberProbabilities[this.numberProbabilities.length - 1].number;
     }
 
@@ -121,11 +69,9 @@ class BlockCountingGame {
         this.currentNumber = this.getWeightedRandomNumber();
         this.currentAttempt = 1;
         this.gameActive = true;
-        
-        // Hide feedback overlay
+
         this.hideFeedback();
-        
-        // Clear any previous button states and shuffle
+
         const container = document.getElementById('number-buttons');
         const buttons = [...container.querySelectorAll('.answer-btn')];
         buttons.forEach(btn => btn.classList.remove('correct', 'incorrect'));
@@ -139,77 +85,121 @@ class BlockCountingGame {
         this.createBlocks();
     }
 
+    // Generate a random connected shape of n cells on the grid.
+    // Starts from a random seed cell and grows by adding random
+    // orthogonal neighbors, producing a unique shape every time.
+    // Generate centered rows of blocks that sum to n.
+    // Each row is centered horizontally, giving a balanced shape.
+    generateArrangement(n) {
+        const rows = this._splitIntoRows(n);
+
+        // Build centered positions
+        const positions = [];
+        const totalRows = rows.length;
+        const centerY = (totalRows - 1) / 2;
+
+        for (let r = 0; r < rows.length; r++) {
+            const count = rows[r];
+            const startX = -(count - 1) / 2;
+            for (let i = 0; i < count; i++) {
+                positions.push([startX + i, r - centerY]);
+            }
+        }
+
+        return positions;
+    }
+
+    // Split n into random row lengths (1 to MAX_ROW_WIDTH each).
+    _splitIntoRows(n) {
+        if (n === 1) return [1];
+
+        for (let attempt = 0; attempt < 50; attempt++) {
+            const rows = [];
+            let remaining = n;
+
+            while (remaining > 0) {
+                const max = Math.min(remaining, this.MAX_ROW_WIDTH);
+                const count = Math.floor(Math.random() * max) + 1;
+                rows.push(count);
+                remaining -= count;
+            }
+
+            // Avoid boring single-row layouts for n > 1
+            if (rows.length === 1 && n > 1) continue;
+
+            // Shuffle row order for variety
+            for (let i = rows.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [rows[i], rows[j]] = [rows[j], rows[i]];
+            }
+
+            return rows;
+        }
+
+        // Fallback
+        return [n];
+    }
+
     createBlocks() {
         const container = document.getElementById('blocks-container');
         container.innerHTML = '';
-        
-        // Get random arrangement for this number
-        const arrangements = this.arrangements[this.currentNumber];
-        const selectedArrangement = arrangements[Math.floor(Math.random() * arrangements.length)];
-        
-        // Create blocks with the selected arrangement
-        selectedArrangement.positions.forEach((pos, index) => {
+
+        const positions = this.generateArrangement(this.currentNumber);
+        const colorOffset = Math.floor(Math.random() * 8);
+
+        positions.forEach(([cx, cy], index) => {
             const block = document.createElement('div');
-            block.className = `block block-${(index % 8) + 1}`;
-            block.style.left = `calc(50% + ${pos.x}px)`;
-            block.style.top = `calc(50% + ${pos.y}px)`;
+            block.className = `block block-${((index + colorOffset) % 8) + 1}`;
+            const px = cx * this.CELL_SPACING;
+            const py = cy * this.CELL_SPACING;
+            block.style.left = `calc(50% + ${px}px)`;
+            block.style.top = `calc(50% + ${py}px)`;
             block.style.transform = 'translate(-50%, -50%)';
-            
-            // Add slight random rotation for more organic feel
-            const rotation = (Math.random() - 0.5) * 10; // -5 to +5 degrees
-            block.style.transform += ` rotate(${rotation}deg)`;
-            
-            // Stagger the appearance animation
-            block.style.animationDelay = `${index * 0.1}s`;
-            
+            block.style.animationDelay = `${index * 0.08}s`;
             container.appendChild(block);
         });
     }
 
     checkAnswer(selectedNumber, buttonElement) {
         if (!this.gameActive) return;
-        
+
         this.gameActive = false;
-        
+
         if (selectedNumber === this.currentNumber) {
-            // Correct answer
             buttonElement.classList.add('correct');
-            
+
             if (this.currentAttempt === 1) {
                 this.firstTryCorrect++;
             }
             this.totalGames++;
-            
+
             this.showFeedback('🎉 Correct! 🎉', 'feedback-correct');
             this.createCelebrationParticles();
-            
-            // Start new round after delay
+
             setTimeout(() => {
                 this.startNewRound();
             }, 2000);
-            
+
         } else {
-            // Incorrect answer
             buttonElement.classList.add('incorrect');
             this.currentAttempt++;
-            
+
             this.showFeedback('Try again! 🤔', 'feedback-incorrect');
-            
-            // Allow retry after delay
+
             setTimeout(() => {
                 this.gameActive = true;
                 buttonElement.classList.remove('incorrect');
                 this.hideFeedback();
             }, 1500);
         }
-        
+
         this.updateStatsDisplay();
     }
 
     showFeedback(message, className) {
         const overlay = document.getElementById('feedback-overlay');
         const messageElement = document.getElementById('feedback-message');
-        
+
         messageElement.textContent = message;
         messageElement.className = className;
         overlay.classList.remove('hidden');
@@ -222,8 +212,7 @@ class BlockCountingGame {
     createCelebrationParticles() {
         const container = document.getElementById('particles-container');
         const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
-        
-        // Create 30 particles
+
         for (let i = 0; i < 30; i++) {
             setTimeout(() => {
                 const particle = document.createElement('div');
@@ -232,10 +221,9 @@ class BlockCountingGame {
                 particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 particle.style.animationDelay = Math.random() * 1 + 's';
                 particle.style.animationDuration = (2 + Math.random() * 2) + 's';
-                
+
                 container.appendChild(particle);
-                
-                // Remove particle after animation
+
                 setTimeout(() => {
                     if (particle.parentNode) {
                         particle.remove();
@@ -246,7 +234,6 @@ class BlockCountingGame {
     }
 }
 
-// Start the game when page loads
 document.addEventListener('DOMContentLoaded', () => {
     new BlockCountingGame();
 });
