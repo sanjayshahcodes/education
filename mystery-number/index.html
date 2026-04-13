@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mystery Number</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Stats sidebar -->
+        <div id="stats-header">
+            <div id="total-games">
+                <div class="stat-label">Total Games</div>
+                <div class="stat-value" id="total-count">0</div>
+            </div>
+        </div>
+
+        <!-- Problem area -->
+        <div id="problem-area">
+            <h1>Mystery Number</h1>
+            <div id="problem-text"></div>
+        </div>
+
+        <!-- Playback area -->
+        <div id="playback-area" class="hidden">
+            <div id="playback-equation"></div>
+            <div id="playback-mark"></div>
+        </div>
+
+        <!-- Answer input -->
+        <div id="answer-section">
+            <div id="answer-display">?</div>
+            <div id="number-pad">
+                <button class="pad-btn" data-value="1">1</button>
+                <button class="pad-btn" data-value="2">2</button>
+                <button class="pad-btn" data-value="3">3</button>
+                <button class="pad-btn" data-value="4">4</button>
+                <button class="pad-btn" data-value="5">5</button>
+                <button class="pad-btn" data-value="6">6</button>
+                <button class="pad-btn" data-value="7">7</button>
+                <button class="pad-btn" data-value="8">8</button>
+                <button class="pad-btn" data-value="9">9</button>
+                <button class="pad-btn backspace" data-value="backspace">&larr;</button>
+                <button class="pad-btn" data-value="0">0</button>
+                <button class="pad-btn enter" data-value="enter">GO</button>
+            </div>
+        </div>
+
+        <!-- Feedback overlay -->
+        <div id="feedback-overlay" class="hidden">
+            <div id="feedback-message"></div>
+        </div>
+
+        <!-- Celebration particles -->
+        <div id="particles-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
