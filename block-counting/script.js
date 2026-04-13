@@ -2,16 +2,13 @@ class BlockCountingGame {
     constructor() {
         // Probability weights - higher numbers appear more often
         this.numberProbabilities = [
-            { number: 1, weight: 1 },
-            { number: 2, weight: 1 },
-            { number: 3, weight: 2 },
-            { number: 4, weight: 3 },
-            { number: 5, weight: 4 },
-            { number: 6, weight: 6 },
-            { number: 7, weight: 8 },
-            { number: 8, weight: 8 },
-            { number: 9, weight: 6 },
-            { number: 10, weight: 4 }
+            { number: 4, weight: 7.5 },
+            { number: 5, weight: 7.5 },
+            { number: 6, weight: 17 },
+            { number: 7, weight: 17 },
+            { number: 8, weight: 17 },
+            { number: 9, weight: 17 },
+            { number: 10, weight: 17 }
         ];
 
         // Max blocks per row for arrangement generation
@@ -66,7 +63,11 @@ class BlockCountingGame {
     }
 
     startNewRound() {
-        this.currentNumber = this.getWeightedRandomNumber();
+        let next;
+        do {
+            next = this.getWeightedRandomNumber();
+        } while (next === this.currentNumber);
+        this.currentNumber = next;
         this.currentAttempt = 1;
         this.gameActive = true;
 
@@ -126,6 +127,9 @@ class BlockCountingGame {
 
             // Avoid boring single-row layouts for n > 1
             if (rows.length === 1 && n > 1) continue;
+
+            // Max 4 rows to stay within the block box
+            if (rows.length > 4) continue;
 
             // Shuffle row order for variety
             for (let i = rows.length - 1; i > 0; i--) {
