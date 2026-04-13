@@ -197,19 +197,19 @@ body {
 #number-pad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    max-width: 340px;
+    gap: 12px;
+    max-width: 289px;
     margin: 0 auto;
 }
 
 .pad-btn {
-    width: 100px;
-    height: 72px;
+    width: 85px;
+    height: 61px;
     border: 2px solid white;
-    border-radius: 16px;
+    border-radius: 14px;
     background: rgba(255, 255, 255, 0.1);
     color: white;
-    font-size: 30px;
+    font-size: 26px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.15s ease;
