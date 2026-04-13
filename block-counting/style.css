@@ -150,7 +150,7 @@ body {
 #number-buttons {
     display: flex;
     justify-content: center;
-    gap: 37px;
+    gap: 34px;
     flex-wrap: nowrap;
     max-width: 100%;
     margin: 0 auto;
