@@ -134,7 +134,7 @@ body {
 /* Answer section */
 #answer-section {
     text-align: center;
-    margin-top: 28px;
+    margin-top: 56px;
 }
 
 #answer-section h2 {
@@ -147,7 +147,7 @@ body {
 #number-buttons {
     display: flex;
     justify-content: center;
-    gap: 28px;
+    gap: 38px;
     flex-wrap: nowrap;
     max-width: 100%;
     margin: 0 auto;
