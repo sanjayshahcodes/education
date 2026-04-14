@@ -12,6 +12,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/mystery-number-v3", "-l", "8084", "--no-clipboard"],
       "port": 8084
+    },
+    {
+      "name": "mystery-v6",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/mystery-number-v6", "-l", "8086", "--no-clipboard"],
+      "port": 8086
     }
   ]
 }
