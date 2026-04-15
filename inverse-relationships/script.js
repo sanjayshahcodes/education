@@ -1,11 +1,15 @@
 class InverseRelationshipsGame {
     constructor() {
+        const params = new URLSearchParams(window.location.search);
+        this.mode = parseInt(params.get('mode')) || 1;
+
         this.totalGames = 0;
 
         // Problem state
         this.whole = 0;
         this.partLeft = 0;  // larger part
         this.partRight = 0; // smaller part
+        this.sPosition = null; // which position is S (mode 2): 'whole', 'left', or 'right'
 
         // Equation sequence
         this.equations = [];      // array of { target, correctNum1, correctOp, correctNum2, text }
@@ -69,38 +73,45 @@ class InverseRelationshipsGame {
             this.partLeft = this.whole - this.partRight;
         } while (this.partRight < 3 && attempts < 100);
 
-        // Generate 3 equations
-        const w = this.whole;
-        const pL = this.partLeft;
-        const pR = this.partRight;
+        // In mode 2, randomly assign S to one position
+        if (this.mode === 2) {
+            const positions = ['whole', 'left', 'right'];
+            this.sPosition = positions[Math.floor(Math.random() * 3)];
+        } else {
+            this.sPosition = null;
+        }
 
+        // Display labels (S or number)
+        const wLabel = this.sPosition === 'whole' ? 'S' : this.whole;
+        const pLLabel = this.sPosition === 'left' ? 'S' : this.partLeft;
+        const pRLabel = this.sPosition === 'right' ? 'S' : this.partRight;
+
+        // Generate 3 equations using labels
         this.equations = [
             {
-                target: pL,
-                otherNums: [w, pR],
-                correctOp: '\u2212',
+                target: pLLabel,
+                otherNums: [wLabel, pRLabel],
                 // Correct: pL = w - pR
-                validate: (n1, op, n2) => {
-                    return op === '\u2212' && n1 === w && n2 === pR;
+                validate: (s1, op, s2) => {
+                    return op === '\u2212' && String(s1) === String(wLabel) && String(s2) === String(pRLabel);
                 }
             },
             {
-                target: pR,
-                otherNums: [w, pL],
-                correctOp: '\u2212',
+                target: pRLabel,
+                otherNums: [wLabel, pLLabel],
                 // Correct: pR = w - pL
-                validate: (n1, op, n2) => {
-                    return op === '\u2212' && n1 === w && n2 === pL;
+                validate: (s1, op, s2) => {
+                    return op === '\u2212' && String(s1) === String(wLabel) && String(s2) === String(pLLabel);
                 }
             },
             {
-                target: w,
-                otherNums: [pL, pR],
-                correctOp: '+',
+                target: wLabel,
+                otherNums: [pLLabel, pRLabel],
                 // Correct: w = pL + pR (either order)
-                validate: (n1, op, n2) => {
+                validate: (s1, op, s2) => {
                     if (op !== '+') return false;
-                    return (n1 === pL && n2 === pR) || (n1 === pR && n2 === pL);
+                    return (String(s1) === String(pLLabel) && String(s2) === String(pRLabel)) ||
+                           (String(s1) === String(pRLabel) && String(s2) === String(pLLabel));
                 }
             }
         ];
@@ -216,13 +227,18 @@ class InverseRelationshipsGame {
             svg.appendChild(rect);
         }
 
+        // Circle labels (S or number)
+        const wholeLabel = this.sPosition === 'whole' ? 'S' : total;
+        const leftLabel = this.sPosition === 'left' ? 'S' : leftValue;
+        const rightLabel = this.sPosition === 'right' ? 'S' : rightValue;
+
         // Whole circle — pre-filled
         const wholeFO = document.createElementNS(ns, 'foreignObject');
         wholeFO.setAttribute('x', topCenterX - half);
         wholeFO.setAttribute('y', arcTopPeakY - half);
         wholeFO.setAttribute('width', circleSize);
         wholeFO.setAttribute('height', circleSize);
-        wholeFO.innerHTML = `<div xmlns="${xhtmlNs}" class="diagram-circle"><span class="circle-label">${total}</span></div>`;
+        wholeFO.innerHTML = `<div xmlns="${xhtmlNs}" class="diagram-circle"><span class="circle-label">${wholeLabel}</span></div>`;
         svg.appendChild(wholeFO);
 
         // Part-left circle — pre-filled
@@ -231,7 +247,7 @@ class InverseRelationshipsGame {
         partLeftFO.setAttribute('y', arcBottomPeakY - half);
         partLeftFO.setAttribute('width', circleSize);
         partLeftFO.setAttribute('height', circleSize);
-        partLeftFO.innerHTML = `<div xmlns="${xhtmlNs}" class="diagram-circle"><span class="circle-label">${leftValue}</span></div>`;
+        partLeftFO.innerHTML = `<div xmlns="${xhtmlNs}" class="diagram-circle"><span class="circle-label">${leftLabel}</span></div>`;
         svg.appendChild(partLeftFO);
 
         // Part-right circle — pre-filled
@@ -240,7 +256,7 @@ class InverseRelationshipsGame {
         partRightFO.setAttribute('y', arcBottomPeakY - half);
         partRightFO.setAttribute('width', circleSize);
         partRightFO.setAttribute('height', circleSize);
-        partRightFO.innerHTML = `<div xmlns="${xhtmlNs}" class="diagram-circle"><span class="circle-label">${rightValue}</span></div>`;
+        partRightFO.innerHTML = `<div xmlns="${xhtmlNs}" class="diagram-circle"><span class="circle-label">${rightLabel}</span></div>`;
         svg.appendChild(partRightFO);
     }
 
@@ -352,11 +368,11 @@ class InverseRelationshipsGame {
 
     checkEquation() {
         const eq = this.equations[this.currentEquationIdx];
-        const num1 = parseInt(this.builderSlots.num1);
+        const s1 = this.builderSlots.num1;
         const op = this.builderSlots.operator;
-        const num2 = parseInt(this.builderSlots.num2);
+        const s2 = this.builderSlots.num2;
 
-        const correct = eq.validate(num1, op, num2);
+        const correct = eq.validate(s1, op, s2);
 
         if (correct) {
             // Flash green on slots
