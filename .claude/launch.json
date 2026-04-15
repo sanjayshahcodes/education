@@ -18,6 +18,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/mystery-number-v6", "-l", "8086", "--no-clipboard"],
       "port": 8086
+    },
+    {
+      "name": "inverse-relationships",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/inverse-relationships", "-l", "8087", "--no-clipboard"],
+      "port": 8087
     }
   ]
 }

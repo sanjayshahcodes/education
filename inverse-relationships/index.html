@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Inverse Relationships</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Stats sidebar -->
+        <div id="stats-header">
+            <div id="total-games">
+                <div class="stat-label">Total Games</div>
+                <div class="stat-value" id="total-count">0</div>
+            </div>
+        </div>
+
+        <!-- Prompt -->
+        <div id="problem-area">
+            <div id="problem-text">Build 3 equations from this diagram</div>
+        </div>
+
+        <!-- Block diagram (SVG built dynamically) -->
+        <div id="diagram-area">
+            <svg id="diagram-svg"></svg>
+        </div>
+
+        <!-- Completed equations list -->
+        <div id="completed-equations"></div>
+
+        <!-- Current equation builder -->
+        <div id="builder-area">
+            <div id="equation-builder">
+                <span class="builder-label" id="builder-target"></span>
+                <div class="builder-slot" data-slot="num1">
+                    <span class="slot-label"></span>
+                </div>
+                <div class="builder-slot operator-slot" data-slot="operator">
+                    <span class="slot-label"></span>
+                </div>
+                <div class="builder-slot" data-slot="num2">
+                    <span class="slot-label"></span>
+                </div>
+            </div>
+            <button id="builder-check" class="action-btn" disabled>Check</button>
+        </div>
+
+        <!-- Value picker popup -->
+        <div id="picker-overlay" class="hidden">
+            <div id="value-picker">
+                <div class="picker-title">Choose a value</div>
+                <div id="picker-options"></div>
+            </div>
+        </div>
+
+        <!-- Celebration particles -->
+        <div id="particles-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
