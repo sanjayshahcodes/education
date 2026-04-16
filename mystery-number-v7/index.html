@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mystery Number</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Stats sidebar -->
+        <div id="stats-header">
+            <div id="total-games">
+                <div class="stat-label">Total Games</div>
+                <div class="stat-value" id="total-count">0</div>
+            </div>
+        </div>
+
+        <!-- Problem text -->
+        <div id="problem-area">
+            <div id="problem-text"></div>
+        </div>
+
+        <!-- Hint button + pre-filled diagram (hidden by default) -->
+        <div id="hint-area">
+            <button id="hint-btn">Show Diagram</button>
+            <div id="diagram-area" class="hidden">
+                <svg id="diagram-svg"></svg>
+            </div>
+        </div>
+
+        <!-- Step 1: Translate sentence to equation (multiple choice) -->
+        <div id="step1-area">
+            <div id="step1-prompt">Which equation describes this?</div>
+            <div id="translate-choices"></div>
+        </div>
+
+        <!-- Step 2: Equation builder for S = ___ -->
+        <div id="step2-area" class="hidden">
+            <div id="step2-prompt">Build the equation for S</div>
+            <div id="equation-builder">
+                <span class="builder-label">S =</span>
+                <div class="builder-slot" data-slot="num1">
+                    <span class="slot-label"></span>
+                </div>
+                <div class="builder-slot operator-slot" data-slot="operator">
+                    <span class="slot-label"></span>
+                </div>
+                <div class="builder-slot" data-slot="num2">
+                    <span class="slot-label"></span>
+                </div>
+            </div>
+            <button id="step2-check" class="action-btn" disabled>Check</button>
+        </div>
+
+        <!-- Step 3: Number pad solve -->
+        <div id="step3-area" class="hidden">
+            <div id="step3-prompt">Solve for S</div>
+            <div id="playback-area" class="hidden">
+                <div id="playback-equation"></div>
+                <div id="playback-mark"></div>
+            </div>
+            <div id="answer-display">?</div>
+            <div id="number-pad">
+                <button class="pad-btn" data-value="1">1</button>
+                <button class="pad-btn" data-value="2">2</button>
+                <button class="pad-btn" data-value="3">3</button>
+                <button class="pad-btn" data-value="4">4</button>
+                <button class="pad-btn" data-value="5">5</button>
+                <button class="pad-btn" data-value="6">6</button>
+                <button class="pad-btn" data-value="7">7</button>
+                <button class="pad-btn" data-value="8">8</button>
+                <button class="pad-btn" data-value="9">9</button>
+                <button class="pad-btn backspace" data-value="backspace">&larr;</button>
+                <button class="pad-btn" data-value="0">0</button>
+                <button class="pad-btn enter" data-value="enter">GO</button>
+            </div>
+        </div>
+
+        <!-- Value picker popup -->
+        <div id="picker-overlay" class="hidden">
+            <div id="value-picker">
+                <div class="picker-title">Choose a value</div>
+                <div id="picker-options"></div>
+            </div>
+        </div>
+
+        <!-- Celebration particles -->
+        <div id="particles-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
