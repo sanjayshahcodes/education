@@ -263,11 +263,11 @@ class MysteryNumberGameV7 {
 
         if (this.hintVisible) {
             diagramArea.classList.remove('hidden');
-            hintBtn.textContent = 'Hide Diagram';
+            hintBtn.textContent = '(Hide hint)';
             hintBtn.classList.add('active');
         } else {
             diagramArea.classList.add('hidden');
-            hintBtn.textContent = 'Show Diagram';
+            hintBtn.textContent = '(Click for a hint)';
             hintBtn.classList.remove('active');
         }
     }
@@ -289,8 +289,9 @@ class MysteryNumberGameV7 {
         });
 
         // Reset hint
+        document.getElementById('hint-area').classList.add('hidden');
         document.getElementById('diagram-area').classList.add('hidden');
-        document.getElementById('hint-btn').textContent = 'Show Diagram';
+        document.getElementById('hint-btn').textContent = '(Click for a hint)';
         document.getElementById('hint-btn').classList.remove('active');
 
         // Show step 1, hide the rest
@@ -387,6 +388,7 @@ class MysteryNumberGameV7 {
             document.querySelectorAll('#translate-choices .equation-option').forEach(btn => {
                 if (!btn.classList.contains('selected-correct')) btn.classList.add('hidden');
             });
+            document.getElementById('hint-area').classList.remove('hidden');
             document.getElementById('step2-area').classList.remove('hidden');
         } else if (step === 3) {
             document.getElementById('step2-prompt').classList.add('hidden');
