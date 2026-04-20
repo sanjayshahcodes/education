@@ -30,6 +30,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/mystery-number-v7", "-l", "8088", "--no-clipboard"],
       "port": 8088
+    },
+    {
+      "name": "array-builder",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/array-builder", "-l", "8089", "--no-clipboard"],
+      "port": 8089
     }
   ]
 }
