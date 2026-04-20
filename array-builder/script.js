@@ -257,6 +257,12 @@ class ArrayBuilderGame {
         this.cols = Math.floor(Math.random() * 6) + 1; // 1–6
         this.placedRowData = [];
         this.occupiedGridRows = new Set();
+
+        // Shuffle colors so each game feels different
+        for (let i = this.rowColors.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.rowColors[i], this.rowColors[j]] = [this.rowColors[j], this.rowColors[i]];
+        }
         this.currentInput = '';
         this.phase = 'building';
 
