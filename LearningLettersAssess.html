@@ -25,11 +25,10 @@
         }
 
         #progress {
-            position: fixed;
-            top: 24px;
             font-size: 1.4rem;
             color: #888;
             letter-spacing: 1px;
+            margin-bottom: 8px;
         }
 
         #letter-display {
@@ -112,9 +111,8 @@
     </style>
 </head>
 <body>
-    <div id="progress"></div>
-
     <div id="game-screen">
+        <div id="progress"></div>
         <div id="letter-display"></div>
         <button id="next-btn">Next →</button>
     </div>
@@ -180,7 +178,6 @@
                 if (currentIndex >= 26) {
                     gameScreen.style.display = 'none';
                     doneScreen.style.display = 'flex';
-                    progress.textContent = '';
                     celebrate();
                 } else {
                     showLetter();
