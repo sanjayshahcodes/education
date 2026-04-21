@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Multiplication Bridge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <!-- Mode selection screen -->
+        <div id="mode-screen">
+            <div id="mode-title">Multiplication Bridge</div>
+            <div id="mode-buttons">
+                <button class="mode-btn" data-mode="1">
+                    <div class="mode-label">4 + 4 + 4 = ?</div>
+                    <div class="mode-arrow">→</div>
+                    <div class="mode-label">? × ? = ?</div>
+                </button>
+                <button class="mode-btn" data-mode="2">
+                    <div class="mode-label">3 × 5 = ?</div>
+                    <div class="mode-arrow">→</div>
+                    <div class="mode-label">? + ? + ? = ?</div>
+                </button>
+                <button class="mode-btn" data-mode="3">
+                    <div class="mode-label">Mix</div>
+                    <div class="mode-sub">both directions</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game screen -->
+        <div id="game-screen" class="hidden">
+
+            <div id="stats-header">
+                <div>
+                    <div class="stat-label">Total</div>
+                    <div class="stat-value" id="total-count">0</div>
+                </div>
+            </div>
+
+            <!-- Problem -->
+            <div id="problem-area">
+                <div id="problem-display"></div>
+            </div>
+
+            <!-- Builder -->
+            <div id="builder-area">
+                <div id="builder-prompt"></div>
+                <div id="builder-slots"></div>
+                <button id="check-btn" class="action-btn" disabled>Check</button>
+            </div>
+
+            <!-- Picker overlay -->
+            <div id="picker-overlay" class="hidden">
+                <div id="value-picker">
+                    <div id="picker-options"></div>
+                </div>
+            </div>
+
+            <!-- Particles -->
+            <div id="particles-container"></div>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

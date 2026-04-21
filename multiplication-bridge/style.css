@@ -1,0 +1,430 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+    min-height: 100vh;
+    color: white;
+    overflow-x: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ── Mode selection screen ─────────────────────── */
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 24px;
+}
+
+#mode-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    max-width: 480px;
+    margin-top: 60px;
+}
+
+#mode-title {
+    font-size: 32px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-align: center;
+    color: white;
+}
+
+#mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 24px 20px;
+    font-family: inherit;
+    font-size: 22px;
+    font-weight: bold;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.mode-btn:active {
+    background: rgba(255, 255, 255, 0.18);
+    transform: scale(0.98);
+}
+
+.mode-btn:nth-child(1) { border-color: rgba(255, 107, 107, 0.5); }
+.mode-btn:nth-child(2) { border-color: rgba(77, 150, 255, 0.5); }
+.mode-btn:nth-child(3) { border-color: rgba(107, 203, 119, 0.5); }
+
+.mode-label {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.mode-arrow {
+    font-size: 20px;
+    opacity: 0.6;
+}
+
+.mode-sub {
+    font-size: 15px;
+    opacity: 0.6;
+    font-weight: normal;
+}
+
+/* ── Game screen ───────────────────────────────── */
+
+#game-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 24px;
+    padding-top: 10px;
+}
+
+/* Stats */
+#stats-header {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 10px 16px;
+    text-align: center;
+    z-index: 10;
+}
+
+.stat-label {
+    font-size: 11px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #00d4ff;
+}
+
+/* Problem display */
+#problem-area {
+    margin-top: 40px;
+    text-align: center;
+}
+
+#problem-display {
+    font-size: 44px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    color: white;
+}
+
+/* Builder */
+#builder-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+#builder-prompt {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+}
+
+#builder-slots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 36px;
+    font-weight: bold;
+    min-height: 80px;
+}
+
+/* Number slots */
+.num-slot {
+    min-width: 70px;
+    height: 70px;
+    border: 2.5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    padding: 0 12px;
+}
+
+.num-slot:active { transform: scale(0.95); }
+
+.num-slot.active {
+    border-color: #00d4ff;
+    background: rgba(0, 212, 255, 0.15);
+}
+
+.num-slot.filled {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.num-slot.correct {
+    border-color: #6BCB77;
+    background: rgba(107, 203, 119, 0.2);
+    color: #6BCB77;
+}
+
+.num-slot.incorrect {
+    border-color: rgba(255, 100, 100, 0.7);
+    background: rgba(255, 100, 100, 0.15);
+    color: rgba(255, 150, 150, 0.9);
+}
+
+/* Operator text (×, +, =, ?) in the builder */
+.op-text {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 32px;
+    font-weight: bold;
+    min-width: 24px;
+    text-align: center;
+}
+
+.result-text {
+    color: #00d4ff;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+/* Check button */
+.action-btn {
+    padding: 14px 50px;
+    font-size: 22px;
+    font-weight: bold;
+    font-family: inherit;
+    border: 2px solid rgba(0, 212, 255, 0.4);
+    border-radius: 20px;
+    background: rgba(0, 212, 255, 0.12);
+    color: #00d4ff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.action-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.action-btn:not(:disabled):active {
+    background: rgba(0, 212, 255, 0.25);
+    transform: scale(0.97);
+}
+
+/* ── Free-form addition builder ────────────────── */
+
+#builder-slots.to-add-mode {
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    width: 100%;
+}
+
+.expr-display {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 70px;
+    width: 100%;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.expr-placeholder {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.3);
+    font-style: italic;
+}
+
+.expr-num {
+    font-size: 36px;
+    font-weight: bold;
+    color: white;
+    min-width: 44px;
+    text-align: center;
+}
+
+.expr-op {
+    font-size: 30px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.45);
+    min-width: 28px;
+    text-align: center;
+}
+
+.expr-q {
+    font-size: 36px;
+    font-weight: bold;
+    color: #00d4ff;
+    min-width: 44px;
+    text-align: center;
+}
+
+.expr-correct { color: #6BCB77 !important; }
+.expr-incorrect { color: rgba(255, 100, 100, 0.9) !important; }
+
+/* Number bank */
+.number-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+}
+
+.bank-tile {
+    width: 58px;
+    height: 58px;
+    font-size: 24px;
+    font-weight: bold;
+    font-family: inherit;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.bank-tile:active {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(0.92);
+}
+
+.bank-plus {
+    color: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.35);
+    font-size: 28px;
+}
+
+.bank-back {
+    color: rgba(255, 150, 150, 0.9);
+    border-color: rgba(255, 100, 100, 0.3);
+    background: rgba(255, 100, 100, 0.1);
+}
+
+/* Picker */
+#picker-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+#value-picker {
+    background: rgba(30, 60, 114, 0.97);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+}
+
+.picker-option {
+    width: 90px;
+    height: 90px;
+    font-size: 36px;
+    font-weight: bold;
+    font-family: inherit;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.picker-option:active {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(0.95);
+}
+
+/* Next button */
+#next-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 14px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: inherit;
+    border: 2px solid rgba(107, 203, 119, 0.9);
+    border-radius: 16px;
+    background: rgba(107, 203, 119, 0.25);
+    color: #6BCB77;
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 0 0 20px rgba(107, 203, 119, 0.4);
+    animation: nextPulse 1.2s ease-in-out infinite;
+}
+
+#next-btn:active { transform: scale(0.96); }
+
+@keyframes nextPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(107, 203, 119, 0.4); }
+    50%       { box-shadow: 0 0 32px rgba(107, 203, 119, 0.8); }
+}
+
+/* Particles */
+.particle {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleFall 3s linear forwards;
+}
+
+@keyframes particleFall {
+    0%   { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
