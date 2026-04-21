@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Letter Assessment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f8ff;
+            font-family: Arial, sans-serif;
+            touch-action: manipulation;
+        }
+
+        #progress {
+            position: fixed;
+            top: 24px;
+            font-size: 1.4rem;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        #letter-display {
+            font-size: 28vw;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1;
+            margin-bottom: 60px;
+            transition: opacity 0.15s ease;
+        }
+
+        #letter-display.flash {
+            opacity: 0;
+        }
+
+        #next-btn {
+            font-size: 1.6rem;
+            font-weight: bold;
+            font-family: inherit;
+            padding: 18px 60px;
+            border: none;
+            border-radius: 50px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+            touch-action: manipulation;
+        }
+
+        #next-btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Done screen */
+        #done-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #done-message {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        #done-sub {
+            font-size: 1.4rem;
+            color: #888;
+        }
+
+        #restart-btn {
+            font-size: 1.3rem;
+            font-family: inherit;
+            padding: 14px 48px;
+            border: 2px solid #4CAF50;
+            border-radius: 50px;
+            background: white;
+            color: #4CAF50;
+            cursor: pointer;
+            margin-top: 10px;
+            touch-action: manipulation;
+        }
+
+        #restart-btn:active {
+            background: #f0fff0;
+        }
+
+        /* Confetti */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="progress"></div>
+
+    <div id="game-screen">
+        <div id="letter-display"></div>
+        <button id="next-btn">Next →</button>
+    </div>
+
+    <div id="done-screen">
+        <div id="done-message">All done! 🎉</div>
+        <div id="done-sub">You went through all 26 letters!</div>
+        <button id="restart-btn">Start over</button>
+    </div>
+
+    <canvas id="confettiCanvas"></canvas>
+
+    <script>
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        let letters = [];
+        let currentIndex = 0;
+
+        const letterDisplay = document.getElementById('letter-display');
+        const nextBtn = document.getElementById('next-btn');
+        const progress = document.getElementById('progress');
+        const gameScreen = document.getElementById('game-screen');
+        const doneScreen = document.getElementById('done-screen');
+        const restartBtn = document.getElementById('restart-btn');
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        function startGame() {
+            letters = shuffleArray('abcdefghijklmnopqrstuvwxyz'.split(''));
+            currentIndex = 0;
+            gameScreen.style.display = 'flex';
+            gameScreen.style.flexDirection = 'column';
+            gameScreen.style.alignItems = 'center';
+            doneScreen.style.display = 'none';
+            showLetter();
+        }
+
+        function showLetter() {
+            progress.textContent = `${currentIndex + 1} / 26`;
+            letterDisplay.textContent = letters[currentIndex];
+            nextBtn.textContent = currentIndex === 25 ? 'Done ✓' : 'Next →';
+        }
+
+        function advance() {
+            // Flash the letter out
+            letterDisplay.classList.add('flash');
+            setTimeout(() => {
+                currentIndex++;
+                if (currentIndex >= 26) {
+                    gameScreen.style.display = 'none';
+                    doneScreen.style.display = 'flex';
+                    progress.textContent = '';
+                    celebrate();
+                } else {
+                    showLetter();
+                    letterDisplay.classList.remove('flash');
+                }
+            }, 150);
+        }
+
+        nextBtn.addEventListener('click', advance);
+        restartBtn.addEventListener('click', startGame);
+
+        // ── Confetti ──────────────────────────────────────────────
+        let particles = [];
+
+        function createParticle(x, y) {
+            return {
+                x, y,
+                vx: (Math.random() * 10 - 5) * 0.5,
+                vy: (Math.random() * -10 - 5) * 0.5,
+                color: Math.random() * 360,
+                size: Math.random() * 8 + 4,
+                alpha: 1
+            };
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.fillStyle = `hsla(${p.color}, 80%, 50%, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.05;
+                p.alpha -= 0.003;
+            });
+            particles = particles.filter(p => p.alpha > 0 && p.y < canvas.height);
+            if (particles.length > 0) {
+                requestAnimationFrame(drawParticles);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function celebrate() {
+            particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push(createParticle(canvas.width / 2, canvas.height / 2));
+            }
+            drawParticles();
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
