@@ -1,0 +1,203 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lowercase Letter Learning Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            touch-action: manipulation;
+        }
+        #letterContainer {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* 6 columns for 26 letters */
+            gap: 1rem;
+            max-width: 90%;
+            margin-bottom: 2rem;
+        }
+        .letter {
+            font-size: 4rem;
+            color: #333;
+            background-color: #add8e6; /* Light blue for unsaid letters */
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            width: 100px;
+            height: 100px;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .letter.grayed {
+            color: #aaa;
+            background-color: #eee;
+            cursor: default;
+        }
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        #celebrationMessage {
+            font-size: 3rem;
+            color: #4CAF50;
+            display: none;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="letterContainer"></div>
+    <div id="celebrationMessage">Great Job! 🎉</div>
+    <canvas id="confettiCanvas"></canvas>
+    <script>
+        const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+        // Function to shuffle an array randomly
+        function shuffleArray(array) {
+            const shuffled = [...array]; // Create a copy
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Shuffle the letters randomly
+        const shuffledLetters = shuffleArray(letters);
+
+        const letterContainer = document.getElementById('letterContainer');
+        const celebrationMessage = document.getElementById('celebrationMessage');
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let grayedCount = 0;
+        let particles = [];
+
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Create letter elements
+        shuffledLetters.forEach(letter => {
+            const div = document.createElement('div');
+            div.classList.add('letter');
+            div.textContent = letter;
+            div.addEventListener('click', () => {
+                if (!div.classList.contains('grayed')) {
+                    div.classList.add('grayed');
+                    grayedCount++;
+                    if (grayedCount === 26) {
+                        setTimeout(celebrate, 500); // Delay celebration for smoother effect
+                    }
+                }
+            });
+            letterContainer.appendChild(div);
+        });
+
+        // Confetti particles
+        function createParticle(x, y) {
+            const hue = Math.random() * 360; // Full rainbow spectrum
+            return {
+                x: x,
+                y: y,
+                vx: (Math.random() * 10 - 5) * 0.5, // Reduced speed
+                vy: (Math.random() * -10 - 5) * 0.5,
+                color: hue, // Store hue for hsla
+                size: Math.random() * 8 + 4,
+                alpha: 1
+            };
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.fillStyle = `hsla(${p.color}, 80%, 50%, ${p.alpha})`; // Use hsla for proper alpha
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.05; // Reduced gravity
+                p.alpha -= 0.003; // Slower fade-out
+            });
+
+            // Filter out faded or off-screen particles
+            particles = particles.filter(p => p.alpha > 0 && p.y < canvas.height);
+
+            // Continue animation if particles remain
+            if (particles.length > 0) {
+                requestAnimationFrame(drawParticles);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas when done
+            }
+        }
+
+        function celebrate() {
+            celebrationMessage.style.display = 'block';
+            particles = []; // Reset particles array
+            for (let i = 0; i < 150; i++) {
+                particles.push(createParticle(canvas.width / 2, canvas.height / 2)); // Center confetti
+            }
+            drawParticles();
+        }
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
