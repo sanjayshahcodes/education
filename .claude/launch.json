@@ -36,6 +36,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/array-builder", "-l", "8089", "--no-clipboard"],
       "port": 8089
+    },
+    {
+      "name": "multiplication-bridge",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/multiplication-bridge", "-l", "8090", "--no-clipboard"],
+      "port": 8090
     }
   ]
 }
