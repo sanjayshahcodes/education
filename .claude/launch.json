@@ -42,6 +42,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/multiplication-bridge", "-l", "8090", "--no-clipboard"],
       "port": 8090
+    },
+    {
+      "name": "number-shortcuts",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/number-shortcuts", "-l", "8091", "--no-clipboard"],
+      "port": 8091
     }
   ]
 }

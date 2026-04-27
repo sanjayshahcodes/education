@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Number Shortcuts</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <div id="stats-header">
+            <div class="stat-label">Total</div>
+            <div class="stat-value" id="total-count">0</div>
+        </div>
+
+        <!-- Equation: always at top -->
+        <div id="main-equation" class="equation-display"></div>
+
+        <!-- Start button -->
+        <div id="start-section">
+            <button id="start-btn" class="action-btn">Start</button>
+        </div>
+
+        <!-- Gaining/Losing → swaps to How Many → then hides -->
+        <div id="question-area" class="hidden">
+            <div id="gl-sub">
+                <div class="phase-prompt">Are you gaining or losing?</div>
+                <div class="choice-row">
+                    <button class="choice-btn gaining-btn" id="btn-gaining">Gaining ↑</button>
+                    <button class="choice-btn losing-btn" id="btn-losing">Losing ↓</button>
+                </div>
+            </div>
+            <div id="hm-sub" class="hidden">
+                <div class="phase-prompt" id="hm-prompt"></div>
+                <div class="amount-row">
+                    <button class="amount-btn" id="hm-btn-1">1</button>
+                    <button class="amount-btn" id="hm-btn-2">2</button>
+                    <button class="amount-btn" id="hm-btn-3">3</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary: "Gaining 2" / "Losing 3" -->
+        <div id="summary-area" class="hidden">
+            <div id="summary-label"></div>
+        </div>
+
+        <!-- Builder -->
+        <div id="build-section" class="hidden">
+            <div class="phase-prompt">Write the simpler equation</div>
+            <div id="build-row">
+                <div class="builder-slot filled locked">
+                    <span class="slot-label" id="build-start"></span>
+                </div>
+                <div class="builder-slot operator-slot" id="build-sign-slot" data-slot="sign">
+                    <span class="slot-label"></span>
+                </div>
+                <div class="builder-slot" id="build-amount-slot" data-slot="amount">
+                    <span class="slot-label"></span>
+                </div>
+                <span class="build-eq">= ?</span>
+            </div>
+            <button id="check-build-btn" class="action-btn" disabled>Check</button>
+        </div>
+
+        <!-- Solve -->
+        <div id="solve-section" class="hidden">
+            <div id="solve-equation" class="equation-display"></div>
+            <div id="number-pad"></div>
+            <button id="solve-next-btn" class="action-btn hidden">Next →</button>
+        </div>
+
+        <!-- Picker overlay -->
+        <div id="picker-overlay" class="hidden">
+            <div id="value-picker">
+                <div class="picker-title">Choose</div>
+                <div id="picker-options"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="particles-container"></div>
+    <script src="script.js"></script>
+</body>
+</html>
