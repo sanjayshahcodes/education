@@ -212,7 +212,7 @@ class NumberShortcuts {
         const sign = net > 0 ? '+' : '-';
         const amount = Math.abs(net);
         document.getElementById('solve-equation').innerHTML =
-            `${a} ${sign} ${amount} = <span id="solve-answer">?</span>`;
+            `${a} <span class="eq-highlight">${sign} ${amount}</span> = <span id="solve-answer">?</span>`;
         this.currentInput = '';
     }
 
