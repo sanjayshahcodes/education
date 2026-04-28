@@ -48,6 +48,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/number-shortcuts", "-l", "8091", "--no-clipboard"],
       "port": 8091
+    },
+    {
+      "name": "lollipop-lab",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/lollipop-lab", "-l", "8092", "--no-clipboard"],
+      "port": 8092
     }
   ]
 }

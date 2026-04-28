@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Lollipop Lab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <div id="stats-header">
+            <div class="stat-label">Total</div>
+            <div class="stat-value" id="total-count">0</div>
+        </div>
+
+        <header id="header">
+            <div id="main-equation"></div>
+            <div id="phase-prompt"></div>
+        </header>
+
+        <div id="start-section">
+            <button id="start-btn" class="btn btn-primary">Start</button>
+        </div>
+
+        <main id="board" class="hidden">
+            <section class="card pile-card">
+                <div class="card-label">Your Pile</div>
+                <div class="pile-split">
+                    <div class="compartment compartment-orig">
+                        <div class="compartment-body" id="original-body"></div>
+                        <div class="compartment-count orig-count" id="orig-count">0</div>
+                    </div>
+                    <div class="compartment compartment-added" id="added-compartment">
+                        <div class="compartment-body" id="added-body"></div>
+                        <div class="compartment-count added-count" id="added-count">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card supply-card" id="supply-card">
+                <div class="card-label" id="supply-label">Supply</div>
+                <div class="supply-body" id="supply-body">
+                    <div class="supply-tile" id="supply-stack" data-amount="5">
+                        <div class="supply-stack-visual">
+                            <span class="lp">🍭</span>
+                            <span class="lp">🍭</span>
+                            <span class="lp">🍭</span>
+                            <span class="lp">🍭</span>
+                            <span class="lp">🍭</span>
+                        </div>
+                    </div>
+                    <div class="supply-tile" id="supply-single" data-amount="1">
+                        <div class="supply-stack-visual">
+                            <span class="lp">🍭</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bin hidden" id="bin">
+                    <div class="bin-icon">🗑️</div>
+                    <div class="bin-label">drop here</div>
+                </div>
+            </section>
+        </main>
+
+        <div id="action-row">
+            <button id="phase-done-btn" class="btn btn-primary hidden">Done →</button>
+        </div>
+
+        <section id="settle-section" class="hidden">
+            <div id="settle-message"></div>
+            <button id="continue-btn" class="btn btn-primary">Continue →</button>
+        </section>
+
+        <section id="solve-section" class="hidden">
+            <div id="solve-equation"></div>
+            <div id="number-pad"></div>
+            <button id="solve-next-btn" class="btn btn-success hidden">Next →</button>
+        </section>
+    </div>
+
+    <div id="particles-container"></div>
+    <script src="script.js"></script>
+</body>
+</html>
