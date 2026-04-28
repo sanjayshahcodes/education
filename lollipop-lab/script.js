@@ -33,7 +33,7 @@ class LollipopLab {
         const a = this.randInt(8, 15);
         const b = this.randInt(12, 20);
         let c;
-        do { c = b + this.randInt(-3, 3); } while (c === b || c < 1);
+        do { c = b + this.randInt(-2, 2); } while (c === b || c < 1);
         const net = b - c;
         return { a, b, c, net };
     }
