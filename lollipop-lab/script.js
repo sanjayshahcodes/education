@@ -71,6 +71,7 @@ class LollipopLab {
             `<span class="eq-part eq-tail">= ?</span>`;
 
         this.hide('settle-section');
+        this.hide('continue-btn');
         this.hide('board');
         this.resetPromptSteps();
         this.setActiveStep(null);
@@ -406,6 +407,7 @@ class LollipopLab {
         this.totalGames++;
         document.getElementById('total-count').textContent = this.totalGames;
         this.show('settle-section');
+        this.show('continue-btn');
     }
 
     show(id) { document.getElementById(id).classList.remove('hidden'); }

@@ -55,7 +55,6 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 14px 20px 18px;
-    gap: 12px;
 }
 
 /* ── Stats badge ────────────────────────────────── */
@@ -560,6 +559,13 @@ body {
     border-radius: 22px;
     max-width: none;
     box-shadow: var(--shadow-soft);
+}
+
+#continue-btn {
+    position: fixed;
+    top: 12px;
+    left: 14px;
+    z-index: 20;
 }
 
 #settle-message {
