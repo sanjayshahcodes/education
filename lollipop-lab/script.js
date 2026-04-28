@@ -1,8 +1,14 @@
 class LollipopLab {
     constructor() {
+        // Mode 1 (default): always add-then-subtract.
+        // Mode 2 (?mode=2): each round is randomly add-first or subtract-first.
+        const params = new URLSearchParams(location.search);
+        this.mode = params.get('mode') === '2' ? 2 : 1;
+
         this.totalGames = 0;
         this.problem = null;
         this.phase = null;
+        this.phaseQueue = [];      // remaining phases for the current round
         this.originalSlots = [];   // [{id, state: 'active'|'consumed'}]
         this.addedSlots = [];
         this.targetAdd = 0;
@@ -30,12 +36,22 @@ class LollipopLab {
     }
 
     generateProblem() {
-        const a = this.randInt(8, 15);
+        const addFirst = this.mode === 2 ? Math.random() < 0.5 : true;
         const b = this.randInt(12, 20);
         let c;
         do { c = b + this.randInt(-2, 2); } while (c === b || c < 1);
+
+        let a;
+        if (addFirst) {
+            a = this.randInt(8, 15);
+        } else {
+            // Subtract-first needs a starting pile big enough to subtract c from
+            // and still have at least 2 left, so the intermediate pile is visible.
+            a = this.randInt(c + 2, c + 5);
+        }
+
         const net = b - c;
-        return { a, b, c, net };
+        return { a, b, c, addFirst, net };
     }
 
     // ── Slot helpers ────────────────────────────────────
@@ -63,12 +79,16 @@ class LollipopLab {
         this.freshSlots.clear();
         this.freshConsumed.clear();
 
-        const { a, b, c } = this.problem;
+        const { a, b, c, addFirst } = this.problem;
+        const addSpan = `<span class="eq-part" id="eq-add">+ ${b}</span>`;
+        const subSpan = `<span class="eq-part" id="eq-sub">− ${c}</span>`;
         document.getElementById('main-equation').innerHTML =
             `<span class="eq-part">${a}</span>` +
-            `<span class="eq-part" id="eq-add">+ ${b}</span>` +
-            `<span class="eq-part" id="eq-sub">− ${c}</span>` +
+            (addFirst ? addSpan + subSpan : subSpan + addSpan) +
             `<span class="eq-part eq-tail">= ?</span>`;
+
+        // Mark phase-prompt so CSS can flip step order to match equation order
+        document.getElementById('phase-prompt').classList.toggle('sub-first', !addFirst);
 
         this.hide('settle-section');
         this.hide('continue-btn');
@@ -88,7 +108,14 @@ class LollipopLab {
     onStart() {
         this.hide('start-section');
         this.show('board');
-        this.startAddPhase();
+        this.phaseQueue = this.problem.addFirst ? ['add', 'remove'] : ['remove', 'add'];
+        this.advancePhase();
+    }
+
+    advancePhase() {
+        const next = this.phaseQueue.shift();
+        if (next === 'add') this.startAddPhase();
+        else if (next === 'remove') this.startRemovePhase();
     }
 
     // ── Rendering ──────────────────────────────────────
@@ -369,24 +396,34 @@ class LollipopLab {
 
     startAddPhase() {
         this.phase = 'add';
+        // Reset removed counter so this phase can track its own subtract if it
+        // ever needed to (it doesn't, but also reset supply card out of bin mode).
+        const supplyCard = document.getElementById('supply-card');
+        supplyCard.classList.remove('bin-mode');
+        document.getElementById('supply-body').classList.remove('hidden');
+        document.getElementById('bin').classList.add('hidden');
+
         const { b } = this.problem;
         const stepAdd = document.getElementById('step-add');
         stepAdd.classList.remove('hidden');
         stepAdd.classList.add('appearing');
         this.setStepText(stepAdd, 'Add', b);
         this.setActiveStep('eq-add');
+        this.renderAll();
     }
 
     checkAddDone() {
         if (this.activeCount(this.addedSlots) >= this.targetAdd) {
             this.markStepDone(document.getElementById('step-add'));
             this.phase = 'transition';
-            setTimeout(() => this.startRemovePhase(), 500);
+            this.scheduleNextPhaseOrSettle(500);
         }
     }
 
     startRemovePhase() {
         this.phase = 'remove';
+        // Reset removed counter — fresh subtract phase starts at 0.
+        this.removedSoFar = 0;
         const { c } = this.problem;
         const stepRemove = document.getElementById('step-remove');
         stepRemove.classList.remove('hidden');
@@ -404,7 +441,16 @@ class LollipopLab {
         if (this.removedSoFar >= this.targetRemove) {
             this.markStepDone(document.getElementById('step-remove'));
             this.phase = 'transition';
-            // Now that the subtract step is finished, tidy up the pile.
+            this.scheduleNextPhaseOrSettle(500);
+        }
+    }
+
+    scheduleNextPhaseOrSettle(transitionMs) {
+        if (this.phaseQueue.length > 0) {
+            // More phases coming — just advance.
+            setTimeout(() => this.advancePhase(), transitionMs);
+        } else {
+            // Last phase completed — consolidate the pile and reveal settle.
             setTimeout(() => this.settleAndFlip(), 350);
             setTimeout(() => this.startSettlePhase(), 1100);
         }

@@ -211,6 +211,10 @@ body {
 
 #phase-prompt .num-active { color: var(--accent-yellow); font-weight: 800; }
 
+/* Mode 2: when the round is subtract-first, swap step order to match equation. */
+#phase-prompt.sub-first #step-add    { order: 2; }
+#phase-prompt.sub-first #step-remove { order: 1; }
+
 /* ── Board ─────────────────────────────────────── */
 
 #board {
