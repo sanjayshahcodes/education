@@ -16,11 +16,8 @@ class LollipopLab {
     }
 
     init() {
-        this.buildNumberPad();
-
         document.getElementById('start-btn').addEventListener('click', () => this.onStart());
-        document.getElementById('continue-btn').addEventListener('click', () => this.startSolvePhase());
-        document.getElementById('solve-next-btn').addEventListener('click', () => this.startNewRound());
+        document.getElementById('continue-btn').addEventListener('click', () => this.startNewRound());
 
         this.attachDragSource(document.getElementById('supply-stack'), { amount: 5 }, 'supply');
         this.attachDragSource(document.getElementById('supply-single'), { amount: 1 }, 'supply');
@@ -74,9 +71,6 @@ class LollipopLab {
             `<span class="eq-part eq-tail">= ?</span>`;
 
         this.hide('settle-section');
-        this.hide('solve-section');
-        this.hide('solve-next-btn');
-        this.show('number-pad');
         this.hide('board');
         this.resetPromptSteps();
         this.setActiveStep(null);
@@ -99,9 +93,9 @@ class LollipopLab {
 
     // ── Rendering ──────────────────────────────────────
 
-    renderAll() {
-        this.renderSection(document.getElementById('original-body'), this.originalSlots, 'original');
-        this.renderSection(document.getElementById('added-body'), this.addedSlots, 'added');
+    renderAll(consolidate = true) {
+        this.renderSection(document.getElementById('original-body'), this.originalSlots, 'original', consolidate);
+        this.renderSection(document.getElementById('added-body'), this.addedSlots, 'added', consolidate);
         document.getElementById('orig-count').textContent = this.activeCount(this.originalSlots);
         document.getElementById('added-count').textContent = this.activeCount(this.addedSlots);
         document.getElementById('added-compartment').classList.toggle('has-content', this.addedSlots.length > 0);
@@ -111,15 +105,27 @@ class LollipopLab {
         this.freshConsumed.clear();
     }
 
-    renderSection(container, slots, section) {
+    renderSection(container, slots, section, consolidate) {
         container.innerHTML = '';
         // Original pile only becomes interactive once added is fully consumed.
         const sectionInteractive = this.phase === 'remove' && (
             section === 'added' || this.activeCount(this.addedSlots) === 0
         );
-        for (let i = 0; i < slots.length; i += 5) {
-            const colSlots = slots.slice(i, i + 5);
-            container.appendChild(this.makeColumn(colSlots, section, sectionInteractive));
+        const renderGroup = (group) => {
+            for (let i = 0; i < group.length; i += 5) {
+                container.appendChild(this.makeColumn(group.slice(i, i + 5), section, sectionInteractive));
+            }
+        };
+        if (consolidate) {
+            // Actives flow first, consumed flow after — chunked into columns of 5.
+            // A partial column at the boundary shows actives on the bottom, consumed on top.
+            const actives = slots.filter(s => s.state === 'active');
+            const consumed = slots.filter(s => s.state === 'consumed');
+            renderGroup([...actives, ...consumed]);
+        } else {
+            // Literal layout — slots stay in their original positions (used for the
+            // moment a drag is consumed so the gray-out animation plays in place).
+            renderGroup(slots);
         }
     }
 
@@ -258,11 +264,41 @@ class LollipopLab {
                 }
             }
             this.removedSoFar += consumed;
-            this.renderAll();
+            // Literal layout — dragged lollipops gray out in place. No rearranging
+            // happens until the whole subtract step is finished.
+            this.renderAll(false);
             this.checkRemoveDone();
             return true;
         }
         return false;
+    }
+
+    settleAndFlip() {
+        // Capture current positions of every .lp keyed by slot id
+        const before = new Map();
+        document.querySelectorAll('.lp[data-slot]').forEach(lp => {
+            before.set(lp.dataset.slot, lp.getBoundingClientRect());
+        });
+
+        // Re-render in consolidated layout: actives on the left, consumed on the right.
+        this.renderAll(true);
+
+        // FLIP: for each lollipop that moved, start at its old position and transition to new.
+        document.querySelectorAll('.lp[data-slot]').forEach(lp => {
+            const prev = before.get(lp.dataset.slot);
+            if (!prev) return;
+            const now = lp.getBoundingClientRect();
+            const dx = prev.left - now.left;
+            const dy = prev.top - now.top;
+            if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+            lp.style.transition = 'none';
+            lp.style.transform = `translate(${dx}px, ${dy}px)`;
+            // next frame, transition back to identity
+            requestAnimationFrame(() => {
+                lp.style.transition = 'transform 0.35s ease';
+                lp.style.transform = '';
+            });
+        });
     }
 
     // ── Phases ─────────────────────────────────────────
@@ -337,15 +373,17 @@ class LollipopLab {
         if (this.removedSoFar >= this.targetRemove) {
             this.markStepDone(document.getElementById('step-remove'));
             this.phase = 'transition';
-            setTimeout(() => this.startSettlePhase(), 600);
+            // Now that the subtract step is finished, tidy up the pile.
+            setTimeout(() => this.settleAndFlip(), 350);
+            setTimeout(() => this.startSettlePhase(), 1100);
         }
     }
 
     startSettlePhase() {
         this.phase = 'settle';
-        this.resetPromptSteps();
         this.setActiveStep(null);
-        const { net } = this.problem;
+        const { a, net } = this.problem;
+        const total = a + net;
         const msgEl = document.getElementById('settle-message');
         if (net > 0) {
             msgEl.innerHTML = `You ended up with <span class="gain">${net} more</span> lollipops than you started with! 🎉`;
@@ -354,79 +392,20 @@ class LollipopLab {
         } else {
             msgEl.innerHTML = `You ended up right where you started!`;
         }
-        this.show('settle-section');
-    }
 
-    // ── Solve ──────────────────────────────────────────
-
-    startSolvePhase() {
-        this.phase = 'solve';
-        this.hide('settle-section');
-        this.hide('board');
-        const stepAdd = document.getElementById('step-add');
-        stepAdd.classList.remove('hidden', 'done');
-        stepAdd.innerHTML = 'How many lollipops do you have now?';
-
-        const { a, net } = this.problem;
         const sign = net >= 0 ? '+' : '−';
         const cls  = net >= 0 ? 'add' : 'sub';
         const amount = Math.abs(net);
-        const netHtml = net === 0 ? '' :
-            ` <span class="${cls}">${sign} ${amount}</span>`;
-        document.getElementById('solve-equation').innerHTML =
-            `${a}${netHtml} = <span id="solve-answer">?</span>`;
-        this.show('solve-section');
-    }
-
-    buildNumberPad() {
-        const pad = document.getElementById('number-pad');
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '⌫', 'GO'].forEach(val => {
-            const btn = document.createElement('button');
-            btn.className = 'pad-btn';
-            if (val === 'GO') btn.classList.add('pad-go');
-            if (val === '⌫') btn.classList.add('pad-back');
-            btn.textContent = val;
-            btn.addEventListener('click', () => {
-                if (val === 'GO') this.handleInput('enter');
-                else if (val === '⌫') this.handleInput('backspace');
-                else this.handleInput(String(val));
-            });
-            pad.appendChild(btn);
-        });
-    }
-
-    handleInput(value) {
-        if (value === 'backspace') {
-            this.currentInput = this.currentInput.slice(0, -1);
-        } else if (value === 'enter') {
-            if (this.currentInput.length > 0) this.checkSolve(parseInt(this.currentInput));
-            return;
+        const eqEl = document.getElementById('settle-equation');
+        if (net === 0) {
+            eqEl.innerHTML = `${a} = <span class="answer">${total}</span>`;
         } else {
-            if (this.currentInput.length < 3) this.currentInput += value;
+            eqEl.innerHTML = `${a} <span class="${cls}">${sign} ${amount}</span> = <span class="answer">${total}</span>`;
         }
-        const ansEl = document.getElementById('solve-answer');
-        if (ansEl) ansEl.textContent = this.currentInput || '?';
-    }
 
-    checkSolve(answer) {
-        const { a, net } = this.problem;
-        if (answer === a + net) {
-            this.totalGames++;
-            document.getElementById('total-count').textContent = this.totalGames;
-            const ansEl = document.getElementById('solve-answer');
-            ansEl.textContent = answer;
-            ansEl.classList.add('correct');
-            this.hide('number-pad');
-            this.show('solve-next-btn');
-            this.celebrate();
-        } else {
-            this.shake(document.getElementById('solve-answer'));
-            this.currentInput = '';
-            setTimeout(() => {
-                const ansEl = document.getElementById('solve-answer');
-                if (ansEl && !ansEl.classList.contains('correct')) ansEl.textContent = '?';
-            }, 500);
-        }
+        this.totalGames++;
+        document.getElementById('total-count').textContent = this.totalGames;
+        this.show('settle-section');
     }
 
     show(id) { document.getElementById(id).classList.remove('hidden'); }

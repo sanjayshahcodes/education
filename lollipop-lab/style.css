@@ -575,6 +575,25 @@ body {
 #settle-message .gain { color: var(--accent-green); }
 #settle-message .loss { color: var(--accent-red);   }
 
+#settle-equation {
+    font-size: 44px;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: -0.5px;
+    color: var(--text-1);
+}
+
+#settle-equation .add { color: var(--accent-green); }
+#settle-equation .sub { color: var(--accent-red); }
+#settle-equation .answer {
+    color: var(--text-1);
+    display: inline-block;
+    padding: 2px 14px;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    border-radius: 12px;
+    margin-left: 4px;
+}
+
 /* ── Solve ──────────────────────────────────── */
 
 #solve-section {
