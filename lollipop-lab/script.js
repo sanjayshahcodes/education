@@ -78,7 +78,6 @@ class LollipopLab {
 
         const supplyCard = document.getElementById('supply-card');
         supplyCard.classList.remove('bin-mode');
-        document.getElementById('supply-label').textContent = 'Supply';
         document.getElementById('supply-body').classList.remove('hidden');
         document.getElementById('bin').classList.add('hidden');
 
@@ -364,7 +363,6 @@ class LollipopLab {
         this.setActiveStep('eq-sub');
         const supplyCard = document.getElementById('supply-card');
         supplyCard.classList.add('bin-mode');
-        document.getElementById('supply-label').textContent = 'Bin';
         document.getElementById('supply-body').classList.add('hidden');
         document.getElementById('bin').classList.remove('hidden');
         this.renderAll();

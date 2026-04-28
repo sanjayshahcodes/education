@@ -49,6 +49,24 @@ body {
 
 .hidden { display: none !important; }
 
+/* ────────────────────────────────────────────────
+   📏 BASELINE HEIGHTS — DO NOT EXCEED
+   Captured after user testing on iPad. The current
+   layout fits well; future changes must stay within
+   these bounds.
+
+     Container padding:   14px top / 18px bottom
+     #main-equation:      44px font, line-height 1.1
+     #phase-prompt:       ~2 lines @ 24px
+     .pile-card:          min-height 314px
+     .stack:              min-height 220px
+     #settle-section:     equation 44px + message
+     #continue-btn:       fixed top-left (off-flow)
+     #stats-header:       fixed top-right (off-flow)
+
+   Total target: fits in ~820px viewport height.
+   ──────────────────────────────────────────────── */
+
 #game-container {
     display: flex;
     flex-direction: column;
@@ -216,7 +234,7 @@ body {
     gap: 8px;
 }
 
-.pile-card { flex: 3; min-height: 290px; }
+.pile-card { flex: 3; min-height: 314px; }
 .supply-card {
     flex: 1;
     min-width: 160px;
@@ -273,8 +291,8 @@ body {
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: center;
-    gap: 6px;
-    padding: 30px 2px 4px;
+    gap: 8px;
+    padding: 38px 2px 4px;
 }
 
 /* ── Pile total readout ────────────────────────── */
@@ -308,11 +326,11 @@ body {
     align-items: center;
     position: relative;
     padding-top: 10px;
-    min-height: 170px;  /* 5 lollipops tall — keeps chevrons aligned across columns */
+    min-height: 220px;  /* 5 lollipops tall — keeps chevrons aligned across columns */
 }
 
 .lp {
-    font-size: 36px;
+    font-size: 46px;
     line-height: 0.84;
     display: block;
     filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
@@ -359,15 +377,15 @@ body {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-bottom: 2px;
-    width: 28px;
-    height: 22px;
+    margin-bottom: 4px;
+    width: 40px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.10);
     color: var(--text-2);
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 8px;
@@ -443,7 +461,7 @@ body {
 }
 
 .supply-stack-visual .lp {
-    font-size: 30px;
+    font-size: 38px;
     cursor: inherit;
 }
 
@@ -514,7 +532,7 @@ body {
 /* ── Buttons ─────────────────────────────────── */
 
 #action-row {
-    min-height: 48px;
+    min-height: 24px;
     display: flex;
     align-items: center;
 }
