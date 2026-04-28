@@ -182,14 +182,46 @@ class LollipopLab {
         e.preventDefault();
         e.stopPropagation();
 
-        const ghost = el.cloneNode(true);
-        ghost.classList.add('drag-ghost');
-        const rect = el.getBoundingClientRect();
-        ghost.style.width = rect.width + 'px';
-        ghost.style.height = rect.height + 'px';
-        ghost.style.left = rect.left + 'px';
-        ghost.style.top = rect.top + 'px';
-        document.body.appendChild(ghost);
+        // For chevron drags, the ghost is the column of active lollipops being
+        // lifted (chevron + consumed stripped). For single-lollipop drags and
+        // supply drags, the ghost is just a clone of the source element.
+        const isChevron = el.classList.contains('stack-grab');
+
+        let ghost;
+        let rect;
+
+        if (isChevron) {
+            const chevronRect = el.getBoundingClientRect();
+            ghost = el.parentElement.cloneNode(true);
+            ghost.classList.add('drag-ghost');
+            ghost.querySelectorAll('.stack-grab, .lp.consumed').forEach(n => n.remove());
+            // Tight-fit the ghost to its lollipops, ignoring stack min-height/padding
+            ghost.style.minHeight = '0';
+            ghost.style.paddingTop = '0';
+            document.body.appendChild(ghost);
+
+            // Anchor the ghost so its top sits at the chevron — lollipops hang
+            // from where the user's finger grabbed.
+            const w = ghost.offsetWidth;
+            const h = ghost.offsetHeight;
+            rect = {
+                left: chevronRect.left + chevronRect.width / 2 - w / 2,
+                top: chevronRect.top,
+                width: w,
+                height: h,
+            };
+            ghost.style.left = rect.left + 'px';
+            ghost.style.top = rect.top + 'px';
+        } else {
+            ghost = el.cloneNode(true);
+            ghost.classList.add('drag-ghost');
+            rect = el.getBoundingClientRect();
+            ghost.style.width = rect.width + 'px';
+            ghost.style.height = rect.height + 'px';
+            ghost.style.left = rect.left + 'px';
+            ghost.style.top = rect.top + 'px';
+            document.body.appendChild(ghost);
+        }
 
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
