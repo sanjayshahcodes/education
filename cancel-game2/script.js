@@ -20,6 +20,13 @@ class CancelGame {
         this.nextTermId = 0;
         this.freshBlocks = new Set();
         this.solved = false;
+        // Mode (URL ?mode=1|2|3):
+        //   1 — a + b − c only           (default)
+        //   2 — a + b − c and a − b + c
+        //   3 — same as 2, but |b − c| up to 3 (wider leftover range)
+        const params = new URLSearchParams(window.location.search);
+        const m = parseInt(params.get('mode'), 10);
+        this.mode = (m === 2 || m === 3) ? m : 1;
         this.init();
     }
 
@@ -35,17 +42,20 @@ class CancelGame {
     // ── Problem generation ─────────────────────────
 
     generateProblem() {
+        const allowSubFirst = this.mode === 2 || this.mode === 3;
+        const deltaRange = this.mode === 3 ? 3 : 2;
         for (let tries = 0; tries < 120; tries++) {
-            const subFirst = Math.random() < 0.5;
+            const subFirst = allowSubFirst && Math.random() < 0.5;
             const ops = subFirst ? ['-', '+'] : ['+', '-'];
             const a = this.randInt(20, 30);
             const bMax = subFirst ? Math.min(22, a - 1) : 22;
             if (bMax < 12) continue;
             const b = this.randInt(12, bMax);
-            const cDelta = this.randInt(-2, 2);
+            const cDelta = this.randInt(-deltaRange, deltaRange);
             const c = b + cDelta;
-            if (c < 10 || c > 24) continue;
-            if (c === b) continue;
+            const cMin = 12 - deltaRange;
+            const cMax = 22 + deltaRange;
+            if (c < cMin || c > cMax) continue;
             const apply = (acc, op, n) => op === '+' ? acc + n : acc - n;
             let result = apply(a, ops[0], b);
             if (result < 1) continue;
@@ -110,20 +120,22 @@ class CancelGame {
     renderBoard() {
         const board = document.getElementById('board');
         board.innerHTML = '';
-        // Only the smaller of the two operation piles is draggable — drag
-        // the smaller onto the bigger to net them in one move.
+        // The smaller of the two operation piles is draggable. When they're
+        // equal, both are draggable (either one can land on the other).
         const opTerms = this.terms.filter(t => !t.isStart);
-        let draggableTermId = null;
+        const draggableIds = new Set();
         if (opTerms.length === 2) {
             const [t1, t2] = opTerms;
             const a1 = this.activeBlocks(t1).length;
             const a2 = this.activeBlocks(t2).length;
             if (a1 > 0 && a2 > 0) {
-                draggableTermId = a1 < a2 ? t1.id : t2.id;
+                if (a1 < a2) draggableIds.add(t1.id);
+                else if (a2 < a1) draggableIds.add(t2.id);
+                else { draggableIds.add(t1.id); draggableIds.add(t2.id); }
             }
         }
         for (const term of this.terms) {
-            board.appendChild(this.renderTerm(term, term.id === draggableTermId));
+            board.appendChild(this.renderTerm(term, draggableIds.has(term.id)));
         }
     }
 
