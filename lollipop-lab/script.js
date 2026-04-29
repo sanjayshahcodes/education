@@ -14,10 +14,12 @@ class LollipopLab {
         this.targetAdd = 0;
         this.targetRemove = 0;
         this.removedSoFar = 0;
+        this.addedSoFar = 0;
         this.currentInput = '';
         this.nextSlotId = 0;
         this.freshSlots = new Set();      // slot ids that should pop-in on next render
         this.freshConsumed = new Set();   // slot ids that should gray-animate on next render
+        this.freshRestored = new Set();   // slot ids that should ungray-animate on next render
         this.init();
     }
 
@@ -45,9 +47,12 @@ class LollipopLab {
         if (addFirst) {
             a = this.randInt(8, 15);
         } else {
-            // Subtract-first needs a starting pile big enough to subtract c from
-            // and still have at least 2 left, so the intermediate pile is visible.
-            a = this.randInt(c + 2, c + 5);
+            // Subtract-first: pick a so that (a - c) is a multiple of 5. The
+            // post-subtract actives form clean columns ("how many are left?"
+            // reads as N×5 at a glance), and the grays read naturally as
+            // groups-of-5-plus-remainder — both trainable by counting by 5s.
+            const gap = this.randInt(1, 2) * 5;  // 5 or 10
+            a = c + gap;
         }
 
         const net = b - c;
@@ -74,10 +79,12 @@ class LollipopLab {
         this.targetAdd = this.problem.b;
         this.targetRemove = this.problem.c;
         this.removedSoFar = 0;
+        this.addedSoFar = 0;
         this.currentInput = '';
         // Don't pop-in animate the starting pile
         this.freshSlots.clear();
         this.freshConsumed.clear();
+        this.freshRestored.clear();
 
         const { a, b, c, addFirst } = this.problem;
         const addSpan = `<span class="eq-part" id="eq-add">+ ${b}</span>`;
@@ -93,6 +100,7 @@ class LollipopLab {
         this.hide('settle-section');
         this.hide('continue-btn');
         this.hide('board');
+        this.hide('add-tally');
         this.resetPromptSteps();
         this.setActiveStep(null);
 
@@ -130,6 +138,7 @@ class LollipopLab {
         // Clear fresh markers — anything fresh has now been rendered with its animation
         this.freshSlots.clear();
         this.freshConsumed.clear();
+        this.freshRestored.clear();
     }
 
     renderSection(container, slots, section, consolidate) {
@@ -185,7 +194,13 @@ class LollipopLab {
                 if (this.freshSlots.has(slot.id)) {
                     lp.classList.add('appearing');
                     setTimeout(() => lp.classList.remove('appearing'), 350);
+                } else if (this.freshRestored.has(slot.id)) {
+                    lp.classList.add('restoring');
+                    setTimeout(() => lp.classList.remove('restoring'), 400);
                 }
+                // Persistent marker for "I just put this back" — survives
+                // re-renders during the add phase, cleared at end of round.
+                if (slot.restored) lp.classList.add('restored');
                 if (interactive) {
                     this.attachDragSource(lp, { slotIds: [slot.id] }, section);
                 }
@@ -301,11 +316,47 @@ class LollipopLab {
 
     handleDrop(payload, sourceType) {
         if (this.phase === 'add') {
-            const amount = payload.amount;
-            const remaining = this.targetAdd - this.activeCount(this.addedSlots);
+            let amount = payload.amount;
+            const remaining = this.targetAdd - this.addedSoFar;
             if (amount > remaining) return false;
-            for (let i = 0; i < amount; i++) this.addedSlots.push(this.makeSlot());
-            this.renderAll();
+
+            // In sub-first mode, additions first restore consumed slots in the
+            // original pile, in reading order (top-down, left-to-right after
+            // the post-subtract consolidate). Each restored slot keeps a
+            // persistent `restored` marker so the user can visually count
+            // exactly how many lollipops she's "put back" — reinforcing that
+            // addition undoes subtraction. The marker is cleared at end of
+            // round.
+            if (!this.problem.addFirst) {
+                const consumed = this.originalSlots.filter(s => s.state === 'consumed');
+                const restoreCount = Math.min(amount, consumed.length);
+                if (restoreCount > 0) {
+                    const toRestore = consumed.slice(0, restoreCount);
+                    for (const slot of toRestore) {
+                        slot.state = 'active';
+                        slot.restored = true;
+                        this.freshRestored.add(slot.id);
+                    }
+                    this.addedSoFar += restoreCount;
+                    amount -= restoreCount;
+                }
+            }
+
+            for (let i = 0; i < amount; i++) {
+                const slot = this.makeSlot();
+                // In sub-first rounds, every "added" lollipop glows — both the
+                // ones that restored grays in the original pile and the
+                // overflow that lands here. In add-first the added pile is
+                // structurally separate so it doesn't need the marker.
+                if (!this.problem.addFirst) slot.restored = true;
+                this.addedSlots.push(slot);
+            }
+            this.addedSoFar += amount;
+
+            // Render literally so original-pile positions don't shift between
+            // drops — restored slots ungray in place, the leftover grays stay
+            // where they were. The pile only consolidates at end-of-round.
+            this.renderAll(false);
             this.checkAddDone();
             return true;
         } else if (this.phase === 'remove') {
@@ -330,6 +381,16 @@ class LollipopLab {
             return true;
         }
         return false;
+    }
+
+    consolidateOriginalSlots() {
+        // Reorder originalSlots in place: actives first, consumed after.
+        // After this, literal renders (renderAll(false)) match the consolidated
+        // layout, and subsequent state changes (restoring a consumed slot)
+        // don't shift any other slot's position.
+        const actives = this.originalSlots.filter(s => s.state === 'active');
+        const consumed = this.originalSlots.filter(s => s.state === 'consumed');
+        this.originalSlots = [...actives, ...consumed];
     }
 
     settleAndFlip() {
@@ -396,8 +457,8 @@ class LollipopLab {
 
     startAddPhase() {
         this.phase = 'add';
-        // Reset removed counter so this phase can track its own subtract if it
-        // ever needed to (it doesn't, but also reset supply card out of bin mode).
+        this.addedSoFar = 0;
+        // Switch supply card out of bin mode (in case we just came from remove).
         const supplyCard = document.getElementById('supply-card');
         supplyCard.classList.remove('bin-mode');
         document.getElementById('supply-body').classList.remove('hidden');
@@ -409,14 +470,29 @@ class LollipopLab {
         stepAdd.classList.add('appearing');
         this.setStepText(stepAdd, 'Add', b);
         this.setActiveStep('eq-add');
-        this.renderAll();
+
+        // (The +N tally pill that previously lived on the pile card was
+        // removed — the persistent yellow glow on restored lollipops + clean
+        // active columns from a-c being a multiple of 5 are enough for the
+        // user to track what she's added back. The element is still in the
+        // DOM but kept hidden via CSS for now in case we want to revive it.)
+
+        // Sub-first: keep the literal gray layout from the subtract phase so
+        // the user adds back into the columns she just emptied — no shuffle.
+        this.renderAll(this.problem.addFirst);
     }
 
     checkAddDone() {
-        if (this.activeCount(this.addedSlots) >= this.targetAdd) {
+        if (this.addedSoFar >= this.targetAdd) {
             this.markStepDone(document.getElementById('step-add'));
             this.phase = 'transition';
-            this.scheduleNextPhaseOrSettle(500);
+            this.hide('add-tally');
+            if (this.phaseQueue.length > 0) {
+                setTimeout(() => this.advancePhase(), 500);
+            } else {
+                setTimeout(() => this.settleAndFlip(), 350);
+                setTimeout(() => this.startSettlePhase(), 1100);
+            }
         }
     }
 
@@ -441,18 +517,22 @@ class LollipopLab {
         if (this.removedSoFar >= this.targetRemove) {
             this.markStepDone(document.getElementById('step-remove'));
             this.phase = 'transition';
-            this.scheduleNextPhaseOrSettle(500);
-        }
-    }
-
-    scheduleNextPhaseOrSettle(transitionMs) {
-        if (this.phaseQueue.length > 0) {
-            // More phases coming — just advance.
-            setTimeout(() => this.advancePhase(), transitionMs);
-        } else {
-            // Last phase completed — consolidate the pile and reveal settle.
-            setTimeout(() => this.settleAndFlip(), 350);
-            setTimeout(() => this.startSettlePhase(), 1100);
+            if (this.phaseQueue.length > 0) {
+                // Sub-first round: consolidate the pile (actives left, grays
+                // right) so the user has a clean gray block to add back into.
+                // We reorder the underlying array so subsequent literal renders
+                // preserve this layout — restored slots ungray in place, no
+                // further shuffle during the add phase.
+                setTimeout(() => {
+                    this.consolidateOriginalSlots();
+                    this.settleAndFlip();
+                }, 350);
+                setTimeout(() => this.advancePhase(), 1100);
+            } else {
+                // End of round (add-first): consolidate then settle.
+                setTimeout(() => this.settleAndFlip(), 350);
+                setTimeout(() => this.startSettlePhase(), 1100);
+            }
         }
     }
 
