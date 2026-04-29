@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cancel Out 2</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <div id="stats-header">
+            <div class="stat-label">Total</div>
+            <div class="stat-value" id="total-count">0</div>
+        </div>
+
+        <header id="header">
+            <div id="main-equation"></div>
+            <div id="prompt">Match green and red. What's left is your answer.</div>
+        </header>
+
+        <main id="board"></main>
+
+        <section id="settle-section" class="hidden">
+            <div id="settle-message"></div>
+            <div id="settle-equation"></div>
+        </section>
+
+        <button id="continue-btn" class="btn btn-primary hidden">Next Problem →</button>
+    </div>
+
+    <div id="particles-container"></div>
+    <script src="script.js"></script>
+</body>
+</html>

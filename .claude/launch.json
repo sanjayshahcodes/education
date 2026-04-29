@@ -54,6 +54,18 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/lollipop-lab", "-l", "8092", "--no-clipboard"],
       "port": 8092
+    },
+    {
+      "name": "cancel-out",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/cancel-out", "-l", "8093", "--no-clipboard"],
+      "port": 8093
+    },
+    {
+      "name": "cancel-game2",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/cancel-game2", "-l", "8094", "--no-clipboard"],
+      "port": 8094
     }
   ]
 }
