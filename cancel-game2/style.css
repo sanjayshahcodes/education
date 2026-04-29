@@ -311,11 +311,11 @@ body {
 }
 
 .drag-ghost.pile-land {
-    transition: left 0.26s cubic-bezier(0.5, 0, 0.7, 1),
-                top  0.26s cubic-bezier(0.5, 0, 0.7, 1),
-                width 0.26s ease, height 0.26s ease,
-                opacity 0.26s ease;
-    opacity: 0.7;
+    transition: left 0.65s cubic-bezier(0.5, 0, 0.5, 1),
+                top  0.65s cubic-bezier(0.5, 0, 0.5, 1),
+                width 0.65s ease, height 0.65s ease,
+                opacity 0.65s ease;
+    opacity: 0.75;
 }
 
 /* ── Buttons ─────────────────────────────────── */

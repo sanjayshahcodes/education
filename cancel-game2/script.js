@@ -278,7 +278,7 @@ class CancelGame {
                 ghost.remove();
                 bodyEl.style.visibility = '';
                 this.cancelPiles(sourceTerm, targetTerm);
-            }, 280);
+            }, 660);
         };
 
         document.addEventListener('pointermove', move);
