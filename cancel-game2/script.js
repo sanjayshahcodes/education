@@ -234,14 +234,42 @@ class CancelGame {
             }
         });
 
+        // Alignment-based drop: release commits only if the ghost is
+        // aligned over a valid target's pile area. Reinforces 1-for-1
+        // pairing — she physically positions her blocks over their
+        // counterparts before letting go.
+        const ALIGN_TOLERANCE = 28;  // pixels, generous leeway
+        let committed = false;
+
+        // Track each valid target's bottom-center anchor. Blocks are
+        // center-justified inside the body, so comparing centers (not left
+        // edges) matches what she sees when she lines up the visible piles.
+        const guides = [];
+        for (const card of validTargets) {
+            const targetBody = card.querySelector('.term-body');
+            const tRect = targetBody.getBoundingClientRect();
+            guides.push({
+                card,
+                anchorCenterX: tRect.left + tRect.width / 2,
+                anchorBottom: tRect.bottom,
+            });
+        }
+
+        const checkAlignment = () => {
+            const ghostRect = ghost.getBoundingClientRect();
+            const ghostCenterX = ghostRect.left + ghostRect.width / 2;
+            for (const g of guides) {
+                const dx = Math.abs(ghostCenterX - g.anchorCenterX);
+                const dy = Math.abs(ghostRect.bottom - g.anchorBottom);
+                if (dx <= ALIGN_TOLERANCE && dy <= ALIGN_TOLERANCE) return g;
+            }
+            return null;
+        };
+
         const move = (ev) => {
+            if (committed) return;
             ghost.style.left = (ev.clientX - offsetX) + 'px';
             ghost.style.top  = (ev.clientY - offsetY) + 'px';
-            const target = document.elementFromPoint(ev.clientX, ev.clientY);
-            const overCard = target && target.closest('.term-card');
-            for (const card of validTargets) {
-                card.classList.toggle('drop-hot', card === overCard);
-            }
         };
 
         const cleanup = () => {
@@ -263,34 +291,36 @@ class CancelGame {
             }, 280);
         };
 
-        const up = (ev) => {
+        const commit = (g) => {
+            if (committed) return;
+            committed = true;
             cleanup();
             ghost.style.pointerEvents = 'none';
-            const target = document.elementFromPoint(ev.clientX, ev.clientY);
-            const overCard = target && target.closest('.term-card');
-            const tid = overCard ? parseInt(overCard.dataset.termId, 10) : null;
-            const targetTerm = tid != null ? this.terms.find(t => t.id === tid) : null;
 
-            if (!targetTerm || targetTerm.sign === sourceTerm.sign || targetTerm.isStart || this.activeBlocks(targetTerm).length === 0) {
-                snapBack();
-                if (overCard) this.shake(overCard);
-                return;
-            }
+            // No slide — fade the ghost out where it was released and let
+            // the cancel-flash on the underlying blocks do the visual work.
+            const targetCard = g.card;
+            const tid = parseInt(targetCard.dataset.termId, 10);
+            const targetTerm = this.terms.find(t => t.id === tid);
 
-            // Animate the ghost slamming onto the target body, then resolve.
-            const targetCard = overCard;
-            const targetBody = targetCard.querySelector('.term-body');
-            const tRect = targetBody.getBoundingClientRect();
-            ghost.classList.add('pile-land');
-            ghost.style.left = tRect.left + 'px';
-            ghost.style.top  = tRect.top + 'px';
-            ghost.style.width = tRect.width + 'px';
-            ghost.style.height = tRect.height + 'px';
+            ghost.style.transition = 'opacity 0.18s ease';
+            ghost.style.opacity = '0';
             setTimeout(() => {
                 ghost.remove();
                 bodyEl.style.visibility = '';
                 this.cancelPiles(sourceTerm, targetTerm);
-            }, 660);
+            }, 180);
+        };
+
+        const up = () => {
+            if (committed) return;
+            const aligned = checkAlignment();
+            if (aligned) {
+                commit(aligned);
+            } else {
+                cleanup();
+                snapBack();
+            }
         };
 
         document.addEventListener('pointermove', move);
