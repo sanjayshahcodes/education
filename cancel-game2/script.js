@@ -97,16 +97,9 @@ class CancelGame {
         if (tail) {
             tail.outerHTML = `<span class="eq-answer-box">${guess}</span><span class="eq-tail">?</span>`;
         }
-        if (guess === this.problem.result) {
-            this.revealBoardAfterSolve();
-        } else {
-            // Wrong: shake, clear, reveal blocks so she can self-correct.
-            const sec = document.getElementById('solve-section');
-            sec.classList.remove('shake');
-            void sec.offsetWidth;
-            sec.classList.add('shake');
-            setTimeout(() => this.revealBoardAfterSolve(), 450);
-        }
+        // No right/wrong feedback here — she discovers the verdict by
+        // dragging and watching the blocks settle.
+        this.revealBoardAfterSolve();
     }
 
     revealBoardAfterSolve() {
