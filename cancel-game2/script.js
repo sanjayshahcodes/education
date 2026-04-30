@@ -43,11 +43,18 @@ class CancelGame {
             const m = parseInt(rawMode, 10);
             this.mode = (m === 2 || m === 3) ? m : 1;
         }
-        // Solve flag (URL ?solve=true): she enters the answer on a numpad
-        // before any blocks appear. Wrong → blocks reveal so she can self-
-        // correct by dragging. Right → blocks reveal as a verification step.
-        // Always disabled in learn mode (which is for demonstration).
-        this.solveMode = params.get('solve') === 'true' && this.mode !== 'learn';
+        // Solve level (URL ?solve=0|1|2):
+        //   0 — drag-only, no answer input          (default)
+        //   1 — numpad first, blocks reveal after submit
+        //   2 — blocks visible + numpad together; drag enabled after submit
+        // Always 0 in learn mode (demonstration only).
+        const rawSolve = parseInt(params.get('solve'), 10);
+        this.solveLevel = (this.mode === 'learn') ? 0
+            : (rawSolve === 1 || rawSolve === 2) ? rawSolve : 0;
+        // Backwards-compat: ?solve=true → level 1
+        if (params.get('solve') === 'true' && this.mode !== 'learn') this.solveLevel = 1;
+        this.solveMode = this.solveLevel > 0;
+        this.dragEnabled = this.solveLevel !== 2;
         this.solveInput = '';
         this.init();
     }
@@ -77,9 +84,10 @@ class CancelGame {
     }
 
     renderSolveInput() {
-        const el = document.getElementById('solve-input');
+        const el = document.getElementById('eq-answer-box');
+        if (!el) return;
         if (this.solveInput.length === 0) {
-            el.textContent = '?';
+            el.textContent = '';
             el.classList.add('empty');
         } else {
             el.textContent = this.solveInput;
@@ -89,22 +97,20 @@ class CancelGame {
 
     checkSolveAnswer() {
         if (this.solveInput.length === 0) return;
-        const guess = parseInt(this.solveInput, 10);
-        // Drop the guess into the equation's answer slot, in a box, with
-        // a trailing "?" — she sees her claim live in the math sentence
-        // and the "?" reads as "let's verify."
-        const tail = document.querySelector('#main-equation .eq-tail');
-        if (tail) {
-            tail.outerHTML = `<span class="eq-answer-box">${guess}</span><span class="eq-tail">?</span>`;
-        }
-        // No right/wrong feedback here — she discovers the verdict by
-        // dragging and watching the blocks settle.
+        // The equation's answer slot already shows her guess (live updated).
+        // No right/wrong feedback — she discovers the verdict by dragging.
         this.revealBoardAfterSolve();
     }
 
     revealBoardAfterSolve() {
-        this.hide('solve-section');
+        this.hide('numpad');
         this.show('board');
+        // In level 2 the board was already visible but inert; flip on
+        // dragging now that she's committed her answer.
+        if (this.solveLevel === 2) {
+            this.dragEnabled = true;
+            this.renderBoard();
+        }
     }
 
     randInt(min, max) {
@@ -173,13 +179,20 @@ class CancelGame {
         this.hide('continue-btn');
         this.renderBoard();
 
-        if (this.solveMode) {
+        if (this.solveLevel === 1) {
             this.solveInput = '';
             this.renderSolveInput();
             this.hide('board');
-            this.show('solve-section');
+            this.show('numpad');
+        } else if (this.solveLevel === 2) {
+            this.solveInput = '';
+            this.renderSolveInput();
+            this.dragEnabled = false;
+            this.renderBoard();          // re-render to drop drag handlers
+            this.show('board');
+            this.show('numpad');
         } else {
-            this.hide('solve-section');
+            this.hide('numpad');
             this.show('board');
         }
     }
@@ -204,9 +217,14 @@ class CancelGame {
         const [op1, op2] = ops;
         const signed = (n, sign) => `<span class="eq-num ${sign === '+' ? 'pos' : 'neg'}">${n}</span>`;
         const signOp = (op) => `<span class="eq-op">${op === '+' ? '+' : '−'}</span>`;
+        // In solve mode the answer slot is a box that fills as she types,
+        // followed by a "?" to mark it as her claim awaiting verification.
+        const tail = this.solveMode
+            ? `<span class="eq-answer-box empty" id="eq-answer-box"></span><span class="eq-tail">?</span>`
+            : `<span class="eq-tail">?</span>`;
         document.getElementById('main-equation').innerHTML =
             `<span class="eq-num">${a}</span>` + signOp(op1) + signed(b, op1) + signOp(op2) + signed(c, op2) +
-            `<span class="eq-op">=</span><span class="eq-tail">?</span>`;
+            `<span class="eq-op">=</span>` + tail;
     }
 
     // ── Rendering ──────────────────────────────────
@@ -218,7 +236,7 @@ class CancelGame {
         // equal, both are draggable (either one can land on the other).
         const opTerms = this.terms.filter(t => !t.isStart);
         const draggableIds = new Set();
-        if (opTerms.length === 2) {
+        if (this.dragEnabled && opTerms.length === 2) {
             const [t1, t2] = opTerms;
             const a1 = this.activeBlocks(t1).length;
             const a2 = this.activeBlocks(t2).length;
