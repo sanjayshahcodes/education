@@ -90,6 +90,13 @@ class CancelGame {
     checkSolveAnswer() {
         if (this.solveInput.length === 0) return;
         const guess = parseInt(this.solveInput, 10);
+        // Drop the guess into the equation's answer slot, in a box, with
+        // a trailing "?" — she sees her claim live in the math sentence
+        // and the "?" reads as "let's verify."
+        const tail = document.querySelector('#main-equation .eq-tail');
+        if (tail) {
+            tail.outerHTML = `<span class="eq-answer-box">${guess}</span><span class="eq-tail">?</span>`;
+        }
         if (guess === this.problem.result) {
             this.revealBoardAfterSolve();
         } else {

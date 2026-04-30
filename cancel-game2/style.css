@@ -119,6 +119,15 @@ body {
     flex-wrap: wrap;
 }
 
+#main-equation .eq-answer-box {
+    color: var(--text-1);
+    display: inline-block;
+    padding: 0 14px;
+    border: 3px solid rgba(255, 255, 255, 0.55);
+    border-radius: 12px;
+    margin: 0 4px;
+}
+
 #main-equation .eq-num     { color: var(--text-1); padding: 0 6px; }
 #main-equation .eq-num.pos { color: var(--text-1); }
 #main-equation .eq-num.neg { color: var(--text-1); }
