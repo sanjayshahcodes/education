@@ -20,19 +20,91 @@ class CancelGame {
         this.nextTermId = 0;
         this.freshBlocks = new Set();
         this.solved = false;
-        // Mode (URL ?mode=1|2|3):
-        //   1 — a + b − c only           (default)
-        //   2 — a + b − c and a − b + c
-        //   3 — same as 2, but |b − c| up to 3 (wider leftover range)
+        // Mode (URL ?mode=1|2|3|learn):
+        //   1     — a + b − c only           (default)
+        //   2     — a + b − c and a − b + c
+        //   3     — same as 2, but |b − c| up to 3 (wider leftover range)
+        //   learn — fixed cycle of teaching problems with same a,b
         const params = new URLSearchParams(window.location.search);
-        const m = parseInt(params.get('mode'), 10);
-        this.mode = (m === 2 || m === 3) ? m : 1;
+        const rawMode = params.get('mode');
+        if (rawMode === 'learn') {
+            this.mode = 'learn';
+            this.learnIndex = 0;
+            // Same a=25, b=16, varying c to show: full cancel, +1 leftover,
+            // -1 leftover, +2, -2.
+            this.learnCycle = [
+                { values: [25, 16, 16], ops: ['+', '-'] },
+                { values: [25, 16, 15], ops: ['+', '-'] },
+                { values: [25, 16, 17], ops: ['+', '-'] },
+                { values: [25, 16, 14], ops: ['+', '-'] },
+                { values: [25, 16, 18], ops: ['+', '-'] },
+            ];
+        } else {
+            const m = parseInt(rawMode, 10);
+            this.mode = (m === 2 || m === 3) ? m : 1;
+        }
+        // Solve flag (URL ?solve=true): she enters the answer on a numpad
+        // before any blocks appear. Wrong → blocks reveal so she can self-
+        // correct by dragging. Right → blocks reveal as a verification step.
+        // Always disabled in learn mode (which is for demonstration).
+        this.solveMode = params.get('solve') === 'true' && this.mode !== 'learn';
+        this.solveInput = '';
         this.init();
     }
 
     init() {
         document.getElementById('continue-btn').addEventListener('click', () => this.startNewRound());
+        // Numpad keys
+        document.querySelectorAll('#numpad .numkey').forEach(btn => {
+            btn.addEventListener('click', () => this.handleNumKey(btn.dataset.key));
+        });
         this.startNewRound();
+    }
+
+    handleNumKey(key) {
+        if (key === 'back') {
+            this.solveInput = this.solveInput.slice(0, -1);
+            this.renderSolveInput();
+            return;
+        }
+        if (key === 'enter') {
+            this.checkSolveAnswer();
+            return;
+        }
+        if (this.solveInput.length >= 2) return;
+        this.solveInput += key;
+        this.renderSolveInput();
+    }
+
+    renderSolveInput() {
+        const el = document.getElementById('solve-input');
+        if (this.solveInput.length === 0) {
+            el.textContent = '?';
+            el.classList.add('empty');
+        } else {
+            el.textContent = this.solveInput;
+            el.classList.remove('empty');
+        }
+    }
+
+    checkSolveAnswer() {
+        if (this.solveInput.length === 0) return;
+        const guess = parseInt(this.solveInput, 10);
+        if (guess === this.problem.result) {
+            this.revealBoardAfterSolve();
+        } else {
+            // Wrong: shake, clear, reveal blocks so she can self-correct.
+            const sec = document.getElementById('solve-section');
+            sec.classList.remove('shake');
+            void sec.offsetWidth;
+            sec.classList.add('shake');
+            setTimeout(() => this.revealBoardAfterSolve(), 450);
+        }
+    }
+
+    revealBoardAfterSolve() {
+        this.hide('solve-section');
+        this.show('board');
     }
 
     randInt(min, max) {
@@ -42,6 +114,15 @@ class CancelGame {
     // ── Problem generation ─────────────────────────
 
     generateProblem() {
+        if (this.mode === 'learn') {
+            const entry = this.learnCycle[this.learnIndex % this.learnCycle.length];
+            this.learnIndex += 1;
+            const [a, b, c] = entry.values;
+            const [op1, op2] = entry.ops;
+            const apply = (acc, op, n) => op === '+' ? acc + n : acc - n;
+            const result = apply(apply(a, op1, b), op2, c);
+            return { values: entry.values, ops: entry.ops, result };
+        }
         const allowSubFirst = this.mode === 2 || this.mode === 3;
         const deltaRange = this.mode === 3 ? 3 : 2;
         for (let tries = 0; tries < 120; tries++) {
@@ -52,6 +133,9 @@ class CancelGame {
             if (bMax < 12) continue;
             const b = this.randInt(12, bMax);
             const cDelta = this.randInt(-deltaRange, deltaRange);
+            // In solve mode there must always be a leftover — b == c trivializes
+            // the answer (it's just the start number).
+            if (this.solveMode && cDelta === 0) continue;
             const c = b + cDelta;
             const cMin = 12 - deltaRange;
             const cMax = 22 + deltaRange;
@@ -88,6 +172,16 @@ class CancelGame {
         this.hide('settle-section');
         this.hide('continue-btn');
         this.renderBoard();
+
+        if (this.solveMode) {
+            this.solveInput = '';
+            this.renderSolveInput();
+            this.hide('board');
+            this.show('solve-section');
+        } else {
+            this.hide('solve-section');
+            this.show('board');
+        }
     }
 
     makeTerm(sign, value, fresh) {
