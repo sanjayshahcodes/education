@@ -1,0 +1,363 @@
+:root {
+    --bg-1: #0f1e3d;
+    --bg-2: #1a3870;
+    --bg-3: #0f1e3d;
+    --card-bg: rgba(255, 255, 255, 0.06);
+    --card-border: rgba(255, 255, 255, 0.12);
+
+    --green-1: #7ee090;
+    --green-2: #5fbd6c;
+    --green-glow: rgba(126, 224, 144, 0.55);
+
+    --red-1:   #ff8a8a;
+    --red-2:   #ff6b6b;
+    --red-glow: rgba(255, 107, 107, 0.55);
+
+    --accent-cyan:   #00d4ff;
+    --accent-yellow: #FFD93D;
+
+    --text-1: #ffffff;
+    --text-2: rgba(255, 255, 255, 0.78);
+    --text-3: rgba(255, 255, 255, 0.50);
+
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.20);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body { overflow-x: hidden; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    background:
+        radial-gradient(ellipse at top left,    rgba(199, 125, 255, 0.12), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(0, 212, 255, 0.10),  transparent 55%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--text-1);
+    touch-action: none;
+    font-feature-settings: "ss01", "ss02";
+}
+
+.hidden { display: none !important; }
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 14px 20px 18px;
+}
+
+/* ── Stats badge ────────────────────────────────── */
+
+#stats-header {
+    position: fixed;
+    top: 12px;
+    right: 14px;
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 5px 12px;
+    text-align: center;
+    z-index: 20;
+    box-shadow: var(--shadow-soft);
+}
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    margin-bottom: 1px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent-cyan);
+    letter-spacing: -0.5px;
+}
+
+/* ── Header / equation ─────────────────────────── */
+
+#header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 980px;
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.14);
+}
+
+#main-equation {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    text-align: center;
+    line-height: 1.1;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#main-equation .eq-num     { color: var(--text-1); padding: 0 6px; }
+#main-equation .eq-op      { color: var(--text-1); padding: 0 2px; }
+#main-equation .eq-tail    { color: var(--text-1); }
+
+/* ── Number line ───────────────────────────────── */
+
+#board {
+    width: 100%;
+    max-width: 980px;
+    display: flex;
+    justify-content: center;
+}
+
+#number-line {
+    width: 100%;
+    height: auto;
+}
+
+/* SVG element styles */
+#number-line .cell {
+    fill: rgba(255, 255, 255, 0.04);
+    stroke: rgba(255, 255, 255, 0.20);
+    stroke-width: 1.5;
+}
+
+#number-line .cell-major {
+    fill: rgba(255, 255, 255, 0.07);
+    stroke: rgba(255, 255, 255, 0.32);
+}
+
+#number-line .cell-start {
+    fill: rgba(255, 255, 255, 0.18);
+    stroke: var(--text-1);
+    stroke-width: 2.5;
+}
+
+#number-line .cell-end {
+    fill: rgba(255, 217, 61, 0.18);
+    stroke: var(--accent-yellow);
+    stroke-width: 2.5;
+}
+
+#number-line .cell-final {
+    fill: rgba(255, 217, 61, 0.22);
+    stroke: var(--accent-yellow);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 8px rgba(255, 217, 61, 0.45));
+}
+
+#number-line .cell-anchor-start {
+    fill: rgba(255, 255, 255, 0.16);
+    stroke: var(--text-1);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.35));
+}
+
+#number-line .cell-label-final {
+    fill: var(--text-1);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+#number-line .cell-path-pos {
+    fill: rgba(126, 224, 144, 0.22);
+    stroke: rgba(126, 224, 144, 0.55);
+    stroke-width: 1.5;
+}
+
+#number-line .cell-path-neg {
+    fill: rgba(255, 138, 138, 0.22);
+    stroke: rgba(255, 138, 138, 0.55);
+    stroke-width: 1.5;
+}
+
+#number-line .cell-label {
+    fill: var(--text-2);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-family: inherit;
+}
+
+#number-line .cell-label-major {
+    fill: var(--text-1);
+}
+
+#number-line .row-label {
+    fill: var(--text-2);
+    font-size: 16px;
+    font-weight: 700;
+    text-anchor: end;
+    dominant-baseline: middle;
+    font-family: inherit;
+}
+
+#number-line .marker-line {
+    stroke: var(--text-1);
+    stroke-width: 3;
+}
+
+#number-line .marker-dot {
+    fill: var(--text-1);
+}
+
+#number-line .marker-label {
+    fill: var(--text-1);
+    font-size: 16px;
+    font-weight: 700;
+    text-anchor: middle;
+    font-family: inherit;
+}
+
+#number-line .marker-label-small {
+    fill: var(--text-2);
+    font-size: 12px;
+    font-weight: 600;
+    text-anchor: middle;
+    font-family: inherit;
+}
+
+#number-line .arrow-pos {
+    stroke: var(--green-1);
+    stroke-width: 10;
+    stroke-linecap: round;
+    fill: none;
+    filter: drop-shadow(0 0 6px var(--green-glow));
+}
+
+#number-line .arrow-neg {
+    stroke: var(--red-1);
+    stroke-width: 10;
+    stroke-linecap: round;
+    fill: none;
+    filter: drop-shadow(0 0 6px var(--red-glow));
+}
+
+#number-line .arrowhead-pos { fill: var(--green-1); }
+#number-line .arrowhead-neg { fill: var(--red-1); }
+
+#number-line .arrow-label-pos {
+    fill: var(--green-1);
+    font-size: 22px;
+    font-weight: 800;
+    text-anchor: middle;
+    font-family: inherit;
+}
+
+#number-line .arrow-label-neg {
+    fill: var(--red-1);
+    font-size: 22px;
+    font-weight: 800;
+    text-anchor: middle;
+    font-family: inherit;
+}
+
+#number-line .net-bracket {
+    stroke: var(--accent-yellow);
+    stroke-width: 3;
+    fill: none;
+}
+
+#number-line .net-label {
+    fill: var(--accent-yellow);
+    font-size: 22px;
+    font-weight: 800;
+    text-anchor: middle;
+    font-family: inherit;
+}
+
+#number-line .start-pin {
+    fill: var(--text-1);
+}
+
+#number-line .end-pin {
+    fill: var(--accent-yellow);
+}
+
+/* Animations */
+.fade-in {
+    opacity: 0;
+    animation: fade-in 0.45s ease forwards;
+}
+
+@keyframes fade-in {
+    to { opacity: 1; }
+}
+
+/* ── Buttons ─────────────────────────────────── */
+
+.btn {
+    padding: 11px 36px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: transform 0.1s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ffe066, #ffc73d);
+    color: #1a3870;
+}
+
+.btn-primary:active { transform: scale(0.97); filter: brightness(1.05); }
+
+#continue-btn {
+    margin-top: 22px;
+}
+
+#predict-buttons {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.btn-predict {
+    padding: 18px 40px;
+    font-size: 22px;
+    font-weight: 800;
+    font-family: inherit;
+    border: 2px solid rgba(255, 255, 255, 0.30);
+    border-radius: 18px;
+    background: var(--card-bg);
+    color: var(--text-1);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-predict:active {
+    transform: scale(0.97);
+    background: rgba(255, 255, 255, 0.12);
+}

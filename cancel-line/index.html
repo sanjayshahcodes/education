@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cancel Line</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <div id="stats-header">
+            <div class="stat-label">Total</div>
+            <div class="stat-value" id="total-count">0</div>
+        </div>
+
+        <header id="header">
+            <div id="main-equation"></div>
+        </header>
+
+        <div id="predict-buttons" class="hidden"></div>
+
+        <main id="board">
+            <svg id="number-line" viewBox="0 0 1000 360" preserveAspectRatio="xMidYMid meet"></svg>
+        </main>
+
+        <button id="continue-btn" class="btn btn-primary hidden">Next Problem →</button>
+    </div>
+
+    <div id="particles-container"></div>
+    <script src="script.js"></script>
+</body>
+</html>

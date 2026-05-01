@@ -66,6 +66,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/cancel-game2", "-l", "8094", "--no-clipboard"],
       "port": 8094
+    },
+    {
+      "name": "cancel-line",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/cancel-line", "-l", "8095", "--no-clipboard"],
+      "port": 8095
     }
   ]
 }
