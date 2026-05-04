@@ -37,11 +37,20 @@ class CancelLine {
             this.mode = (m === 2 || m === 3) ? m : 1;
         }
 
+        // Solve mode (?solve=true) — after predicting more/less, she has to
+        // type the actual answer on a numpad. Rows stay hidden until she
+        // submits, forcing a mental computation rather than counting cells.
+        this.solveMode = params.get('solve') === 'true';
+        this.solveInput = '';
+
         this.init();
     }
 
     init() {
         document.getElementById('continue-btn').addEventListener('click', () => this.startNewRound());
+        document.querySelectorAll('#numpad .numkey').forEach(btn => {
+            btn.addEventListener('click', () => this.handleNumKey(btn.dataset.key));
+        });
         this.startNewRound();
     }
 
@@ -94,24 +103,73 @@ class CancelLine {
     startNewRound() {
         this.problem = this.generateProblem();
         this.revealed = false;
+        this.predicted = false;
+        this.solveInput = '';
         this.renderEquation();
         this.hide('continue-btn');
-        // Number-line is hidden until she predicts — keeps the question pure.
+        this.hide('numpad');
+        // Number-line is hidden until she's done predicting (and, in solve
+        // mode, typed her answer) — keeps the question pure.
         document.getElementById('number-line').innerHTML = '';
         this.renderPredictButtons();
     }
 
     onPredict() {
-        if (this.revealed) return;
-        this.revealed = true;
+        if (this.predicted) return;
+        this.predicted = true;
         this.hide('predict-buttons');
-        this.renderEquation();      // re-render to show the answer
+        if (this.solveMode) {
+            // Reveal numpad; rows still hidden until she submits an answer.
+            this.solveInput = '';
+            this.renderSolveInput();
+            this.show('numpad');
+        } else {
+            this.reveal();
+        }
+    }
+
+    handleNumKey(key) {
+        if (!this.solveMode || !this.predicted || this.revealed) return;
+        if (key === 'back') {
+            this.solveInput = this.solveInput.slice(0, -1);
+            this.renderSolveInput();
+            return;
+        }
+        if (key === 'enter') {
+            if (this.solveInput.length === 0) return;
+            this.hide('numpad');
+            this.reveal();
+            return;
+        }
+        if (this.solveInput.length >= 2) return;
+        this.solveInput += key;
+        this.renderSolveInput();
+    }
+
+    renderSolveInput() {
+        const el = document.getElementById('eq-answer-box');
+        if (!el) return;
+        if (this.solveInput.length === 0) {
+            el.textContent = '';
+            el.classList.add('empty');
+        } else {
+            el.textContent = this.solveInput;
+            el.classList.remove('empty');
+        }
+    }
+
+    // Reveal the rows and (in non-solve mode) fill in the answer. In solve
+    // mode the equation already shows her typed guess; the picture is the
+    // truth she compares against.
+    reveal() {
+        this.revealed = true;
+        this.renderEquation();
         this.renderLine();
         setTimeout(() => {
             this.totalGames++;
             document.getElementById('total-count').textContent = this.totalGames;
             this.show('continue-btn');
-        }, 1400);
+        }, 3400);
     }
 
     renderPredictButtons() {
@@ -136,10 +194,16 @@ class CancelLine {
         const [op1, op2] = ops;
         const num  = (n) => `<span class="eq-num">${n}</span>`;
         const op   = (s) => `<span class="eq-op">${s === '+' ? '+' : '−'}</span>`;
-        const tail = this.revealed ? String(result) : '?';
+        // In solve mode, the equation always ends with [her answer box] ? —
+        // her guess goes in the box, the picture below is the truth.
+        // Otherwise the tail is ? before reveal, the result after.
+        const tail = this.solveMode
+            ? `<span class="eq-answer-box empty" id="eq-answer-box"></span><span class="eq-tail">?</span>`
+            : `<span class="eq-tail">${this.revealed ? String(result) : '?'}</span>`;
         document.getElementById('main-equation').innerHTML =
             num(a) + op(op1) + num(b) + op(op2) + num(c) +
-            `<span class="eq-op">=</span><span class="eq-tail">${tail}</span>`;
+            `<span class="eq-op">=</span>` + tail;
+        if (this.solveMode) this.renderSolveInput();
     }
 
     // ── Number-line rendering ─────────────────────
@@ -211,8 +275,14 @@ class CancelLine {
         //   path:  optional { from, to, kind } — colors every cell from
         //          min(from,to) to max(from,to) inclusive in the same
         //          endpoint styling as marks of that kind.
-        const drawRow = (rowY, marks, rowLabel, path = null) => {
+        const STEP_MS = 450;
+        const setStep = (g, step) => {
+            g.style.animationDelay = (step * STEP_MS) + 'ms';
+        };
+
+        const drawRow = (rowY, marks, rowLabel, path = null, step = 0) => {
             const g = elt('g', { class: 'fade-in' });
+            setStep(g, step);
             const markFor = (v) => marks.find((m) => m.value === v);
             const inPath = (v) => {
                 if (!path) return false;
@@ -262,18 +332,26 @@ class CancelLine {
             svg.appendChild(g);
         };
 
+        // Reveal sequence:
+        //   step 0 — both rows fade in together (the empty number lines)
+        //   step 1 — start anchor on row 2
+        //   step 2 — arrow above row 2
+        //   step 3 — arrow above row 3
+        //   step 4 — end anchor on row 3
         // Row 2: every cell from start to mid (inclusive) colored to op1.
         const kind1 = op1 === '+' ? 'pos' : 'neg';
         drawRow(ROW2_Y,
             [],
             `After ${op1 === '+' ? '+' : '−'}${b}`,
-            { from: start, to: mid, kind: kind1 });
+            { from: start, to: mid, kind: kind1 },
+            0);
         // Row 3: every cell from mid to end (inclusive) colored to op2.
         const kind2 = op2 === '+' ? 'pos' : 'neg';
         drawRow(ROW3_Y,
             [],
             `After ${op2 === '+' ? '+' : '−'}${c}`,
-            { from: mid, to: end, kind: kind2 });
+            { from: mid, to: end, kind: kind2 },
+            0);
 
         // Anchor cells — overlay slightly larger boxes on top of the start
         // (row 2) and end (row 3) cells so the journey's beginning and end
@@ -281,8 +359,9 @@ class CancelLine {
         const anchorScale = 1.30;
         const anchorW = (cellW - 2) * anchorScale;
         const anchorH = cellH * anchorScale;
-        const drawAnchor = (v, rowY, boxCls, labelCls) => {
+        const drawAnchor = (v, rowY, boxCls, labelCls, step) => {
             const g = elt('g', { class: 'fade-in' });
+            setStep(g, step);
             g.appendChild(elt('rect', {
                 class: boxCls,
                 x: xOf(v) - anchorW / 2,
@@ -298,13 +377,13 @@ class CancelLine {
             }, String(v)));
             svg.appendChild(g);
         };
-        drawAnchor(start, ROW2_Y, 'cell-anchor-start', 'cell-label-final');
-        drawAnchor(end,   ROW3_Y, 'cell-final',        'cell-label-final');
+        drawAnchor(start, ROW2_Y, 'cell-anchor-start', 'cell-label-final', 1);
+        drawAnchor(end,   ROW3_Y, 'cell-final',        'cell-label-final', 4);
 
         // Arrow helper: a straight line from x1→x2 with an arrowhead at x2.
         // Stagger lets the second arrow stack above the first when their
         // ranges overlap — keeps the netting visually legible.
-        const drawArrow = (vFrom, vTo, sign, label, yOffset) => {
+        const drawArrow = (vFrom, vTo, sign, label, yOffset, step) => {
             const cls = sign === '+' ? 'arrow-pos' : 'arrow-neg';
             const headCls = sign === '+' ? 'arrowhead-pos' : 'arrowhead-neg';
             const lblCls = sign === '+' ? 'arrow-label-pos' : 'arrow-label-neg';
@@ -313,6 +392,7 @@ class CancelLine {
             const y = yOffset;
 
             const g = elt('g', { class: 'fade-in' });
+            setStep(g, step);
             // Shaft (stop short of the tip so the arrowhead caps it).
             const dir = Math.sign(x2 - x1) || 1;
             const tip = x2;
@@ -342,16 +422,9 @@ class CancelLine {
         // cells so the motion (and direction) reads at a glance.
         const ARROW_Y_OFFSET = cellH / 2 + 18;
         drawArrow(start, mid, op1, `${op1 === '+' ? '+' : '−'}${b}`,
-                  ROW2_Y - ARROW_Y_OFFSET);
+                  ROW2_Y - ARROW_Y_OFFSET, 2);
         drawArrow(mid, end, op2, `${op2 === '+' ? '+' : '−'}${c}`,
-                  ROW3_Y - ARROW_Y_OFFSET);
-
-        // Stagger the fade-ins so the diagram tells a story:
-        //   start → first arrow → second arrow → end → net.
-        const order = svg.querySelectorAll('.fade-in');
-        order.forEach((g, i) => {
-            g.style.animationDelay = (i * 220) + 'ms';
-        });
+                  ROW3_Y - ARROW_Y_OFFSET, 3);
     }
 
     show(id) { document.getElementById(id).classList.remove('hidden'); }

@@ -123,6 +123,63 @@ body {
 #main-equation .eq-op      { color: var(--text-1); padding: 0 2px; }
 #main-equation .eq-tail    { color: var(--text-1); }
 
+#main-equation .eq-answer-box {
+    color: var(--text-1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    height: 60px;
+    padding: 0 14px;
+    border: 3px solid rgba(255, 255, 255, 0.55);
+    border-radius: 12px;
+    margin: 0 4px;
+    vertical-align: middle;
+}
+
+/* ── Numpad (solve mode) ───────────────────────── */
+
+#numpad {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+    max-width: 100%;
+}
+
+.numkey {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+    font-weight: 700;
+    font-family: inherit;
+    background: var(--card-bg);
+    color: var(--text-1);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.numkey:active {
+    transform: scale(0.94);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.numkey-enter {
+    background: linear-gradient(135deg, #ffe066, #ffc73d);
+    color: #1a3870;
+    border-color: transparent;
+}
+
+.numkey-back {
+    color: var(--text-2);
+    font-size: 18px;
+}
+
 /* ── Number line ───────────────────────────────── */
 
 #board {
@@ -300,7 +357,7 @@ body {
 /* Animations */
 .fade-in {
     opacity: 0;
-    animation: fade-in 0.45s ease forwards;
+    animation: fade-in 0.75s ease forwards;
 }
 
 @keyframes fade-in {
