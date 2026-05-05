@@ -17,6 +17,7 @@
 class CancelLine {
     constructor() {
         this.totalGames = 0;
+        this.correctCount = 0;
         this.problem = null;
 
         // Mode (URL ?mode=1|2|3|learn) — same conventions as cancel-game2.
@@ -51,6 +52,11 @@ class CancelLine {
         document.querySelectorAll('#numpad .numkey').forEach(btn => {
             btn.addEventListener('click', () => this.handleNumKey(btn.dataset.key));
         });
+        // The "Correct" stat is only meaningful when she's actually
+        // submitting answers — hide it in observe-only mode.
+        if (this.solveMode) {
+            document.getElementById('correct-stat').classList.remove('hidden');
+        }
         this.startNewRound();
     }
 
@@ -137,6 +143,12 @@ class CancelLine {
         }
         if (key === 'enter') {
             if (this.solveInput.length === 0) return;
+            // Silently track correctness — the counter updates without
+            // any visual flash so the no-feedback rule still holds.
+            if (parseInt(this.solveInput, 10) === this.problem.result) {
+                this.correctCount++;
+                document.getElementById('correct-count').textContent = this.correctCount;
+            }
             this.hide('numpad');
             this.reveal();
             return;

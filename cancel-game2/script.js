@@ -14,6 +14,7 @@
 class CancelGame {
     constructor() {
         this.totalGames = 0;
+        this.correctCount = 0;
         this.problem = null;
         this.terms = [];
         this.nextBlockId = 0;
@@ -65,6 +66,10 @@ class CancelGame {
         document.querySelectorAll('#numpad .numkey').forEach(btn => {
             btn.addEventListener('click', () => this.handleNumKey(btn.dataset.key));
         });
+        // Show the Correct stat only when she's actually submitting answers.
+        if (this.solveMode) {
+            document.getElementById('correct-stat').classList.remove('hidden');
+        }
         this.startNewRound();
     }
 
@@ -97,8 +102,11 @@ class CancelGame {
 
     checkSolveAnswer() {
         if (this.solveInput.length === 0) return;
+        // Stash her submission's correctness; the counter only ticks up
+        // after she finishes the drag and verifies it herself in startSettle.
+        // No flash here — she discovers the verdict through the cancellation.
+        this.pendingCorrect = parseInt(this.solveInput, 10) === this.problem.result;
         // The equation's answer slot already shows her guess (live updated).
-        // No right/wrong feedback — she discovers the verdict by dragging.
         this.revealBoardAfterSolve();
     }
 
@@ -502,6 +510,12 @@ class CancelGame {
 
         this.totalGames++;
         document.getElementById('total-count').textContent = this.totalGames;
+        // Drag-verified — now we credit her solve-mode submission.
+        if (this.solveMode && this.pendingCorrect) {
+            this.correctCount++;
+            document.getElementById('correct-count').textContent = this.correctCount;
+        }
+        this.pendingCorrect = false;
         this.show('settle-section');
         this.show('continue-btn');
         this.celebrate();

@@ -76,7 +76,13 @@ body {
     text-align: center;
     z-index: 20;
     box-shadow: var(--shadow-soft);
+    display: flex;
+    gap: 14px;
 }
+
+.stat-block { text-align: center; }
+
+#correct-stat .stat-value { color: var(--green-1); }
 
 .stat-label {
     font-size: 10px;
