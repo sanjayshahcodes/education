@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Day the Crayons Quit</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Helvetica Neue", sans-serif;
+    background: #fdf8f0;
+    color: #2d2d2d;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    color: #c0392b;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: #aaa;
+    margin-bottom: 28px;
+  }
+  .letter {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .letter-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .letter-header svg {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+  }
+  .letter-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .letter-body {
+    padding: 0 20px 20px;
+  }
+  .line {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0ebe3;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    align-items: flex-start;
+  }
+  .line:last-child { border-bottom: none; }
+  .line-num {
+    font-size: 14px;
+    font-weight: 600;
+    color: #bbb;
+    min-width: 24px;
+    text-align: right;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+  .line-text {
+    font-size: 19px;
+    line-height: 1.55;
+    transition: opacity 0.25s ease, color 0.25s ease;
+  }
+  .line.hidden .line-text {
+    color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .blue-header { border-left: 5px solid #2980b9; }
+  .blue-header h2 { color: #2980b9; }
+  .peach-header { border-left: 5px solid #e8a87c; }
+  .peach-header h2 { color: #c97a4a; }
+  .hint {
+    text-align: center;
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
+  .toggle-all {
+    display: block;
+    margin: 0 auto 12px;
+    padding: 10px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .toggle-all:active { background: #f5f5f5; }
+</style>
+</head>
+<body>
+
+<h1>The Day the Crayons Quit</h1>
+<p class="hint">Tap a line to hide/show it. Practice reciting from memory!</p>
+<button class="toggle-all" id="hideAll">Hide All Lines</button>
+
+<!-- BLUE CRAYON -->
+<div class="letter">
+  <div class="letter-header blue-header">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect x="25" y="20" width="22" height="65" rx="4" fill="#2980b9"/>
+      <rect x="30" y="20" width="12" height="65" rx="2" fill="#5dade2"/>
+      <polygon points="36,20 25,8 47,8" fill="#2980b9"/>
+      <polygon points="36,20 30,8 42,8" fill="#5dade2"/>
+      <polygon points="36,8 33,2 39,2" fill="#1a5276"/>
+      <rect x="24" y="50" width="24" height="10" rx="2" fill="#1a5276" opacity="0.3"/>
+      <!-- face -->
+      <circle cx="33" cy="38" r="1.5" fill="#1a5276"/>
+      <circle cx="39" cy="38" r="1.5" fill="#1a5276"/>
+      <path d="M33,44 Q36,42 39,44" fill="none" stroke="#1a5276" stroke-width="1" stroke-linecap="round"/>
+      <!-- water drops -->
+      <ellipse cx="62" cy="35" rx="6" ry="8" fill="#aed6f1"/>
+      <ellipse cx="75" cy="50" rx="5" ry="7" fill="#85c1e9"/>
+      <ellipse cx="68" cy="68" rx="4" ry="6" fill="#aed6f1"/>
+    </svg>
+    <h2>Blue Crayon</h2>
+  </div>
+  <div class="letter-body" id="blue-lines">
+    <div class="line"><span class="line-num">1</span><span class="line-text">Dear Duncan, It has been great being your FAVORITE color this past year. And the year before. And the before THAT!</span></div>
+    <div class="line"><span class="line-num">2</span><span class="line-text">I have really enjoyed all those oceans, lakes, rivers, raindrops, rain clouds and clear skies.</span></div>
+    <div class="line"><span class="line-num">3</span><span class="line-text">But the BAD NEWS is that I am so short and stubby, I can't even see over the railing in the crayon box anymore!</span></div>
+    <div class="line"><span class="line-num">4</span><span class="line-text">I need a BREAK! Your very stubby friend, Blue Crayon</span></div>
+  </div>
+</div>
+
+<!-- PEACH CRAYON -->
+<div class="letter">
+  <div class="letter-header peach-header">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- crayon box -->
+      <rect x="50" y="30" width="36" height="50" rx="3" fill="#aed6f1"/>
+      <rect x="50" y="30" width="36" height="12" rx="3" fill="#85c1e9"/>
+      <ellipse cx="68" cy="56" rx="10" ry="5" fill="#1a5276" opacity="0.7"/>
+      <text x="68" y="59" text-anchor="middle" font-size="6" fill="#fff" font-weight="bold">CRAYONS</text>
+      <!-- peach crayon peeking out -->
+      <rect x="18" y="25" width="20" height="55" rx="4" fill="#f5cba7"/>
+      <rect x="22" y="25" width="12" height="55" rx="2" fill="#fad7a0"/>
+      <polygon points="28,25 18,14 38,14" fill="#f5cba7"/>
+      <polygon points="28,25 22,14 34,14" fill="#fad7a0"/>
+      <polygon points="28,14 25,8 31,8" fill="#e8a87c"/>
+      <!-- worried face -->
+      <circle cx="25" cy="40" r="1.5" fill="#a04000"/>
+      <circle cx="31" cy="40" r="1.5" fill="#a04000"/>
+      <path d="M25,48 Q28,50 31,48" fill="none" stroke="#a04000" stroke-width="1" stroke-linecap="round"/>
+    </svg>
+    <h2>Peach Crayon</h2>
+  </div>
+  <div class="letter-body" id="peach-lines">
+    <div class="line"><span class="line-num">1</span><span class="line-text">Hey Duncan, It's me PEACH CRAYON. Why did you peel of my paper wrapping??</span></div>
+    <div class="line"><span class="line-num">2</span><span class="line-text">Now I'm NAKED and embarrassed to leave the box. I don't even have any underwear!</span></div>
+    <div class="line"><span class="line-num">3</span><span class="line-text">How would YOU like to go to school naked? I need some clothes. HELP!</span></div>
+    <div class="line"><span class="line-num">4</span><span class="line-text">Your naked friend, Peach Crayon</span></div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.line').forEach(function(line) {
+  line.addEventListener('click', function() {
+    line.classList.toggle('hidden');
+  });
+});
+
+var allHidden = false;
+document.getElementById('hideAll').addEventListener('click', function() {
+  allHidden = !allHidden;
+  document.querySelectorAll('.line').forEach(function(line) {
+    if (allHidden) {
+      line.classList.add('hidden');
+    } else {
+      line.classList.remove('hidden');
+    }
+  });
+  this.textContent = allHidden ? 'Show All Lines' : 'Hide All Lines';
+});
+</script>
+
+</body>
+</html>
