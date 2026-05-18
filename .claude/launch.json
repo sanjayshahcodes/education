@@ -72,6 +72,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/cancel-line", "-l", "8095", "--no-clipboard"],
       "port": 8095
+    },
+    {
+      "name": "mystery-v8",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/mystery-number-v8", "-l", "8096", "--no-clipboard"],
+      "port": 8096
     }
   ]
 }
