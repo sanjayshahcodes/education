@@ -85,6 +85,36 @@
         if (deck.length) new Image().src = imagePath(deck[deck.length - 1].word);
     }
 
+    // The word under the picture, laid out on a handwriting triline the way
+    // her worksheet does it — top line, dashed midline, solid baseline — with
+    // the first letter's slot left empty for her to work out.
+    function renderWordHint(word) {
+        wordHint.innerHTML = "";
+        if (!SHOW_WORD) return;
+
+        [...word].forEach((ch, i) => {
+            if (ch === " ") {
+                const gap = document.createElement("span");
+                gap.className = "gap";
+                wordHint.appendChild(gap);
+                return;
+            }
+            const slot = document.createElement("span");
+            slot.className = "slot";
+            if (i === 0) {
+                slot.classList.add("blank");         // the letter she's identifying
+            } else {
+                const glyph = document.createElement("span");
+                glyph.className = "glyph";
+                glyph.textContent = LETTER_CASE === "upper"
+                    ? ch.toUpperCase()
+                    : ch.toLowerCase();
+                slot.appendChild(glyph);
+            }
+            wordHint.appendChild(slot);
+        });
+    }
+
     function renderChoices() {
         // one correct letter + wrong choices drawn only from letters she knows
         const pool = KNOWN_LETTERS

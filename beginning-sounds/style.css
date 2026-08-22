@@ -1,6 +1,15 @@
 /* Beginning Sounds — built for iPad (portrait and landscape).
    Everything is sized off the viewport so it never scrolls. */
 
+:root {
+    /* Handwriting-style face with a SINGLE-STOREY 'a' and 'g' — the letter
+       shapes she's actually being taught to write. Most print fonts
+       (Verdana, Helvetica, system-ui) use the double-storey 'a', which is a
+       different shape from the one she forms by hand. Both of these ship on
+       iPadOS and macOS. Used for the word AND the letter buttons she taps. */
+    --hand-font: "Chalkboard SE", "Comic Sans MS", "Marker Felt", sans-serif;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -149,13 +158,57 @@ body {
     pointer-events: none;                /* she can't drag the image off */
 }
 
+/* The word on handwriting triline, matching her worksheet:
+   solid top line, dashed midline at the x-height, solid baseline.
+   Tune the two variables below to shift the lines.  */
 #word-hint {
     flex: 0 0 auto;
-    font-size: clamp(28px, 5vh, 60px);
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    color: #6b6459;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    font-family: var(--hand-font);
+    font-size: clamp(32px, 7vh, 78px);
+    font-weight: 700;
+    color: #2b2b2b;
+
+    /* Measured from Chalkboard SE at weight 700: ascender 0.72em,
+       descender 0.30em. The top rule sits one ascender above the baseline,
+       so ascenders (t, k, l) just touch it.  */
+    --rule-h:  0.72em;   /* top line → baseline */
+    --rule:    #2b2b2b;
+    --rule-w:  2.5px;
+
+    /* room for descenders (p, g, j, y) to hang below the baseline */
+    padding-bottom: 0.30em;
 }
+
+#word-hint .slot {
+    position: relative;
+    width: 0.72em;
+    height: var(--rule-h);
+    background-image:
+        linear-gradient(var(--rule), var(--rule)),   /* top line */
+        linear-gradient(var(--rule), var(--rule));   /* baseline */
+    background-size: 100% var(--rule-w), 100% var(--rule-w);
+    background-position: 0 0, 0 100%;
+    background-repeat: no-repeat, no-repeat;
+}
+
+/* the blank first slot reads as a space to fill */
+#word-hint .slot.blank { width: 0.86em; }
+
+#word-hint .glyph {
+    position: absolute;
+    left: 50%;
+    /* measured: puts the glyph's baseline exactly on the bottom rule */
+    bottom: -0.077em;
+    transform: translateX(-50%);
+    line-height: 1;
+    white-space: pre;
+}
+
+/* gap between words, e.g. "teddy bear" — no rules drawn */
+#word-hint .gap { width: 0.4em; }
 
 
 /* ── letter choices ───────────────────────────────────────── */
@@ -171,7 +224,9 @@ body {
 }
 
 .choice {
-    font-family: inherit;
+    /* same handwritten letterforms as the word — she taps these, so the 'a'
+       here has to be the single-storey one she's learning to write */
+    font-family: var(--hand-font);
     /* Sized by script.js to fit LETTER_OPTIONS on screen, never below a
        comfortable tap target. The clamp is just the pre-script fallback. */
     width:  var(--choice-size, clamp(84px, 15vh, 150px));
