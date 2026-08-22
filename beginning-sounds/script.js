@@ -113,6 +113,25 @@
             }
             wordHint.appendChild(slot);
         });
+
+        fitWordHint();
+    }
+
+    // The word is set as large as it will go. A few of the longest words
+    // would spill past the edge of the card at that size, so those — and
+    // only those — are scaled down just enough to fit.
+    function fitWordHint() {
+        wordHint.style.fontSize = "";                     // back to the CSS size
+        const card = document.getElementById("picture-card");
+        const cs = getComputedStyle(card);
+        const avail = card.clientWidth
+                    - parseFloat(cs.paddingLeft)
+                    - parseFloat(cs.paddingRight);
+        const needed = wordHint.scrollWidth;
+        if (needed > avail && needed > 0) {
+            const size = parseFloat(getComputedStyle(wordHint).fontSize);
+            wordHint.style.fontSize = Math.floor(size * (avail / needed)) + "px";
+        }
     }
 
     function renderChoices() {
@@ -270,10 +289,11 @@
 
     sayAgain.addEventListener("click", () => { if (current) speak(current.word); });
 
-    // re-fit the letters when the iPad is rotated
+    // re-fit the letters and the word when the iPad is rotated
     window.addEventListener("resize", () => {
         const n = choices.children.length;
         if (n) sizeChoices(n);
+        if (wordHint.children.length) fitWordHint();
     });
 
     startButton.addEventListener("click", () => {

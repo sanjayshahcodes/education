@@ -362,6 +362,14 @@ body {
         align-self: center;
         margin-top: 0;
     }
+
+    /* Landscape is the orientation this actually gets used in, so the word
+       is set twice as large here. Words too long to fit at this size are
+       nudged down by fitWordHint() in script.js — at her current letters
+       that's only the 11-character ones, by about 2%. */
+    #word-hint {
+        font-size: clamp(48px, 14vh, 150px);
+    }
 }
 
 
