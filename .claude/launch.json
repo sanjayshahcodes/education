@@ -78,6 +78,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/mystery-number-v8", "-l", "8096", "--no-clipboard"],
       "port": 8096
+    },
+    {
+      "name": "beginning-sounds",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/beginning-sounds", "-l", "8097", "--no-clipboard"],
+      "port": 8097
     }
   ]
 }

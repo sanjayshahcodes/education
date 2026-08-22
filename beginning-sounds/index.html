@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- Lets it run full-screen when saved to the iPad home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sounds">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#fdf6e8">
+
+    <title>Beginning Sounds</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Tap-to-start. Also unlocks audio, which iOS blocks until a real tap. -->
+    <div id="start-screen">
+        <div id="start-inner">
+            <div id="start-emoji">🔤</div>
+            <button id="start-button">Start</button>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden">
+
+        <!-- Stars earned, one per correct answer -->
+        <div id="score-strip">
+            <div id="stars"></div>
+        </div>
+
+        <!-- The picture -->
+        <div id="picture-card">
+            <img id="picture" alt="" draggable="false">
+            <div id="word-hint"></div>
+        </div>
+
+        <!-- Letter choices -->
+        <div id="choices"></div>
+
+        <!-- Replay the word -->
+        <button id="say-again" title="Say it again">🔊</button>
+
+        <!-- Full-screen celebration on a correct answer -->
+        <div id="cheer" class="hidden"></div>
+
+    </div>
+
+    <!-- Shown if settings.js has a problem -->
+    <div id="setup-error" class="hidden"></div>
+
+    <script src="settings.js"></script>
+    <script src="words.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

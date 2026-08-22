@@ -1,0 +1,329 @@
+/* Beginning Sounds — built for iPad (portrait and landscape).
+   Everything is sized off the viewport so it never scrolls. */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;                    /* no scroll, no rubber-banding */
+    overscroll-behavior: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;          /* kills double-tap-to-zoom */
+}
+
+body {
+    font-family: -apple-system, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+    background: #fdf6e8;
+    color: #33302b;
+}
+
+.hidden { display: none !important; }
+
+
+/* ── tap to start ─────────────────────────────────────────── */
+
+#start-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #ffd98a 0%, #ffb4a8 50%, #b8d8f5 100%);
+    z-index: 50;
+}
+
+#start-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5vh;
+}
+
+#start-emoji {
+    font-size: clamp(90px, 18vh, 190px);
+    animation: bob 2.4s ease-in-out infinite;
+}
+
+@keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-16px); }
+}
+
+#start-button {
+    font-family: inherit;
+    font-size: clamp(30px, 5vh, 54px);
+    font-weight: 800;
+    color: #fff;
+    background: #f2704f;
+    border: none;
+    border-radius: 999px;
+    padding: 0.5em 1.7em;
+    box-shadow: 0 8px 0 #c2543a, 0 14px 24px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+}
+
+#start-button:active {
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 #c2543a, 0 6px 12px rgba(0, 0, 0, 0.18);
+}
+
+
+/* ── layout ───────────────────────────────────────────────── */
+
+#game-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* respect the home indicator / notch on newer iPads */
+    padding: calc(env(safe-area-inset-top) + 10px)
+             calc(env(safe-area-inset-right) + 20px)
+             calc(env(safe-area-inset-bottom) + 14px)
+             calc(env(safe-area-inset-left) + 20px);
+    gap: 1.4vh;
+}
+
+
+/* ── stars ────────────────────────────────────────────────── */
+
+#score-strip {
+    height: 5vh;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+#stars {
+    display: flex;
+    gap: 0.35em;
+    font-size: clamp(22px, 3.4vh, 40px);
+    line-height: 1;
+}
+
+.star {
+    color: #ffb300;
+    text-shadow: 0 2px 0 #d38f00;
+    animation: star-in 0.45s cubic-bezier(.2, 1.5, .4, 1);
+}
+
+@keyframes star-in {
+    from { transform: scale(0) rotate(-90deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0);      opacity: 1; }
+}
+
+
+/* ── picture ──────────────────────────────────────────────── */
+
+#picture-card {
+    flex: 1 1 auto;
+    min-height: 0;                       /* lets the image shrink inside flex */
+    width: 100%;
+    max-width: 760px;
+    background: #fff;
+    border: 5px solid #33302b;
+    border-radius: 28px;
+    box-shadow: 0 10px 0 rgba(51, 48, 43, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6vh;
+    padding: 2vh;
+    overflow: hidden;
+}
+
+#picture {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-width: 100%;
+    object-fit: contain;
+    pointer-events: none;                /* she can't drag the image off */
+}
+
+#word-hint {
+    flex: 0 0 auto;
+    font-size: clamp(28px, 5vh, 60px);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #6b6459;
+}
+
+
+/* ── letter choices ───────────────────────────────────────── */
+
+#choices {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(14px, 3vw, 40px);
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.choice {
+    font-family: inherit;
+    /* Sized by script.js to fit LETTER_OPTIONS on screen, never below a
+       comfortable tap target. The clamp is just the pre-script fallback. */
+    width:  var(--choice-size, clamp(84px, 15vh, 150px));
+    height: var(--choice-size, clamp(84px, 15vh, 150px));
+    font-size: calc(var(--choice-size, 15vh) * 0.58);
+    font-weight: 800;
+    line-height: 1;
+    color: #33302b;
+    background: #fff;
+    border: 5px solid #33302b;
+    border-radius: 50%;
+    box-shadow: 0 7px 0 #33302b;
+    cursor: pointer;
+    transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.choice:active {
+    transform: translateY(5px);
+    box-shadow: 0 2px 0 #33302b;
+}
+
+.choice.right {
+    background: #6fcf72;
+    border-color: #2f7a33;
+    box-shadow: 0 7px 0 #2f7a33;
+    color: #fff;
+    animation: right-pop 0.4s ease;
+}
+
+@keyframes right-pop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.22); }
+    100% { transform: scale(1); }
+}
+
+.choice.wrong {
+    background: #e9e4da;
+    border-color: #b3aca0;
+    box-shadow: 0 7px 0 #b3aca0;
+    color: #b3aca0;
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-11px); }
+    40%      { transform: translateX(11px); }
+    60%      { transform: translateX(-7px); }
+    80%      { transform: translateX(7px); }
+}
+
+
+/* ── replay button ────────────────────────────────────────── */
+
+#say-again {
+    flex: 0 0 auto;
+    font-size: clamp(24px, 3.6vh, 40px);
+    line-height: 1;
+    background: #fff;
+    border: 4px solid #33302b;
+    border-radius: 999px;
+    padding: 0.32em 0.85em;
+    box-shadow: 0 5px 0 #33302b;
+    cursor: pointer;
+}
+
+#say-again:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #33302b;
+}
+
+
+/* ── celebration ──────────────────────────────────────────── */
+
+#cheer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: min(48vh, 48vw);
+    pointer-events: none;
+    z-index: 40;
+}
+
+#cheer.pop { animation: cheer-pop 0.9s ease-out; }
+
+@keyframes cheer-pop {
+    0%   { transform: scale(0.2); opacity: 0; }
+    30%  { transform: scale(1.1); opacity: 1; }
+    70%  { transform: scale(1);   opacity: 1; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+
+
+/* ── landscape iPad: picture beside the letters ───────────── */
+
+@media (orientation: landscape) {
+
+    #game-container {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto 1fr auto;
+        grid-template-areas:
+            "stars   stars"
+            "picture choices"
+            "picture replay";
+        column-gap: 3vw;
+        align-items: center;
+    }
+
+    #score-strip { grid-area: stars; }
+
+    #picture-card {
+        grid-area: picture;
+        height: 100%;
+        min-height: 0;
+        max-width: none;
+    }
+
+    #choices {
+        grid-area: choices;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        width: auto;
+        gap: clamp(10px, 2.2vh, 26px);
+        align-self: center;
+    }
+
+    #say-again {
+        grid-area: replay;
+        justify-self: center;
+        align-self: center;
+        margin-top: 0;
+    }
+}
+
+
+/* ── setup error ──────────────────────────────────────────── */
+
+#setup-error {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8vw;
+    background: #fdf6e8;
+    font-size: clamp(18px, 2.6vh, 26px);
+    font-weight: 600;
+    line-height: 1.5;
+    color: #b3402f;
+}
