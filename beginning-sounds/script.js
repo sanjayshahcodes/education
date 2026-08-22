@@ -76,8 +76,7 @@
         picture.src = imagePath(current.word);
         picture.alt = current.word;
 
-        // "apple" → "_pple", matching the blank on her worksheet
-        wordHint.textContent = SHOW_WORD ? "_" + current.word.slice(1) : "";
+        renderWordHint(current.word);
 
         renderChoices();
         speak(current.word);
