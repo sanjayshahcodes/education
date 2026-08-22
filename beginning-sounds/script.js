@@ -226,6 +226,7 @@
     let audioCtx = null;
 
     function unlockAudio() {
+        if (!SPEAK_WORD && !SOUND_EFFECTS) return;   // nothing to unlock
         try {
             const Ctx = window.AudioContext || window.webkitAudioContext;
             if (Ctx) {
@@ -287,7 +288,12 @@
     const problem = checkSettings();
     if (problem) { fail(problem); return; }
 
-    sayAgain.addEventListener("click", () => { if (current) speak(current.word); });
+    // the replay button does nothing without speech, so don't show it
+    if (SPEAK_WORD) {
+        sayAgain.addEventListener("click", () => { if (current) speak(current.word); });
+    } else {
+        sayAgain.classList.add("hidden");
+    }
 
     // re-fit the letters and the word when the iPad is rotated
     window.addEventListener("resize", () => {

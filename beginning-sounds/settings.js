@@ -34,9 +34,10 @@ const LETTER_OPTIONS = 3;
 
 // Say the word out loud when each picture appears, and again if
 // she taps the wrong letter. Uses the device's built-in voice.
-// This matters: it means she never has to guess what a picture
-// is called. Set to false for silent play.
-const SPEAK_WORD = true;
+// Turn this on if you ever want it: it means she never has to
+// guess what a picture is called. The 🔊 replay button only shows
+// when this is true.
+const SPEAK_WORD = false;
 
 // Show the word under the picture with the first letter blanked
 // out, the way her worksheet does:  _pple
@@ -46,5 +47,6 @@ const SHOW_WORD = true;
 // "lower" → a b c      "upper" → A B C
 const LETTER_CASE = "lower";
 
-// Play a chime when she gets it right.
-const SOUND_EFFECTS = true;
+// Play a chime when she gets it right, and a soft blip when she
+// doesn't. Off — the game is silent.
+const SOUND_EFFECTS = false;
