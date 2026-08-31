@@ -90,6 +90,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/block-subtraction", "-l", "8098", "--no-clipboard"],
       "port": 8098
+    },
+    {
+      "name": "block-addition",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/block-addition", "-l", "8099", "--no-clipboard"],
+      "port": 8099
     }
   ]
 }
