@@ -1,0 +1,430 @@
+/* Block Subtraction — built for iPad landscape.
+   Everything is sized off a single --u (the edge of one ones-cube), which
+   script.js computes from the viewport so the board never scrolls. */
+
+:root {
+    --bg-1: #0f1e3d;
+    --bg-2: #1a3870;
+    --bg-3: #0f1e3d;
+    --card-bg: rgba(255, 255, 255, 0.06);
+    --card-border: rgba(255, 255, 255, 0.12);
+
+    --green-1: #7ee090;
+    --green-fill: rgba(126, 224, 144, 0.22);
+    --green-line: rgba(126, 224, 144, 0.42);
+    --green-glow: rgba(126, 224, 144, 0.55);
+
+    --red-1: #ff8a8a;
+    --red-fill: rgba(255, 138, 138, 0.22);
+    --red-line: rgba(255, 138, 138, 0.42);
+
+    --gone-1: rgba(255, 255, 255, 0.22);
+    --gone-fill: rgba(255, 255, 255, 0.04);
+    --gone-line: rgba(255, 255, 255, 0.10);
+
+    --accent-cyan: #00d4ff;
+    --accent-yellow: #FFD93D;
+
+    --text-1: #ffffff;
+    --text-2: rgba(255, 255, 255, 0.78);
+    --text-3: rgba(255, 255, 255, 0.50);
+
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.20);
+
+    /* Geometry, all in multiples of --u. script.js overwrites --u. */
+    --u: 24px;
+    --pgap: 7px;    /* the one gap: between any two boards in a row */
+    --labelw: 132px;
+    --wh: 0px;      /* hundreds column width — set from the TOP number so
+                       both rows' partial boards stay vertically aligned */
+    --wr: 0px;      /* remainder column: always exactly one board wide */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;                 /* no scroll, no rubber-banding */
+    overscroll-behavior: none;
+    touch-action: manipulation;       /* kills double-tap-to-zoom */
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    background:
+        radial-gradient(ellipse at top left,     rgba(199, 125, 255, 0.12), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(0, 212, 255, 0.10),   transparent 55%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    background-attachment: fixed;
+    color: var(--text-1);
+    font-feature-settings: "ss01", "ss02";
+}
+
+.hidden { display: none !important; }
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    padding: max(10px, env(safe-area-inset-top)) 18px max(10px, env(safe-area-inset-bottom));
+}
+
+/* ── Stats badge ────────────────────────────────── */
+
+#stats-header {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    right: max(14px, env(safe-area-inset-right));
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 5px 12px;
+    z-index: 20;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    gap: 14px;
+}
+
+.stat-block { text-align: center; }
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    margin-bottom: 1px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent-cyan);
+    letter-spacing: -0.5px;
+}
+
+#correct-count { color: var(--green-1); }
+
+/* ── Header / equation ─────────────────────────── */
+
+#header {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.14);
+}
+
+#main-equation {
+    font-size: clamp(30px, 6.4vh, 54px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+}
+
+#main-equation .eq-num-top { color: var(--green-1); }
+#main-equation .eq-num-bot { color: var(--red-1); }
+#main-equation .eq-op      { color: var(--text-1); padding: 0 4px; }
+
+#main-equation .eq-answer-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.6em;
+    height: 1.3em;
+    padding: 0 0.25em;
+    border: 3px solid rgba(255, 255, 255, 0.55);
+    border-radius: 12px;
+    margin-left: 6px;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+#main-equation .eq-answer-box.right {
+    border-color: var(--green-1);
+    color: var(--green-1);
+    background: rgba(126, 224, 144, 0.12);
+}
+
+#main-equation .eq-answer-box.wrong {
+    border-color: var(--red-1);
+    color: var(--red-1);
+    background: rgba(255, 138, 138, 0.12);
+}
+
+#main-equation .eq-answer-box.revealed {
+    border-color: var(--accent-yellow);
+    color: var(--accent-yellow);
+    background: rgba(255, 217, 61, 0.12);
+}
+
+/* ── Board ─────────────────────────────────────── */
+
+#board {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(1.4 * var(--u));
+}
+
+/* Four columns: row label, hundreds, tens, ones. The hundreds column is
+   sized from the top number, so the tens and ones groups of both rows
+   start at the same x — that alignment is the whole point of the game. */
+.grid-row {
+    display: grid;
+    grid-template-columns: var(--labelw) var(--wh) var(--wr);
+    column-gap: var(--pgap);
+    align-items: end;
+    width: max-content;
+    max-width: 100%;
+}
+
+.row-label {
+    padding-right: calc(0.9 * var(--u));
+    font-size: calc(1.5 * var(--u));
+    font-weight: 800;
+    text-align: right;
+    letter-spacing: -1px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+#row-top    .row-label { color: var(--green-1); }
+#row-bottom .row-label { color: var(--red-1); }
+
+.place-group {
+    display: flex;
+    align-items: flex-end;      /* pieces rest on a common baseline */
+    justify-content: flex-start; /* left-aligned, so a leftover flat sticks
+                                    out on the right with nothing beneath it */
+    gap: var(--pgap);
+    height: calc(10 * var(--u));
+}
+
+/* ── Hundred boards ────────────────────────────── */
+
+/* Every quantity is drawn on the same 10x10 board at the same cell size:
+   a full hundred is a board with all 100 cells filled, and the leftover
+   part of the number is a board with only that many filled. Same object,
+   more or less of it — which is the comparison the game is about. */
+
+.piece {
+    flex: 0 0 auto;
+    border-radius: 3px;
+    box-sizing: border-box;
+    width: calc(10 * var(--u));
+    height: calc(10 * var(--u));
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+/* Cells are drawn with gradients rather than 100 child divs per board. */
+.filled {
+    background-color: var(--fill);
+    background-origin: border-box;
+    background-clip: border-box;
+    background-image:
+        repeating-linear-gradient(to right,  var(--line) 0 1px, transparent 1px var(--u)),
+        repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px var(--u));
+    transition: background-color 0.35s ease,
+                background-image 0.35s ease,
+                border-color 0.35s ease;
+}
+
+/* Only a whole board outlines itself. The partial board's fills are drawn
+   without borders and share one outline (below), so its blocks read as a
+   single quantity rather than a tens piece next to a ones piece. */
+.piece.filled {
+    border: 1.5px solid var(--edge);
+}
+
+/* A partial board is only its blocks — nothing is drawn for the part of a
+   hundred it doesn't fill. It still occupies a full board's slot so that the
+   two rows' remainders line up, but the empty space stays empty: only a whole
+   hundred gets to look like a hundred. */
+.board {
+    position: relative;
+}
+
+/* The complete columns of the partial board, standing on its floor.
+   A full column is ten cells tall — a tens rod, drawn in place. */
+.board-cols {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: calc(var(--fullcols) * var(--u));
+    height: calc(10 * var(--u));
+    border-radius: 2px;
+}
+
+/* The last, incomplete column, standing beside them — also from the floor. */
+.board-part {
+    position: absolute;
+    left: calc(var(--fullcols) * var(--u));
+    bottom: 0;
+    width: var(--u);
+    height: calc(var(--rest) * var(--u));
+    border-radius: 2px;
+}
+
+/* A single stroke around the union of the filled columns — the L-shaped
+   boundary of the whole remainder, with no line between its tens and its
+   ones. The point being made is that all 73 of them cancel, not that they
+   are 70 and 3. */
+.board-outline {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.board-outline polygon {
+    fill: none;
+    stroke: var(--edge);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    transition: stroke 0.35s ease;
+}
+
+.piece.top {
+    --fill: var(--green-fill);
+    --line: var(--green-line);
+    --edge: var(--green-1);
+}
+
+.piece.bottom {
+    --fill: var(--red-fill);
+    --line: var(--red-line);
+    --edge: var(--red-1);
+}
+
+/* Matched — drained of color, still there so she can see what it matched. */
+.piece.gone {
+    --fill: var(--gone-fill);
+    --line: var(--gone-line);
+    --edge: var(--gone-1);
+    opacity: 0.45;
+    transform: scale(0.94);
+}
+
+/* The hundred(s) with nothing underneath — the answer, made visible. */
+.piece.leftover {
+    animation: leftover-pulse 1.5s ease-in-out infinite;
+    z-index: 2;
+}
+
+@keyframes leftover-pulse {
+    0%, 100% { filter: drop-shadow(0 0 5px var(--green-glow)); }
+    50%      { filter: drop-shadow(0 0 20px var(--green-glow)); }
+}
+
+/* ── Caption ───────────────────────────────────── */
+
+#caption {
+    flex: 0 0 auto;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(17px, 2.8vh, 26px);
+    font-weight: 700;
+    color: var(--text-2);
+    text-align: center;
+}
+
+#caption.final {
+    color: var(--accent-yellow);
+    font-size: clamp(21px, 3.4vh, 32px);
+    font-weight: 800;
+}
+
+/* ── Footer: numpad / next ─────────────────────── */
+
+#footer {
+    flex: 0 0 auto;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#numpad {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
+.numkey {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+    font-weight: 700;
+    font-family: inherit;
+    background: var(--card-bg);
+    color: var(--text-1);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.numkey:active {
+    transform: scale(0.94);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.numkey-enter {
+    background: linear-gradient(135deg, #ffe066, #ffc73d);
+    color: #1a3870;
+    border-color: transparent;
+}
+
+.numkey-back {
+    color: var(--text-2);
+    font-size: 18px;
+}
+
+.btn {
+    padding: 12px 38px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: transform 0.1s ease, filter 0.15s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ffe066, #ffc73d);
+    color: #1a3870;
+}
+
+.btn-primary:active { transform: scale(0.97); filter: brightness(1.05); }

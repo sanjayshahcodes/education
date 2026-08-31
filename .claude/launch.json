@@ -84,6 +84,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/beginning-sounds", "-l", "8097", "--no-clipboard"],
       "port": 8097
+    },
+    {
+      "name": "block-subtraction",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/block-subtraction", "-l", "8098", "--no-clipboard"],
+      "port": 8098
     }
   ]
 }
