@@ -266,28 +266,24 @@ class BlockSubtraction {
         this.runReveal();
     }
 
-    // Everything that has a match goes grey in one moment, and the boards
-    // with no match light up in that same moment. One fade, one event: the
-    // whole of 273 cancels, and what's left over is the answer.
+    // One moment, and it's the answer: everything with a match goes grey,
+    // the boards with no match stay lit, and the equation completes. No
+    // step in between — the picture and the answer arrive together.
     runReveal() {
-        const { top, bottom, answer, kind, remTop } = this.problem;
+        const { top, bottom, answer } = this.problem;
         const caption = document.getElementById('caption');
         const step = (delay, fn) => this.timers.push(setTimeout(fn, delay));
 
         step(500, () => {
-            caption.textContent = kind === 'match'
-                ? `${bottom} − ${bottom} = 0`
-                : `Nothing to match the ${remTop} — it stays`;
             const { matched, leftover } = this.splitByMatch();
             matched.forEach(el => el.classList.add('gone'));
             // The leftover isn't styled — it's simply the thing that never
             // faded. The class only marks it as the answer.
             leftover.forEach(el => el.classList.add('leftover'));
-        });
 
-        step(2000, () => {
             caption.classList.add('final');
             caption.textContent = `${top} − ${bottom} = ${answer}`;
+
             const box = document.getElementById('eq-answer-box');
             if (box) {
                 box.classList.remove('right', 'wrong');
@@ -296,7 +292,7 @@ class BlockSubtraction {
             }
         });
 
-        step(2700, () => this.show('continue-btn'));
+        step(1400, () => this.show('continue-btn'));
     }
 
     // Split every board into the ones that have a partner in the other term
