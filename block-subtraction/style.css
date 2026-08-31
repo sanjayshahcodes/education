@@ -260,7 +260,6 @@ body {
     box-sizing: border-box;
     width: calc(var(--gw) * var(--u));
     height: calc(10 * var(--u));
-    transition: transform 0.35s ease;
 }
 
 /* Cells are drawn with gradients rather than 100 child divs per board. */
@@ -345,12 +344,13 @@ body {
     --edge: var(--red-1);
 }
 
-/* Matched — drained of color, still there so she can see what it matched. */
+/* Matched — drained of color, but the same size and in the same place, so
+   the blocks she's comparing never change shape under her. The fade is the
+   whole signal. */
 .piece.gone {
     --fill: var(--gone-fill);
     --line: var(--gone-line);
     --edge: var(--gone-1);
-    transform: scale(0.94);
 }
 
 /* The hundred(s) with nothing underneath — the answer, made visible. */
