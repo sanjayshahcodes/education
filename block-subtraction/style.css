@@ -33,11 +33,7 @@
 
     /* Geometry, all in multiples of --u. script.js overwrites --u. */
     --u: 24px;
-    --pgap: 7px;    /* the one gap: between any two boards in a row */
-    --labelw: 132px;
-    --wh: 0px;      /* hundreds column width — set from the TOP number so
-                       both rows' partial boards stay vertically aligned */
-    --wr: 0px;      /* remainder column: always exactly one board wide */
+    --pgap: 7px;    /* the one gap: between any two boards in a term */
 }
 
 * {
@@ -175,7 +171,11 @@ body {
     background: rgba(255, 217, 61, 0.12);
 }
 
-/* ── Board ─────────────────────────────────────── */
+/* ── The equation ──────────────────────────────── */
+
+/* Each number sits directly over its own blocks, with a rule between them,
+   and the two terms stand side by side like a written equation. The digits
+   and the quantity they name are the same object, in the same place. */
 
 #board {
     flex: 1 1 auto;
@@ -185,41 +185,62 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: calc(1.4 * var(--u));
+    gap: calc(1.3 * var(--u));
 }
 
-/* Four columns: row label, hundreds, tens, ones. The hundreds column is
-   sized from the top number, so the tens and ones groups of both rows
-   start at the same x — that alignment is the whole point of the game. */
-.grid-row {
-    display: grid;
-    grid-template-columns: var(--labelw) var(--wh) var(--wr);
-    column-gap: var(--pgap);
-    align-items: end;
+#equation-row {
+    display: flex;
+    align-items: flex-end;
+    gap: calc(1.0 * var(--u));
     width: max-content;
     max-width: 100%;
 }
 
-.row-label {
-    padding-right: calc(0.9 * var(--u));
-    font-size: calc(1.5 * var(--u));
-    font-weight: 800;
-    text-align: right;
-    letter-spacing: -1px;
-    line-height: 1;
-    white-space: nowrap;
+.term {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
-#row-top    .row-label { color: var(--green-1); }
-#row-bottom .row-label { color: var(--red-1); }
+.term.side-top    { color: var(--green-1); }
+.term.side-bottom { color: var(--red-1); }
 
-.place-group {
+.term-label {
+    font-size: calc(2.2 * var(--u));
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    text-align: center;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+}
+
+.term-rule {
+    height: 3px;
+    background: currentColor;
+    opacity: 0.55;
+    border-radius: 2px;
+    margin: calc(0.30 * var(--u)) 0 calc(0.55 * var(--u));
+}
+
+.term-blocks {
     display: flex;
-    align-items: flex-end;      /* pieces rest on a common baseline */
-    justify-content: flex-start; /* left-aligned, so a leftover flat sticks
-                                    out on the right with nothing beneath it */
+    align-items: flex-end;
     gap: var(--pgap);
     height: calc(10 * var(--u));
+}
+
+/* The minus rides at the height of the numerals, lifted clear of the
+   blocks by exactly one board. */
+#equation-row .op {
+    margin-bottom: calc(10.2 * var(--u));
+}
+
+.op {
+    flex: 0 0 auto;
+    font-size: calc(2.2 * var(--u));
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--text-1);
 }
 
 /* ── Hundred boards ────────────────────────────── */

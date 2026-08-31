@@ -3,18 +3,23 @@
  *
  * The digits hide the answer; hundred boards show it. Every number is drawn
  * on the same 10x10 board at the same cell size — full boards for the
- * hundreds, plus one partly-filled board for whatever is left over:
+ * hundreds, plus one partly-filled board for whatever is left over. Each
+ * number sits directly above its own blocks, and the two terms stand side
+ * by side as a written equation:
  *
- *     486   [100][100][100][100]  [ 86 ]
- *   − 386   [100][100][100]       [ 86 ]
+ *              273 − 173 = [   ]
+ *     ─────────────────────────────────────
+ *        273                 173
+ *     ───────────    −    ─────────
+ *     [100][100][73]      [100][73]
  *
- * The partial board fills column by column from the floor up, so its eight
- * complete columns are eight tens rods and the six cells beside them are
- * six ones — place value, without the cells ever leaving the board.
+ * The partial board fills column by column from the floor up, so its seven
+ * complete columns are seven tens rods and the three cells beside them are
+ * three ones — place value, without the cells ever leaving the board.
  *
  * The two partial boards are visibly the same object, filled to the same
- * line, sitting in the same column. Three full boards match three full
- * boards. One board has nothing beneath it — and that board IS the answer.
+ * line. One full board matches one full board. What has no match on the
+ * other side IS the answer.
  *
  * She doesn't touch the blocks. They're there to look at while she works the
  * problem, and once she answers they cancel off so the leftover hundred is
@@ -39,15 +44,17 @@ class BlockSubtraction {
             { diff: 3, weight: 18 },
         ];
 
-        // Never draw more than this many flats in a row. Past four the unit
-        // size has to shrink so far that a flat's 10×10 grid stops reading
-        // as ten tens — which is the one thing it has to read as.
+        // Side by side, both numbers' boards share one line, so the widest
+        // problem sets the cell size for all of them. Numbers stay under 450.
+        this.MAX_VALUE = 450;
+
+        // Never draw more than this many full boards in a term. Past four the
+        // cell size has to shrink so far that a board stops reading as ten
+        // tens — which is the one thing it has to read as.
         this.MAX_HUNDREDS = 4;
 
         // Layout constants, in multiples of --u (one ones-cube edge).
-        this.PIECE_GAP  = 0.30;   // between any two boards in a row
-        this.LABEL_W    = 5.60;
-        this.ROW_GAP    = 1.40;
+        this.PIECE_GAP  = 0.30;   // between any two boards in a term
         this.U_MIN      = 10;
         this.U_MAX      = 34;
 
@@ -119,6 +126,7 @@ class BlockSubtraction {
 
             const top = h1 * 100 + t * 10 + o;
             const bottom = h2 * 100 + t * 10 + o;
+            if (top >= this.MAX_VALUE) continue;
             if (this.problem && this.problem.top === top && this.problem.bottom === bottom) continue;
 
             return { h1, h2, rem: t * 10 + o, diff, top, bottom, answer: diff * 100 };
@@ -246,6 +254,18 @@ class BlockSubtraction {
 
     // ── Rendering ──────────────────────────────────
 
+    // The whole equation is one row: term, minus, term, equals, answer box.
+    renderBoard() {
+        const { h1, h2, rem, top, bottom } = this.problem;
+        const row = document.getElementById('equation-row');
+        row.innerHTML = '';
+        row.appendChild(this.buildTerm('row-top', 'top', top, h1, rem));
+        row.appendChild(this.buildOp('−'));
+        row.appendChild(this.buildTerm('row-bottom', 'bottom', bottom, h2, rem));
+
+    }
+
+    // The problem as she'd meet it on a worksheet, above the model of it.
     renderEquation() {
         const { top, bottom } = this.problem;
         document.getElementById('main-equation').innerHTML =
@@ -262,37 +282,41 @@ class BlockSubtraction {
         if (box) box.textContent = this.input;
     }
 
-    renderBoard() {
-        const { h1, h2, rem } = this.problem;
-        this.buildRow('row-top',    'top',    h1, rem, String(this.problem.top));
-        this.buildRow('row-bottom', 'bottom', h2, rem, `− ${this.problem.bottom}`);
+    buildOp(glyph) {
+        const op = document.createElement('div');
+        op.className = 'op';
+        op.textContent = glyph;
+        return op;
     }
 
-    buildRow(rowId, side, hundreds, rem, labelText) {
-        const row = document.getElementById(rowId);
-        row.innerHTML = '';
+    // One term: the numeral, a rule, and the blocks it names — stacked, so
+    // the digits and the quantity read as the same thing.
+    buildTerm(blocksId, side, value, hundreds, rem) {
+        const term = document.createElement('div');
+        term.className = `term side-${side}`;
 
         const label = document.createElement('div');
-        label.className = 'row-label';
-        label.textContent = labelText;
-        row.appendChild(label);
+        label.className = 'term-label';
+        label.textContent = String(value);
+        term.appendChild(label);
 
-        // Hundreds: full boards, all 100 cells filled.
-        const hGroup = document.createElement('div');
-        hGroup.className = 'place-group';
+        const rule = document.createElement('div');
+        rule.className = 'term-rule';
+        term.appendChild(rule);
+
+        const blocks = document.createElement('div');
+        blocks.className = 'term-blocks';
+        blocks.id = blocksId;
         for (let i = 0; i < hundreds; i++) {
-            const board = document.createElement('div');
-            board.className = `piece filled ${side}`;
-            board.dataset.place = 'h';
-            hGroup.appendChild(board);
+            const full = document.createElement('div');
+            full.className = `piece filled ${side}`;
+            full.dataset.place = 'h';
+            blocks.appendChild(full);
         }
-        row.appendChild(hGroup);
+        blocks.appendChild(this.buildPartialBoard(rem, side));
+        term.appendChild(blocks);
 
-        // Remainder: the same board, filled only part way up.
-        const rGroup = document.createElement('div');
-        rGroup.className = 'place-group';
-        rGroup.appendChild(this.buildPartialBoard(rem, side));
-        row.appendChild(rGroup);
+        return term;
     }
 
     // A 10x10 board holding `rem` cells, filled column by column and each
@@ -355,35 +379,30 @@ class BlockSubtraction {
     // resulting column widths back into CSS so both rows share them.
     fitUnit() {
         if (!this.problem) return;
-        const { h1 } = this.problem;
+        const { h1, h2 } = this.problem;
         const board = document.getElementById('board');
         const availW = board.clientWidth;
         const availH = board.clientHeight;
         if (availW <= 0 || availH <= 0) return;
 
-        // Hundreds group is h1 boards wide; the remainder column is always
-        // exactly one board, whatever it holds. Every gap in the row is the
-        // same, so the remainder board sits no further off than the hundreds
-        // do from each other — one continuous quantity.
-        const whUnits = h1 * 10 + (h1 - 1) * this.PIECE_GAP;
-        const wrUnits = 10;
+        // A term is its full boards plus one remainder board, with a gap
+        // between each. Both terms, both operators and the answer box all
+        // share one line, so the row's total width sets the cell size.
+        const termUnits = (h) => (h + 1) * 10 + h * this.PIECE_GAP;
+        const OP_W = 2.2;
+        const GAP = 1.0;
 
-        const unitsWide = this.LABEL_W + whUnits + wrUnits + 2 * this.PIECE_GAP;
-        const unitsTall = 10 + this.ROW_GAP + 10 + 2 * this.ROW_GAP;
+        // Only the terms and the minus share the line; the answer sits below.
+        const unitsWide = termUnits(h1) + termUnits(h2) + OP_W + 2 * GAP;
+        // Numeral, rule, one board tall, plus air.
+        const unitsTall = 2.4 + 1.0 + 10 + 1.6;
 
         let u = Math.min(availW / unitsWide, availH / unitsTall);
         u = Math.max(this.U_MIN, Math.min(this.U_MAX, Math.floor(u)));
 
-        // Recompute the column widths from the *rounded* pixel gap, so the
-        // declared widths match what the boards actually occupy.
-        const pgap = Math.max(2, Math.round(this.PIECE_GAP * u));
-
         const root = document.documentElement.style;
         root.setProperty('--u', `${u}px`);
-        root.setProperty('--pgap', `${pgap}px`);
-        root.setProperty('--labelw', `${Math.round(this.LABEL_W * u)}px`);
-        root.setProperty('--wh', `${h1 * 10 * u + (h1 - 1) * pgap}px`);
-        root.setProperty('--wr', `${10 * u}px`);
+        root.setProperty('--pgap', `${Math.max(2, Math.round(this.PIECE_GAP * u))}px`);
     }
 
     show(id) { document.getElementById(id).classList.remove('hidden'); }
