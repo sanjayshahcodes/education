@@ -35,7 +35,9 @@
 
     /* Geometry, all in multiples of --u. script.js overwrites --u. */
     --u: 24px;
-    --pgap: 7px;    /* the one gap: between any two boards in a term */
+    --pgap: 7px;    /* the one gap: between any two groups in a term */
+    --gw: 10;       /* cells across one full group: 10 for a hundred board,
+                       1 for a stack of ten */
 }
 
 * {
@@ -256,7 +258,7 @@ body {
     flex: 0 0 auto;
     border-radius: 3px;
     box-sizing: border-box;
-    width: calc(10 * var(--u));
+    width: calc(var(--gw) * var(--u));
     height: calc(10 * var(--u));
     transition: transform 0.35s ease;
 }
@@ -295,7 +297,7 @@ body {
     position: absolute;
     left: 0;
     bottom: 0;
-    width: calc(var(--fullcols) * var(--u));
+    width: calc(var(--fullcols) * var(--u));   /* zero in tens mode */
     height: calc(10 * var(--u));
     border-radius: 2px;
 }

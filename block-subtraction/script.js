@@ -1,5 +1,5 @@
 /**
- * Block Subtraction — why 486 − 386 is 100.
+ * Block Subtraction — why 486 − 386 is 100, and why 73 − 23 is 50.
  *
  * The digits hide the answer; hundred boards show it. Every number is drawn
  * on the same 10x10 board at the same cell size — full boards for the
@@ -29,34 +29,59 @@
  * the leftover is the answer) moved up into place value. Same punchline,
  * bigger numbers.
  *
- * Problems are "clean cancels" only: the last two digits always match, so
- * the partial boards are always identical and every answer is a whole
- * number of hundreds.
+ * Problems are "clean cancels" only: everything below the leading place
+ * always matches, so the partial groups are identical and every answer is
+ * a whole number of hundreds.
+ *
+ * By default problems mix the two places. ?mode=hundreds or ?mode=tens pins
+ * one of them. At the tens place hundred boards don't exist; the largest
+ * unit is a stack of ten, and the partial group holds the ones:
+ *
+ *               73 − 23 = [   ]
+ *     ─────────────────────────────────
+ *          73                23
+ *     ───────────        ─────────
+ *     ||||||| ▪          || ▪
+ *
+ * Seven stacks against two, the same 3 on both, five stacks left over.
+ * Identical code — only how much one full group is worth, and how wide it
+ * is drawn, differ between the modes.
  */
 
 class BlockSubtraction {
     constructor() {
-        // Difference in hundreds, weighted hard toward 1 — "they're only one
-        // hundred apart" is the case she's actually stuck on.
+        // Difference in leading units, weighted hard toward 1 — "they're only
+        // one apart" is the case she's actually stuck on. Same weights in
+        // both modes: the lesson is the same, one place down.
         this.diffWeights = [
             { diff: 1, weight: 56 },
             { diff: 2, weight: 26 },
             { diff: 3, weight: 18 },
         ];
 
-        // Side by side, both numbers' boards share one line, so the widest
-        // problem sets the cell size for all of them. Numbers stay under 450.
-        this.MAX_VALUE = 450;
+        // The same game at two places. All that differs is what one full
+        // group is worth and how many cells wide it gets drawn.
+        this.PLACES = {
+            // Side by side, both numbers' groups share one line, so the
+            // widest problem sets the cell size for all of them. Four boards
+            // is the limit before a board stops reading as ten tens.
+            hundreds: { unit: 100, groupW: 10, maxGroups: 4, maxValue: 450 },
+            // A stack is one cell wide, so width stops mattering here.
+            tens:     { unit: 10,  groupW: 1,  maxGroups: 9, maxValue: 100 },
+        };
 
-        // Never draw more than this many full boards in a term. Past four the
-        // cell size has to shrink so far that a board stops reading as ten
-        // tens — which is the one thing it has to read as.
-        this.MAX_HUNDREDS = 4;
+        // ?mode=hundreds or ?mode=tens pins one place; the default mixes
+        // them, so she has to notice which size she's looking at rather
+        // than settling into "the answer is always a hundred-something".
+        const raw = new URLSearchParams(window.location.search).get('mode');
+        this.mode = (raw === 'tens' || raw === 'hundreds') ? raw : 'mixed';
+        this.lastPlace = null;
+        this.placeRun = 0;
 
         // Layout constants, in multiples of --u (one ones-cube edge).
         this.PIECE_GAP  = 0.30;   // between any two boards in a term
         this.U_MIN      = 10;
-        this.U_MAX      = 34;
+        this.U_MAX      = 42;
 
         this.totalGames = 0;
         this.correctCount = 0;
@@ -109,29 +134,57 @@ class BlockSubtraction {
         return 1;
     }
 
+    // In mixed mode, keep it genuinely varied but never let one place run
+    // more than twice — a long streak turns back into a single-place drill.
+    pickPlace() {
+        if (this.mode !== 'mixed') return this.mode;
+        if (this.placeRun >= 2) {
+            return this.lastPlace === 'tens' ? 'hundreds' : 'tens';
+        }
+        return Math.random() < 0.5 ? 'hundreds' : 'tens';
+    }
+
+    // The remainder is everything below the leading place: a two-digit tail
+    // for hundreds, a single digit for tens. Never zero — there is always a
+    // partial group, and it is always the same on both sides.
+    randomRemainder(place) {
+        if (place.unit === 10) return this.randInt(1, 9);
+        // A visible pile of tens AND ones is what makes "all of that
+        // cancelled" land, so favour both digits being non-zero.
+        const bothNonZero = Math.random() < 0.8;
+        const t = bothNonZero ? this.randInt(1, 9) : this.randInt(0, 9);
+        const o = bothNonZero ? this.randInt(1, 9) : this.randInt(0, 9);
+        return t * 10 + o;
+    }
+
     generateProblem() {
+        const name = this.pickPlace();
+        const place = this.PLACES[name];
+
+        this.placeRun = (name === this.lastPlace) ? this.placeRun + 1 : 1;
+        this.lastPlace = name;
+
+        const shape = { place: name, unit: place.unit, groupW: place.groupW };
+
         for (let tries = 0; tries < 200; tries++) {
             const diff = this.weightedDiff();
-            const h2 = this.randInt(1, this.MAX_HUNDREDS - diff);
-            const h1 = h2 + diff;
-            if (h1 > this.MAX_HUNDREDS) continue;
+            const g2 = this.randInt(1, place.maxGroups - diff);
+            const g1 = g2 + diff;
+            if (g1 > place.maxGroups) continue;
 
-            // Both digits non-zero most of the time — a visible pile of tens
-            // AND ones is what makes "all of that cancelled" land. Now and
-            // then one place is empty so the picture doesn't get stale.
-            const bothNonZero = Math.random() < 0.8;
-            const t = bothNonZero ? this.randInt(1, 9) : this.randInt(0, 9);
-            const o = bothNonZero ? this.randInt(1, 9) : this.randInt(0, 9);
-            if (t === 0 && o === 0) continue;
+            const rem = this.randomRemainder(place);
+            if (rem === 0) continue;
 
-            const top = h1 * 100 + t * 10 + o;
-            const bottom = h2 * 100 + t * 10 + o;
-            if (top >= this.MAX_VALUE) continue;
+            const top = g1 * place.unit + rem;
+            const bottom = g2 * place.unit + rem;
+            if (top >= place.maxValue) continue;
             if (this.problem && this.problem.top === top && this.problem.bottom === bottom) continue;
 
-            return { h1, h2, rem: t * 10 + o, diff, top, bottom, answer: diff * 100 };
+            return { ...shape, g1, g2, rem, diff, top, bottom, answer: diff * place.unit };
         }
-        return { h1: 2, h2: 1, rem: 93, diff: 1, top: 293, bottom: 193, answer: 100 };
+        return name === 'tens'
+            ? { ...shape, g1: 7, g2: 2, rem: 3,  diff: 5, top: 73,  bottom: 23,  answer: 50 }
+            : { ...shape, g1: 2, g2: 1, rem: 93, diff: 1, top: 293, bottom: 193, answer: 100 };
     }
 
     // ── Round lifecycle ────────────────────────────
@@ -244,12 +297,14 @@ class BlockSubtraction {
 
     // The whole equation is one row: term, minus, term, equals, answer box.
     renderBoard() {
-        const { h1, h2, rem, top, bottom } = this.problem;
+        const { g1, g2, rem, top, bottom } = this.problem;
+        document.documentElement.style.setProperty('--gw', this.problem.groupW);
+
         const row = document.getElementById('equation-row');
         row.innerHTML = '';
-        row.appendChild(this.buildTerm('row-top', 'top', top, h1, rem));
+        row.appendChild(this.buildTerm('row-top', 'top', top, g1, rem));
         row.appendChild(this.buildOp('−'));
-        row.appendChild(this.buildTerm('row-bottom', 'bottom', bottom, h2, rem));
+        row.appendChild(this.buildTerm('row-bottom', 'bottom', bottom, g2, rem));
 
     }
 
@@ -279,7 +334,7 @@ class BlockSubtraction {
 
     // One term: the numeral, a rule, and the blocks it names — stacked, so
     // the digits and the quantity read as the same thing.
-    buildTerm(blocksId, side, value, hundreds, rem) {
+    buildTerm(blocksId, side, value, groups, rem) {
         const term = document.createElement('div');
         term.className = `term side-${side}`;
 
@@ -295,7 +350,7 @@ class BlockSubtraction {
         const blocks = document.createElement('div');
         blocks.className = 'term-blocks';
         blocks.id = blocksId;
-        for (let i = 0; i < hundreds; i++) {
+        for (let i = 0; i < groups; i++) {
             const full = document.createElement('div');
             full.className = `piece filled ${side}`;
             full.dataset.place = 'h';
@@ -345,6 +400,7 @@ class BlockSubtraction {
         const SVG_NS = 'http://www.w3.org/2000/svg';
         const c = fullcols;
         const r = rest;
+        const w = this.problem.groupW;
 
         let points;
         if (r === 0)      points = `0,0 ${c},0 ${c},10 0,10`;
@@ -353,7 +409,7 @@ class BlockSubtraction {
 
         const svg = document.createElementNS(SVG_NS, 'svg');
         svg.setAttribute('class', 'board-outline');
-        svg.setAttribute('viewBox', '0 0 10 10');
+        svg.setAttribute('viewBox', `0 0 ${w} 10`);
         svg.setAttribute('preserveAspectRatio', 'none');
 
         const poly = document.createElementNS(SVG_NS, 'polygon');
@@ -367,21 +423,21 @@ class BlockSubtraction {
     // resulting column widths back into CSS so both rows share them.
     fitUnit() {
         if (!this.problem) return;
-        const { h1, h2 } = this.problem;
+        const { g1, g2, groupW } = this.problem;
         const board = document.getElementById('board');
         const availW = board.clientWidth;
         const availH = board.clientHeight;
         if (availW <= 0 || availH <= 0) return;
 
-        // A term is its full boards plus one remainder board, with a gap
-        // between each. Both terms, both operators and the answer box all
-        // share one line, so the row's total width sets the cell size.
-        const termUnits = (h) => (h + 1) * 10 + h * this.PIECE_GAP;
+        // A term is its full groups plus one partial group, each groupW
+        // cells wide, with a gap between each. Both terms share one line, so
+        // the row's total width sets the cell size.
+        const termUnits = (g) => (g + 1) * groupW + g * this.PIECE_GAP;
         const OP_W = 2.2;
         const GAP = 1.0;
 
         // Only the terms and the minus share the line; the answer sits below.
-        const unitsWide = termUnits(h1) + termUnits(h2) + OP_W + 2 * GAP;
+        const unitsWide = termUnits(g1) + termUnits(g2) + OP_W + 2 * GAP;
         // Numeral, rule, one board tall, plus air.
         const unitsTall = 2.4 + 1.0 + 10 + 1.6;
 
