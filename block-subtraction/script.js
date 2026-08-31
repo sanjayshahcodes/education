@@ -29,9 +29,16 @@
  * the leftover is the answer) moved up into place value. Same punchline,
  * bigger numbers.
  *
- * Problems are "clean cancels" only: everything below the leading place
- * always matches, so the partial groups are identical and every answer is
- * a whole number of hundreds.
+ * Problems come in two kinds, mixed evenly, so the pair of rules shows up
+ * against each other:
+ *
+ *   match — the same tail on both. It cancels, and what's left is whole
+ *           groups:  273 − 173 = 100,  77 − 47 = 30
+ *   round — a round number taken away. Nothing can match the tail, so it
+ *           survives:  343 − 100 = 243,  77 − 40 = 37
+ *
+ * Both are clean cancels: nothing ever needs regrouping, and the whole of
+ * the smaller number always disappears.
  *
  * By default problems mix the two places. ?mode=hundreds or ?mode=tens pins
  * one of them. At the tens place hundred boards don't exist; the largest
@@ -57,6 +64,20 @@ class BlockSubtraction {
             { diff: 1, weight: 56 },
             { diff: 2, weight: 26 },
             { diff: 3, weight: 18 },
+        ];
+
+        // Two halves of one idea, mixed evenly so the contrast lands:
+        //
+        //   match — the same tail on both, so the tail cancels and what's
+        //           left is whole groups:            77 − 47 = 30
+        //   round — a round number taken away, so nothing can match the
+        //           tail and it survives untouched:  77 − 40 = 37
+        //
+        // Both are still clean cancels: nothing ever needs regrouping, and
+        // the whole of the smaller number always disappears.
+        this.kindWeights = [
+            { kind: 'match', weight: 50 },
+            { kind: 'round', weight: 50 },
         ];
 
         // The same game at two places. All that differs is what one full
@@ -124,14 +145,14 @@ class BlockSubtraction {
 
     // ── Problem generation ─────────────────────────
 
-    weightedDiff() {
-        const total = this.diffWeights.reduce((s, d) => s + d.weight, 0);
+    pickWeighted(list) {
+        const total = list.reduce((sum, x) => sum + x.weight, 0);
         let r = Math.random() * total;
-        for (const d of this.diffWeights) {
-            r -= d.weight;
-            if (r <= 0) return d.diff;
+        for (const x of list) {
+            r -= x.weight;
+            if (r <= 0) return x;
         }
-        return 1;
+        return list[list.length - 1];
     }
 
     // In mixed mode, keep it genuinely varied but never let one place run
@@ -167,24 +188,31 @@ class BlockSubtraction {
         const shape = { place: name, unit: place.unit, groupW: place.groupW };
 
         for (let tries = 0; tries < 200; tries++) {
-            const diff = this.weightedDiff();
+            const kind = this.pickWeighted(this.kindWeights).kind;
+            const diff = this.pickWeighted(this.diffWeights).diff;
             const g2 = this.randInt(1, place.maxGroups - diff);
             const g1 = g2 + diff;
             if (g1 > place.maxGroups) continue;
 
-            const rem = this.randomRemainder(place);
-            if (rem === 0) continue;
+            // The top always carries a tail. On a 'round' problem the
+            // subtrahend has none, so nothing can match that tail.
+            const remTop = this.randomRemainder(place);
+            if (remTop === 0) continue;
+            const remBottom = kind === 'match' ? remTop : 0;
 
-            const top = g1 * place.unit + rem;
-            const bottom = g2 * place.unit + rem;
+            const top = g1 * place.unit + remTop;
+            const bottom = g2 * place.unit + remBottom;
             if (top >= place.maxValue) continue;
             if (this.problem && this.problem.top === top && this.problem.bottom === bottom) continue;
 
-            return { ...shape, g1, g2, rem, diff, top, bottom, answer: diff * place.unit };
+            return {
+                ...shape, kind, g1, g2, remTop, remBottom, diff,
+                top, bottom, answer: top - bottom,
+            };
         }
         return name === 'tens'
-            ? { ...shape, g1: 7, g2: 2, rem: 3,  diff: 5, top: 73,  bottom: 23,  answer: 50 }
-            : { ...shape, g1: 2, g2: 1, rem: 93, diff: 1, top: 293, bottom: 193, answer: 100 };
+            ? { ...shape, kind: 'match', g1: 7, g2: 2, remTop: 3,  remBottom: 3,  diff: 5, top: 73,  bottom: 23,  answer: 50 }
+            : { ...shape, kind: 'match', g1: 2, g2: 1, remTop: 93, remBottom: 93, diff: 1, top: 293, bottom: 193, answer: 100 };
     }
 
     // ── Round lifecycle ────────────────────────────
@@ -242,12 +270,14 @@ class BlockSubtraction {
     // with no match light up in that same moment. One fade, one event: the
     // whole of 273 cancels, and what's left over is the answer.
     runReveal() {
-        const { top, bottom, answer } = this.problem;
+        const { top, bottom, answer, kind, remTop } = this.problem;
         const caption = document.getElementById('caption');
         const step = (delay, fn) => this.timers.push(setTimeout(fn, delay));
 
         step(500, () => {
-            caption.textContent = `${bottom} − ${bottom} = 0`;
+            caption.textContent = kind === 'match'
+                ? `${bottom} − ${bottom} = 0`
+                : `Nothing to match the ${remTop} — it stays`;
             const { matched, leftover } = this.splitByMatch();
             matched.forEach(el => el.classList.add('gone'));
             leftover.forEach(el => el.classList.add('leftover'));
@@ -297,14 +327,14 @@ class BlockSubtraction {
 
     // The whole equation is one row: term, minus, term, equals, answer box.
     renderBoard() {
-        const { g1, g2, rem, top, bottom } = this.problem;
+        const { g1, g2, remTop, remBottom, top, bottom } = this.problem;
         document.documentElement.style.setProperty('--gw', this.problem.groupW);
 
         const row = document.getElementById('equation-row');
         row.innerHTML = '';
-        row.appendChild(this.buildTerm('row-top', 'top', top, g1, rem));
+        row.appendChild(this.buildTerm('row-top', 'top', top, g1, remTop));
         row.appendChild(this.buildOp('−'));
-        row.appendChild(this.buildTerm('row-bottom', 'bottom', bottom, g2, rem));
+        row.appendChild(this.buildTerm('row-bottom', 'bottom', bottom, g2, remBottom));
 
     }
 
@@ -356,7 +386,9 @@ class BlockSubtraction {
             full.dataset.place = 'h';
             blocks.appendChild(full);
         }
-        blocks.appendChild(this.buildPartialBoard(rem, side));
+        // A round number has no tail, so it gets no partial group — which
+        // is exactly why the other term's tail has nothing to match.
+        if (rem > 0) blocks.appendChild(this.buildPartialBoard(rem, side));
         term.appendChild(blocks);
 
         return term;
@@ -423,7 +455,7 @@ class BlockSubtraction {
     // resulting column widths back into CSS so both rows share them.
     fitUnit() {
         if (!this.problem) return;
-        const { g1, g2, groupW } = this.problem;
+        const { g1, g2, remTop, remBottom, groupW } = this.problem;
         const board = document.getElementById('board');
         const availW = board.clientWidth;
         const availH = board.clientHeight;
@@ -432,12 +464,16 @@ class BlockSubtraction {
         // A term is its full groups plus one partial group, each groupW
         // cells wide, with a gap between each. Both terms share one line, so
         // the row's total width sets the cell size.
-        const termUnits = (g) => (g + 1) * groupW + g * this.PIECE_GAP;
+        const termUnits = (g, rem) => {
+            const drawn = g + (rem > 0 ? 1 : 0);
+            return drawn * groupW + (drawn - 1) * this.PIECE_GAP;
+        };
         const OP_W = 2.2;
         const GAP = 1.0;
 
         // Only the terms and the minus share the line; the answer sits below.
-        const unitsWide = termUnits(g1) + termUnits(g2) + OP_W + 2 * GAP;
+        const unitsWide = termUnits(g1, remTop) + termUnits(g2, remBottom)
+                        + OP_W + 2 * GAP;
         // Numeral, rule, one board tall, plus air.
         const unitsTall = 2.4 + 1.0 + 10 + 1.6;
 
