@@ -12,7 +12,6 @@
     --green-1: #7ee090;
     --green-fill: rgba(126, 224, 144, 0.22);
     --green-line: rgba(126, 224, 144, 0.42);
-    --green-glow: rgba(126, 224, 144, 0.55);
 
     --red-1: #ff8a8a;
     --red-fill: rgba(255, 138, 138, 0.22);
@@ -353,16 +352,9 @@ body {
     --edge: var(--gone-1);
 }
 
-/* The hundred(s) with nothing underneath — the answer, made visible. */
-.piece.leftover {
-    animation: leftover-pulse 1.5s ease-in-out infinite;
-    z-index: 2;
-}
-
-@keyframes leftover-pulse {
-    0%, 100% { filter: drop-shadow(0 0 5px var(--green-glow)); }
-    50%      { filter: drop-shadow(0 0 20px var(--green-glow)); }
-}
+/* Nothing styles the leftover. Once everything it matched has drained to
+   grey it's the only coloured thing on the screen, which is emphasis
+   enough — a glow on top of that just bleeds onto its neighbours. */
 
 /* ── Caption ───────────────────────────────────── */
 

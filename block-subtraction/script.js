@@ -280,6 +280,8 @@ class BlockSubtraction {
                 : `Nothing to match the ${remTop} — it stays`;
             const { matched, leftover } = this.splitByMatch();
             matched.forEach(el => el.classList.add('gone'));
+            // The leftover isn't styled — it's simply the thing that never
+            // faded. The class only marks it as the answer.
             leftover.forEach(el => el.classList.add('leftover'));
         });
 
