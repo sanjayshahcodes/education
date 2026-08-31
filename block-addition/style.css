@@ -216,6 +216,18 @@ body {
     letter-spacing: -1px;
     text-align: center;
     text-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+    transition: color 0.45s ease, margin-right 0.7s cubic-bezier(0.34, 0.9, 0.3, 1);
+}
+
+/* Once the move is done each number is re-read off the blocks under it: the
+   frame says what a full frame is worth, the pile says what stayed. They go
+   yellow because they're now parts of the answer, not the question. */
+.term-label.settled { color: var(--accent-yellow); }
+
+/* The pile closed up leftward, so its label follows: shrinking the label's
+   box on the right pulls its centre left by half of what the pile moved. */
+.term.side-b .term-label.settled {
+    margin-right: calc(var(--moved) * (var(--u) + var(--pgap)));
 }
 
 .term-rule {
@@ -224,6 +236,8 @@ body {
     opacity: 0.55;
     border-radius: 2px;
     margin: calc(0.30 * var(--u)) 0 calc(0.55 * var(--u));
+    transform-origin: left center;
+    transition: transform 0.7s cubic-bezier(0.34, 0.9, 0.3, 1);
 }
 
 /* The frame is always ten units across, at both places — that sameness is
@@ -293,28 +307,6 @@ body {
 
 /* Units in flight land on top of the slots they're filling. */
 .unit.moving { z-index: 3; }
-
-/* ── What each part is worth, once the move is done ── */
-
-.part-label {
-    height: calc(1.9 * var(--u));
-    margin-top: calc(0.45 * var(--u));
-    font-size: calc(1.35 * var(--u));
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    text-align: center;
-    color: var(--accent-yellow);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-
-.part-label.show { opacity: 1; }
-
-/* The leftover label sits under the units that stayed put, not under the
-   gap the travellers left behind. */
-#loose-label {
-    margin-left: calc(var(--moved) * (var(--u) + var(--pgap)));
-}
 
 /* ── Caption ───────────────────────────────────── */
 

@@ -188,18 +188,18 @@ class BlockAddition {
         const caption = document.getElementById('caption');
         const step = (delay, fn) => this.timers.push(setTimeout(fn, delay));
 
-        step(400, () => this.flyUnitsIn());
+        // As the blocks move, each number is re-read off what's under it: the
+        // frame becomes a full ten or hundred, the pile becomes whatever
+        // stayed. Leaving it saying 70 over a hundred blocks is a lie.
+        step(400, () => {
+            this.flyUnitsIn();
+
+            const scale = place === 'ones' ? 1 : 10;
+            this.relabel('frame-num', place === 'ones' ? 10 : 100);
+            this.relabel('loose-num', left * scale);
+        });
 
         step(1150, () => {
-            const whole = place === 'ones' ? 10 : 100;
-            document.getElementById('frame-label').textContent = String(whole);
-            document.getElementById('frame-label').classList.add('show');
-
-            const rest = left * (place === 'ones' ? 1 : 10);
-            const looseLabel = document.getElementById('loose-label');
-            looseLabel.textContent = String(rest);
-            looseLabel.classList.add('show');
-
             caption.textContent = `${top} + ${addend} = ${answer}`;
 
             const box = document.getElementById('eq-answer-box');
@@ -213,25 +213,49 @@ class BlockAddition {
         step(2000, () => this.show('continue-btn'));
     }
 
+    relabel(id, value) {
+        const el = document.getElementById(id);
+        el.textContent = String(value);
+        el.classList.add('settled');
+    }
+
     // Translate the leading units of the loose pile onto the frame's empty
     // slots. They keep their own colour, so the finished frame visibly shows
-    // which part came from which number. The gap they leave behind is what
-    // separates the whole from the remainder.
+    // which part came from which number.
+    //
+    // Everything still in the pile closes up behind them in the same motion,
+    // so what's left reads as a count of its own rather than a pile with a
+    // hole punched in it.
     flyUnitsIn() {
         const { moved } = this.problem;
         const slots = [...document.querySelectorAll('#frame .slot')];
         const loose = [...document.querySelectorAll('#loose .unit')];
+        if (!loose.length) return;
 
-        for (let i = 0; i < moved; i++) {
-            const unit = loose[i];
-            const slot = slots[i];
-            if (!unit || !slot) continue;
-            const from = unit.getBoundingClientRect();
-            const to = slot.getBoundingClientRect();
-            unit.classList.add('moving');
-            unit.style.transform =
-                `translate(${to.left - from.left}px, ${to.top - from.top}px)`;
-        }
+        // One unit's worth of travel, measured off the pile itself so it
+        // stays right whatever --u and --pgap currently are.
+        const stride = loose.length > 1
+            ? loose[1].getBoundingClientRect().left - loose[0].getBoundingClientRect().left
+            : 0;
+
+        loose.forEach((unit, i) => {
+            if (i < moved) {
+                const slot = slots[i];
+                if (!slot) return;
+                const from = unit.getBoundingClientRect();
+                const to = slot.getBoundingClientRect();
+                unit.classList.add('moving');
+                unit.style.transform =
+                    `translate(${to.left - from.left}px, ${to.top - from.top}px)`;
+            } else {
+                unit.style.transform = `translateX(${-moved * stride}px)`;
+            }
+        });
+
+        // The rule over the pile narrows to match what's left under it.
+        const { b, left } = this.problem;
+        const rule = document.querySelector('.term.side-b .term-rule');
+        if (rule && b > 0) rule.style.transform = `scaleX(${left / b})`;
     }
 
     clearTimers() {
@@ -275,7 +299,7 @@ class BlockAddition {
             cell.className = i < a ? 'unit a' : 'slot';
             frame.appendChild(cell);
         }
-        row.appendChild(this.buildTerm('side-a', top, frame, 'frame-label'));
+        row.appendChild(this.buildTerm('side-a', top, frame, 'frame-num'));
 
         const op = document.createElement('div');
         op.className = 'op';
@@ -291,7 +315,7 @@ class BlockAddition {
             unit.className = 'unit b';
             loose.appendChild(unit);
         }
-        row.appendChild(this.buildTerm('side-b', addend, loose, 'loose-label'));
+        row.appendChild(this.buildTerm('side-b', addend, loose, 'loose-num'));
     }
 
     buildTerm(sideClass, value, blocks, labelId) {
@@ -300,6 +324,7 @@ class BlockAddition {
 
         const label = document.createElement('div');
         label.className = 'term-label';
+        label.id = labelId;
         label.textContent = String(value);
         term.appendChild(label);
 
@@ -308,13 +333,6 @@ class BlockAddition {
         term.appendChild(rule);
 
         term.appendChild(blocks);
-
-        // Filled in on the reveal with what this part turned out to be worth.
-        const part = document.createElement('div');
-        part.className = 'part-label';
-        part.id = labelId;
-        term.appendChild(part);
-
         return term;
     }
 
@@ -334,7 +352,7 @@ class BlockAddition {
         const looseUnits = b + (b - 1) * PGAP;
         const unitsWide = frameUnits + looseUnits + this.OP_W + 2 * this.PAIR_GAP;
         // Numeral, rule, the blocks themselves, then the part label.
-        const unitsTall = 2.4 + 1.0 + unitH + 2.4 + 1.2;
+        const unitsTall = 2.4 + 1.0 + unitH + 1.6;
 
         let u = Math.min(availW / unitsWide, availH / unitsTall);
         u = Math.max(this.U_MIN, Math.min(this.U_MAX, Math.floor(u)));
