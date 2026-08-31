@@ -18,9 +18,11 @@
     --red-fill: rgba(255, 138, 138, 0.22);
     --red-line: rgba(255, 138, 138, 0.42);
 
-    --gone-1: rgba(255, 255, 255, 0.22);
-    --gone-fill: rgba(255, 255, 255, 0.04);
-    --gone-line: rgba(255, 255, 255, 0.10);
+    /* Cancelled boards stay legible — they're the evidence that something
+       matched. The fade lives here and nowhere else. */
+    --gone-1: rgba(255, 255, 255, 0.37);
+    --gone-fill: rgba(255, 255, 255, 0.08);
+    --gone-line: rgba(255, 255, 255, 0.15);
 
     --accent-cyan: #00d4ff;
     --accent-yellow: #FFD93D;
@@ -256,7 +258,7 @@ body {
     box-sizing: border-box;
     width: calc(10 * var(--u));
     height: calc(10 * var(--u));
-    transition: opacity 0.35s ease, transform 0.35s ease;
+    transition: transform 0.35s ease;
 }
 
 /* Cells are drawn with gradients rather than 100 child divs per board. */
@@ -346,7 +348,6 @@ body {
     --fill: var(--gone-fill);
     --line: var(--gone-line);
     --edge: var(--gone-1);
-    opacity: 0.45;
     transform: scale(0.94);
 }
 

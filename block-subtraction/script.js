@@ -185,33 +185,22 @@ class BlockSubtraction {
         this.runReveal();
     }
 
-    // Cancel the places smallest-first, narrating each one, then let the
-    // leftover hundreds stand alone. Right or wrong, she sees the same
-    // explanation — the picture is the teaching, not the score.
+    // Everything that has a match goes grey in one moment, and the boards
+    // with no match light up in that same moment. One fade, one event: the
+    // whole of 273 cancels, and what's left over is the answer.
     runReveal() {
-        const { rem, h1, h2, diff, top, bottom, answer } = this.problem;
+        const { top, bottom, answer } = this.problem;
         const caption = document.getElementById('caption');
-        const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+        const step = (delay, fn) => this.timers.push(setTimeout(fn, delay));
 
-        let at = 500;
-        const step = (delay, fn) => {
-            this.timers.push(setTimeout(fn, delay));
-        };
-
-        step(at, () => {
-            caption.textContent = `Same ${rem} on both. ${rem} − ${rem} = 0`;
-            this.cancelPlace('r');
+        step(500, () => {
+            caption.textContent = `${bottom} − ${bottom} = 0`;
+            const { matched, leftover } = this.splitByMatch();
+            matched.forEach(el => el.classList.add('gone'));
+            leftover.forEach(el => el.classList.add('leftover'));
         });
-        at += 1400;
 
-        step(at, () => {
-            caption.textContent =
-                `${plural(h1, 'hundred')} − ${plural(h2, 'hundred')} = ${plural(diff, 'hundred')}`;
-            this.cancelPlace('h');
-        });
-        at += 1200;
-
-        step(at, () => {
+        step(2000, () => {
             caption.classList.add('final');
             caption.textContent = `${top} − ${bottom} = ${answer}`;
             const box = document.getElementById('eq-answer-box');
@@ -221,30 +210,29 @@ class BlockSubtraction {
                 box.textContent = String(answer);
             }
         });
-        at += 700;
 
-        step(at, () => this.show('continue-btn'));
+        step(2700, () => this.show('continue-btn'));
     }
 
-    // Grey out every piece in a place that has a partner in the other row.
-    // In the hundreds, the unpartnered flats instead start glowing.
-    cancelPlace(place) {
-        const tops = [...document.querySelectorAll(`#row-top .piece[data-place="${place}"]`)];
-        const bots = [...document.querySelectorAll(`#row-bottom .piece[data-place="${place}"]`)];
-        const pairs = Math.min(tops.length, bots.length);
+    // Split every board into the ones that have a partner in the other term
+    // and the ones that don't. Pairing runs from the right, so the boards
+    // that survive are the ones at the FRONT of the number — the leftover
+    // hundred is where she starts reading, not stranded at the end.
+    splitByMatch() {
+        const matched = [];
+        const leftover = [];
 
-        for (let i = 0; i < pairs; i++) {
-            const delay = i * 70;
-            this.timers.push(setTimeout(() => {
-                tops[i].classList.add('gone');
-                bots[i].classList.add('gone');
-            }, delay));
+        for (const place of ['h', 'r']) {
+            const tops = [...document.querySelectorAll(`#row-top .piece[data-place="${place}"]`)];
+            const bots = [...document.querySelectorAll(`#row-bottom .piece[data-place="${place}"]`)];
+            const pairs = Math.min(tops.length, bots.length);
+            const topStart = tops.length - pairs;
+            const botStart = bots.length - pairs;
+
+            leftover.push(...tops.slice(0, topStart));
+            matched.push(...tops.slice(topStart), ...bots.slice(botStart));
         }
-        for (let i = pairs; i < tops.length; i++) {
-            this.timers.push(setTimeout(() => {
-                tops[i].classList.add('leftover');
-            }, pairs * 70 + 260));
-        }
+        return { matched, leftover };
     }
 
     clearTimers() {
