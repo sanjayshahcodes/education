@@ -32,12 +32,16 @@ class LetterTest {
         this.showRules =
             new URLSearchParams(window.location.search).get('lines') !== 'off';
 
-        // SVG user units. The glyph is drawn at GLYPH_SIZE and the rules are
-        // placed from the font's own metrics at that size, so they land on the
-        // real cap-height, x-height and baseline for whichever face resolves.
-        this.GLYPH_SIZE = 300;
+        // SVG user units. Fonts are measured at REF_SIZE; RISE is how far the
+        // sky line sits above the grass line, and each mode's glyph size is
+        // then solved so that mode's tallest letter reaches it exactly.
+        this.REF_SIZE = 300;
+        this.RISE = 220;
         this.RULE_W = 760;
         this.PAD = 34;
+
+        // Filled in by layoutRules(): the glyph size each mode needs.
+        this.sizeFor = {};
 
         this.mode = null;
         this.queue = [];
@@ -75,45 +79,48 @@ class LetterTest {
         });
     }
 
-    // Measure the font at GLYPH_SIZE and place the rules from it.
+    // Place the rules once, then solve a glyph size per mode.
     //
-    // Sky goes at the tallest thing the alphabet actually draws — not the
-    // cap height, because f and d overshoot H in this face — and grass on
-    // the baseline, which is the line doing the real work: it's what tells
-    // d from q and b from p.
+    // The paper is the same for both modes — sky and grass never move — and
+    // each mode's letters are scaled so its tallest one reaches the sky line,
+    // exactly as capitals and tall lowercase both reach the top line on real
+    // handwriting paper. Uppercase ends up a few percent larger because the
+    // tallest capital is shorter than the tallest ascender: in this face H is
+    // 203 against f at 220.
     //
-    // The dashed plane line goes midway between them, the way it does on her
-    // writing paper. It deliberately isn't at the x-height: paper assumes
-    // lowercase is half the height of capitals, and no real face agrees (this
-    // one is 0.74, and every other handwriting font on the machine is around
-    // 0.7). Since nothing in the test depends on the dashed line, it should
-    // look like the paper rather than fight the font.
+    // The grass line is the one doing the real work — it's what tells d from
+    // q and b from p. The dashed plane line goes midway between, the way it
+    // does on her paper; it deliberately isn't at the x-height, because paper
+    // assumes lowercase is half the height of capitals and no real face
+    // agrees (this one is 0.74).
     layoutRules() {
         const svg = document.getElementById('letter-svg');
         const text = document.getElementById('letter');
         const family = getComputedStyle(text).fontFamily;
 
         const ctx = document.createElement('canvas').getContext('2d');
-        ctx.font = `${this.GLYPH_SIZE}px ${family}`;
-        const ascentOf = (ch) => ctx.measureText(ch).actualBoundingBoxAscent;
-        const descentOf = (ch) => ctx.measureText(ch).actualBoundingBoxDescent;
+        ctx.font = `${this.REF_SIZE}px ${family}`;
+        const spanOf = (letters, key) => Math.max(
+            ...letters.split('').map(ch => ctx.measureText(ch)[key]).filter(Number.isFinite));
 
-        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
-        // The tallest letter sets the sky line and the deepest sets how much
-        // room is needed under the baseline, so nothing is ever clipped or
-        // left sticking out through a rule.
-        const rise = Math.max(...alphabet.map(ascentOf).filter(Number.isFinite),
-                              this.GLYPH_SIZE * 0.70);
-        const drop = Math.max(...alphabet.map(descentOf).filter(Number.isFinite),
-                              this.GLYPH_SIZE * 0.22);
+        // How far below the grass line any mode reaches once scaled up. The
+        // viewBox has to hold the deepest of them, or the box would resize
+        // between modes and shift the rules on screen.
+        let deepest = 0;
+        for (const [name, mode] of Object.entries(this.MODES)) {
+            const rise = spanOf(mode.letters, 'actualBoundingBoxAscent') || this.REF_SIZE * 0.7;
+            const scale = this.RISE / rise;
+            this.sizeFor[name] = this.REF_SIZE * scale;
+            const drop = (spanOf(mode.letters, 'actualBoundingBoxDescent') || 0) * scale;
+            deepest = Math.max(deepest, drop);
+        }
 
-        const baseline = this.PAD + rise;
-        const height = baseline + drop + this.PAD;
+        const baseline = this.PAD + this.RISE;
+        const height = baseline + deepest + this.PAD;
 
         svg.setAttribute('viewBox', `0 0 ${this.RULE_W} ${height}`);
         text.setAttribute('x', this.RULE_W / 2);
         text.setAttribute('y', baseline);
-        text.setAttribute('font-size', this.GLYPH_SIZE);
 
         const place = (id, y) => {
             const line = document.getElementById(id);
@@ -123,9 +130,16 @@ class LetterTest {
             line.setAttribute('y2', y);
             line.classList.toggle('hidden', !this.showRules);
         };
-        place('rule-sky', baseline - rise);
-        place('rule-plane', baseline - rise / 2);
+        place('rule-sky', baseline - this.RISE);
+        place('rule-plane', baseline - this.RISE / 2);
         place('rule-grass', baseline);
+
+        if (this.mode) this.applyGlyphSize();
+    }
+
+    applyGlyphSize() {
+        const size = this.sizeFor[this.mode] || this.REF_SIZE;
+        document.getElementById('letter').setAttribute('font-size', size);
     }
 
     // Fisher-Yates: the whole alphabet, once each, in a fresh order every run.
@@ -143,6 +157,7 @@ class LetterTest {
         this.queue = this.shuffle(this.MODES[mode].letters.split(''));
         this.index = 0;
         this.missed = [];
+        this.applyGlyphSize();
         this.showScreen('test-screen');
         this.showLetter();
     }
