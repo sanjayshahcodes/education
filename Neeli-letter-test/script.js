@@ -75,9 +75,19 @@ class LetterTest {
         });
     }
 
-    // Measure the font at GLYPH_SIZE and put the three rules where it actually
-    // draws: sky at the cap-height, plane at the x-height, grass on the
-    // baseline. Descenders fall below the grass line on their own.
+    // Measure the font at GLYPH_SIZE and place the rules from it.
+    //
+    // Sky goes at the tallest thing the alphabet actually draws — not the
+    // cap height, because f and d overshoot H in this face — and grass on
+    // the baseline, which is the line doing the real work: it's what tells
+    // d from q and b from p.
+    //
+    // The dashed plane line goes midway between them, the way it does on her
+    // writing paper. It deliberately isn't at the x-height: paper assumes
+    // lowercase is half the height of capitals, and no real face agrees (this
+    // one is 0.74, and every other handwriting font on the machine is around
+    // 0.7). Since nothing in the test depends on the dashed line, it should
+    // look like the paper rather than fight the font.
     layoutRules() {
         const svg = document.getElementById('letter-svg');
         const text = document.getElementById('letter');
@@ -88,14 +98,16 @@ class LetterTest {
         const ascentOf = (ch) => ctx.measureText(ch).actualBoundingBoxAscent;
         const descentOf = (ch) => ctx.measureText(ch).actualBoundingBoxDescent;
 
-        const capH = ascentOf('H') || this.GLYPH_SIZE * 0.70;
-        const xH = ascentOf('x') || this.GLYPH_SIZE * 0.48;
-        // The deepest descender in the alphabet sets how much room is needed
-        // under the baseline, so no letter is ever clipped.
-        const drop = Math.max(...'gjpqy'.split('').map(descentOf).filter(Number.isFinite),
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+        // The tallest letter sets the sky line and the deepest sets how much
+        // room is needed under the baseline, so nothing is ever clipped or
+        // left sticking out through a rule.
+        const rise = Math.max(...alphabet.map(ascentOf).filter(Number.isFinite),
+                              this.GLYPH_SIZE * 0.70);
+        const drop = Math.max(...alphabet.map(descentOf).filter(Number.isFinite),
                               this.GLYPH_SIZE * 0.22);
 
-        const baseline = this.PAD + capH;
+        const baseline = this.PAD + rise;
         const height = baseline + drop + this.PAD;
 
         svg.setAttribute('viewBox', `0 0 ${this.RULE_W} ${height}`);
@@ -111,8 +123,8 @@ class LetterTest {
             line.setAttribute('y2', y);
             line.classList.toggle('hidden', !this.showRules);
         };
-        place('rule-sky', baseline - capH);
-        place('rule-plane', baseline - xH);
+        place('rule-sky', baseline - rise);
+        place('rule-plane', baseline - rise / 2);
         place('rule-grass', baseline);
     }
 
