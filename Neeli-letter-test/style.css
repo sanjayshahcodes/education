@@ -1,0 +1,221 @@
+/* Neeli Letter Test — built for iPad landscape.
+   Everything is sized off the viewport so it never scrolls. */
+
+:root {
+    /* Handwriting-style face with a SINGLE-STOREY 'a' and 'g', and a capital
+       I with top and bottom crossbars — the letter shapes she's actually
+       taught to write. Most print faces (Helvetica, system-ui) give a
+       double-storey 'a' and a bare vertical stroke for capital I, which is
+       indistinguishable from lowercase l. Both of these ship on iPadOS. */
+    --hand-font: "Chalkboard SE", "Comic Sans MS", "Marker Felt", sans-serif;
+
+    --paper: #fdf6e8;
+    --ink: #33302b;
+    --ink-soft: rgba(51, 48, 43, 0.45);
+    --rule: rgba(51, 48, 43, 0.16);
+    --card: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;                    /* no scroll, no rubber-banding */
+    overscroll-behavior: none;
+    touch-action: manipulation;          /* kills double-tap-to-zoom */
+}
+
+body {
+    font-family: -apple-system, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+}
+
+.hidden { display: none !important; }
+
+.screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: max(14px, env(safe-area-inset-top)) 24px max(14px, env(safe-area-inset-bottom));
+}
+
+/* ── Start ────────────────────────────────────────── */
+
+#start-title {
+    font-size: clamp(30px, 6vh, 52px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6vh;
+}
+
+#mode-buttons {
+    display: flex;
+    gap: clamp(18px, 4vw, 48px);
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.6vh;
+    padding: clamp(18px, 4vh, 42px) clamp(28px, 5vw, 66px);
+    font-family: inherit;
+    background: var(--card);
+    color: var(--ink);
+    border: 3px solid var(--rule);
+    border-radius: 26px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(51, 48, 43, 0.10);
+    transition: transform 0.1s ease, border-color 0.15s ease;
+}
+
+.mode-btn:active {
+    transform: scale(0.97);
+    border-color: var(--ink-soft);
+}
+
+.mode-sample {
+    font-family: var(--hand-font);
+    font-size: clamp(40px, 9vh, 88px);
+    line-height: 1;
+}
+
+.mode-name {
+    font-size: clamp(16px, 2.6vh, 24px);
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: 0.5px;
+}
+
+/* ── Test ─────────────────────────────────────────── */
+
+/* Only how far along she is — never how she's doing. A running tally on
+   screen would tell her the answer she isn't supposed to get. */
+#progress {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: clamp(14px, 2.2vh, 20px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--ink-soft);
+}
+
+#letter {
+    font-family: var(--hand-font);
+    font-size: min(52vh, 42vw);
+    line-height: 1.05;
+    color: var(--ink);
+    /* Reserve the full line box so letters with descenders (g, j, p, q, y)
+       don't shift the ones without them. */
+    height: min(56vh, 46vw);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Small, plain, and identical to each other — down at the edge so they're
+   the grown-up's controls, not part of what she's looking at. */
+#score-buttons {
+    position: fixed;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: clamp(14px, 3vw, 36px);
+}
+
+.score-btn {
+    font-family: inherit;
+    font-size: clamp(15px, 2.2vh, 20px);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 12px 34px;
+    min-width: 130px;
+    background: var(--card);
+    color: var(--ink-soft);
+    border: 2px solid var(--rule);
+    border-radius: 40px;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.score-btn:active { transform: scale(0.96); }
+
+/* ── Results ──────────────────────────────────────── */
+
+#results-mode {
+    font-size: clamp(16px, 2.6vh, 22px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 1.2vh;
+}
+
+#results-score {
+    font-size: clamp(46px, 13vh, 120px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+
+#results-missed {
+    margin-top: 3vh;
+    max-width: 900px;
+    text-align: center;
+    font-size: clamp(15px, 2.3vh, 21px);
+    font-weight: 600;
+    color: var(--ink-soft);
+    line-height: 1.9;
+}
+
+#results-missed .missed-letters {
+    display: block;
+    margin-top: 1vh;
+    font-family: var(--hand-font);
+    font-size: clamp(30px, 6.5vh, 62px);
+    color: var(--ink);
+    letter-spacing: 0.22em;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+#results-buttons {
+    display: flex;
+    gap: 18px;
+    margin-top: 5vh;
+}
+
+.plain-btn {
+    font-family: inherit;
+    font-size: clamp(15px, 2.2vh, 20px);
+    font-weight: 700;
+    padding: 13px 34px;
+    background: var(--card);
+    color: var(--ink);
+    border: 2px solid var(--rule);
+    border-radius: 40px;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease;
+}
+
+.plain-btn:active {
+    transform: scale(0.97);
+    border-color: var(--ink-soft);
+}

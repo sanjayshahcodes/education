@@ -96,6 +96,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/block-addition", "-l", "8099", "--no-clipboard"],
       "port": 8099
+    },
+    {
+      "name": "neeli-letter-test",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/Neeli-letter-test", "-l", "8100", "--no-clipboard"],
+      "port": 8100
     }
   ]
 }

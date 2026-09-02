@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- Full-screen when saved to the iPad home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Letters">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#fdf6e8">
+
+    <title>Neeli Letter Test</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ── Pick a mode ──────────────────────────────────── -->
+    <section id="start-screen" class="screen">
+        <h1 id="start-title">Letter Check</h1>
+        <div id="mode-buttons">
+            <button class="mode-btn" data-mode="upper">
+                <span class="mode-sample">A B C</span>
+                <span class="mode-name">Uppercase</span>
+            </button>
+            <button class="mode-btn" data-mode="lower">
+                <span class="mode-sample">a b c</span>
+                <span class="mode-name">Lowercase</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ── The test ─────────────────────────────────────── -->
+    <section id="test-screen" class="screen hidden">
+        <div id="progress"></div>
+        <div id="letter"></div>
+        <!-- Deliberately plain and identical: she must not be able to read
+             the outcome off the buttons, their colour, or their size. -->
+        <div id="score-buttons">
+            <button class="score-btn" data-score="right">Right</button>
+            <button class="score-btn" data-score="wrong">Wrong</button>
+        </div>
+    </section>
+
+    <!-- ── Results, for the grown-up ────────────────────── -->
+    <section id="results-screen" class="screen hidden">
+        <div id="results-mode"></div>
+        <div id="results-score"></div>
+        <div id="results-missed"></div>
+        <div id="results-buttons">
+            <button id="other-mode-btn" class="plain-btn"></button>
+            <button id="restart-btn" class="plain-btn">Start over</button>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
