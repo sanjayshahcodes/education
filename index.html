@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games">
+<meta name="theme-color" content="#fdf6e8">
+<title>Games</title>
+<style>
+    :root {
+        --paper: #fdf6e8;
+        --ink: #33302b;
+        --ink-soft: rgba(51, 48, 43, 0.52);
+        --ink-faint: rgba(51, 48, 43, 0.30);
+        --rule: rgba(51, 48, 43, 0.14);
+        --card: #ffffff;
+        --new: #7a9e5e;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        font-family: -apple-system, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+        background: var(--paper);
+        color: var(--ink);
+        padding: clamp(22px, 4vw, 52px) clamp(16px, 4vw, 52px) 80px;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    header {
+        max-width: 1100px;
+        margin: 0 auto clamp(24px, 4vh, 44px);
+    }
+
+    h1 {
+        font-size: clamp(28px, 5vw, 44px);
+        letter-spacing: -0.5px;
+    }
+
+    .sub {
+        margin-top: 6px;
+        font-size: clamp(14px, 2vw, 17px);
+        color: var(--ink-soft);
+    }
+
+    main { max-width: 1100px; margin: 0 auto; }
+
+    section { margin-bottom: clamp(26px, 4vh, 44px); }
+
+    h2 {
+        font-size: clamp(13px, 1.8vw, 15px);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--ink-faint);
+        padding-bottom: 8px;
+        margin-bottom: 14px;
+        border-bottom: 2px solid var(--rule);
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 12px;
+    }
+
+    a.card {
+        display: block;
+        padding: 15px 17px;
+        background: var(--card);
+        border: 2px solid var(--rule);
+        border-radius: 16px;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.1s ease, border-color 0.15s ease;
+    }
+
+    a.card:active { transform: scale(0.98); }
+    a.card:hover { border-color: var(--ink-faint); }
+
+    .name {
+        font-size: clamp(16px, 2vw, 18px);
+        font-weight: 700;
+        letter-spacing: -0.2px;
+    }
+
+    .what {
+        margin-top: 4px;
+        font-size: clamp(13px, 1.7vw, 14px);
+        line-height: 1.45;
+        color: var(--ink-soft);
+    }
+
+    /* Marks the few built most recently, so they're findable in a long list. */
+    .name .new {
+        display: inline-block;
+        margin-left: 7px;
+        padding: 2px 7px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--new);
+        border: 1.5px solid var(--new);
+        border-radius: 20px;
+        vertical-align: 2px;
+    }
+
+    /* Earlier attempts at a game that has since been redone. Kept reachable,
+       kept out of the way. */
+    details {
+        margin-top: 12px;
+    }
+
+    summary {
+        display: inline-block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink-faint);
+        cursor: pointer;
+        padding: 5px 0;
+        list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▸ "; }
+    details[open] summary::before { content: "▾ "; }
+
+    details .grid { margin-top: 10px; }
+    details a.card { background: transparent; }
+
+    footer {
+        max-width: 1100px;
+        margin: 40px auto 0;
+        font-size: 13px;
+        color: var(--ink-faint);
+        line-height: 1.6;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Games</h1>
+    <div class="sub">Tap one to play. Everything runs offline in the browser.</div>
+</header>
+
+<main id="main"></main>
+
+<footer id="footer"></footer>
+
+<script>
+/* One entry per playable page. `path` is the real entry file — some folders
+   use index.html, others game.html or skipcounting.html. `old: true` tucks a
+   superseded iteration behind the disclosure in its section. */
+const SECTIONS = [
+    {
+        title: 'Place value',
+        games: [
+            { name: 'Block Subtraction', path: 'block-subtraction/', isNew: true,
+              what: 'Why 293 − 193 is only 100. Hundred boards and stacks of ten.' },
+            { name: 'Block Addition', path: 'block-addition/', isNew: true,
+              what: 'Making a ten, then making a hundred — 7 + 9 and 70 + 90 back to back.' },
+            { name: 'Tens and Ones Adventure', path: 'PrincessGame/',
+              what: 'Breaking numbers into tens and ones.' },
+        ]
+    },
+    {
+        title: 'Adding and subtracting',
+        games: [
+            { name: 'Visual Adding', path: 'visual-adding-one-split/game.html',
+              what: 'Split a number, then combine the pieces.' },
+            { name: 'Visual Subtraction', path: 'visual-subtraction/',
+              what: 'Subtraction on a number grid.' },
+            { name: 'Add & Subtract Sequences', path: 'AdditionSubtractionSequence.html',
+              what: 'A run of additions and subtractions in a row.' },
+            { name: 'Add & Subtract, Basic', path: 'AdditionSubtractionBasic.html',
+              what: 'The simpler version of the sequence game.' },
+            { name: 'Runner Addition', path: 'runner-addition/',
+              what: 'Addition against a running character.' },
+            { name: 'Animated Addition', path: 'AnimatedAddition.html',
+              what: 'Single-digit addition, animated.' },
+            { name: 'Single Digit Addition', path: 'SingleDigitAddition.html',
+              what: 'Sums within ten.' },
+            { name: 'Single Digit + Teens', path: 'SingleDigitAdditionTeens.html',
+              what: 'Sums that cross into the teens.' },
+            { name: 'Teen Pairs', path: 'Teen%20pairs.html',
+              what: 'Pairs of numbers that make a teen number.' },
+            { name: 'Visual Adding — Flexible', path: 'visual-adding-flexible/game.html', old: true,
+              what: 'Earlier take: combine freely.' },
+            { name: 'Visual Adding — Methods', path: 'visual-adding-methods/game.html', old: true,
+              what: 'Earlier take: pick a method.' },
+            { name: 'Visual Adding — Multi-Path', path: 'visual-adding-multipath/game.html', old: true,
+              what: 'Earlier take: more than one route.' },
+            { name: 'Visual Adding — original', path: 'visual-adding/game.html', old: true,
+              what: 'The first version.' },
+            { name: 'Dual Mode Addition', path: 'dual-mode-addition/', old: true,
+              what: 'Two methods side by side.' },
+            { name: 'Dual Mode Addition v2', path: 'dual-mode-addition-v2/', old: true,
+              what: 'Second pass at the dual view.' },
+            { name: 'Dual Mode, Simple', path: 'dual-mode-simple/', old: true,
+              what: 'Stripped-back dual view.' },
+            { name: 'Combined Addition', path: 'combined-addition-game/', old: true,
+              what: 'Alternates equation and block modes.' },
+            { name: 'Combined Addition, Clean', path: 'combined-addition-clean/game.html', old: true,
+              what: 'Tidied version of the same idea.' },
+        ]
+    },
+    {
+        title: 'Cancelling out',
+        games: [
+            { name: 'Cancel Line', path: 'cancel-line/',
+              what: 'Netting shown as movement along a number line.' },
+            { name: 'Cancel Out 2', path: 'cancel-game2/',
+              what: 'Drag a whole pile onto its opposite; the leftover is the answer.' },
+            { name: 'Cancel Out', path: 'cancel-out/',
+              what: 'Pair off green against red one block at a time.' },
+            { name: 'Lollipop Lab', path: 'lollipop-lab/',
+              what: 'Add, then subtract, one step at a time.' },
+        ]
+    },
+    {
+        title: 'Missing numbers',
+        games: [
+            { name: 'Mystery Number v8', path: 'mystery-number-v8/',
+              what: 'Solve for x: diagram, then equation, then answer.' },
+            { name: 'Inverse Relationships', path: 'inverse-relationships/',
+              what: 'Adding and subtracting as two sides of one fact.' },
+            { name: 'Number Shortcuts', path: 'number-shortcuts/',
+              what: 'Faster routes to an answer.' },
+            { name: 'Mystery Number v7', path: 'mystery-number-v7/', old: true, what: '' },
+            { name: 'Mystery Number v6', path: 'mystery-number-v6/', old: true, what: '' },
+            { name: 'Mystery Number v5', path: 'mystery-number-v5/', old: true, what: '' },
+            { name: 'Mystery Number v4', path: 'mystery-number-v4/', old: true, what: '' },
+            { name: 'Mystery Number v3', path: 'mystery-number-v3/', old: true, what: '' },
+            { name: 'Mystery Number v2', path: 'mystery-number-v2/', old: true, what: '' },
+            { name: 'Mystery Number v1', path: 'mystery-number/', old: true, what: '' },
+        ]
+    },
+    {
+        title: 'Multiplying',
+        games: [
+            { name: 'Array Builder', path: 'array-builder/',
+              what: 'Build a rectangle of dots to see the product.' },
+            { name: 'Multiplication Bridge', path: 'multiplication-bridge/',
+              what: 'Getting from one fact to a harder one.' },
+        ]
+    },
+    {
+        title: 'Skip counting',
+        games: [
+            { name: 'Skip Counting', path: 'skip-counting/skipcounting.html',
+              what: 'Counting by 2s, 5s and 10s on a number board.' },
+            { name: 'Equation Skip Counting', path: 'equation-skip-counting/skipcounting.html',
+              what: 'Skip counting inside an equation.' },
+            { name: 'Visual Skip Adding', path: 'visual-skip-adding/game.html',
+              what: 'Skip counting used to add.' },
+        ]
+    },
+    {
+        title: 'Counting and number names',
+        games: [
+            { name: 'Block Counter', path: 'block-counting/',
+              what: 'How many blocks are there?' },
+            { name: 'Counting Jar', path: 'counting-jar/',
+              what: 'Count what is in the jar.' },
+            { name: 'Counting Fun', path: 'counting/Counting.html',
+              what: 'Early counting practice.' },
+            { name: 'Numbers 1–10', path: 'numbers1-10/',
+              what: 'The numbers one to ten, with sound.' },
+            { name: 'Learning Numbers', path: 'LearningNumbers.html',
+              what: 'Number slideshow.' },
+            { name: 'Number Identification', path: 'NumberIdentificationGame.html',
+              what: 'Which number is this?' },
+        ]
+    },
+    {
+        title: 'Letters and reading',
+        games: [
+            { name: 'Neeli Letter Test', path: 'Neeli-letter-test/', isNew: true,
+              what: 'Letter recognition check. You score it; she can’t tell how she did.' },
+            { name: 'Beginning Sounds', path: 'beginning-sounds/',
+              what: 'Which letter does the word start with?' },
+            { name: 'Learning Letters', path: 'LearningLetters.html',
+              what: 'Uppercase letter slideshow.' },
+            { name: 'Learning Letters, Lowercase', path: 'LearningLettersLower.html',
+              what: 'Lowercase letter slideshow.' },
+            { name: 'The Day the Crayons Quit', path: 'crayons/',
+              what: 'Memorizing the letters from the book.' },
+            { name: 'Letter Assessment', path: 'LearningLettersAssess.html', old: true,
+              what: 'Earlier letter slideshow, no scoring.' },
+        ]
+    },
+    {
+        title: 'Everything else',
+        games: [
+            { name: 'SET', path: 'set/',
+              what: 'The card game.' },
+            { name: 'Sally Ride', path: 'sallyride/',
+              what: 'A presentation, not a game.' },
+            { name: 'Eye Patch Guide', path: 'Patch.html',
+              what: 'Patching schedule reference.' },
+        ]
+    },
+];
+
+function card(g) {
+    const a = document.createElement('a');
+    a.className = 'card';
+    a.href = g.path;
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = g.name;
+    if (g.isNew) {
+        const tag = document.createElement('span');
+        tag.className = 'new';
+        tag.textContent = 'new';
+        name.appendChild(tag);
+    }
+    a.appendChild(name);
+    if (g.what) {
+        const what = document.createElement('div');
+        what.className = 'what';
+        what.textContent = g.what;
+        a.appendChild(what);
+    }
+    return a;
+}
+
+function grid(games) {
+    const el = document.createElement('div');
+    el.className = 'grid';
+    games.forEach(g => el.appendChild(card(g)));
+    return el;
+}
+
+const main = document.getElementById('main');
+let older = 0;
+
+SECTIONS.forEach(section => {
+    const current = section.games.filter(g => !g.old);
+    const past = section.games.filter(g => g.old);
+    older += past.length;
+
+    const el = document.createElement('section');
+    const h2 = document.createElement('h2');
+    h2.textContent = section.title;
+    el.appendChild(h2);
+    el.appendChild(grid(current));
+
+    if (past.length) {
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = `${past.length} earlier version${past.length > 1 ? 's' : ''}`;
+        details.appendChild(summary);
+        details.appendChild(grid(past));
+        el.appendChild(details);
+    }
+    main.appendChild(el);
+});
+
+const total = SECTIONS.reduce((n, s) => n + s.games.length, 0);
+document.getElementById('footer').textContent =
+    `${total} pages — ${total - older} current, ${older} earlier versions kept for reference.`;
+</script>
+</body>
+</html>

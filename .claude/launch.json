@@ -102,6 +102,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/Neeli-letter-test", "-l", "8100", "--no-clipboard"],
       "port": 8100
+    },
+    {
+      "name": "games-index",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education", "-l", "8101", "--no-clipboard"],
+      "port": 8101
     }
   ]
 }

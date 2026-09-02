@@ -22,9 +22,20 @@
 
 class LetterTest {
     constructor() {
+        // `fit` says which letter should land on the sky line.
+        //
+        // Capitals are all nominally one height, so they're fitted to the
+        // MEDIAN of the set. Chalkboard SE is hand-drawn and its capitals
+        // vary 11% — R is 220 units where Z is 195 — so fitting the tallest
+        // leaves most of the alphabet visibly short of the line. The median
+        // puts about half on it and splits the wobble either way.
+        //
+        // Lowercase is deliberately two heights, x-height and ascenders, so
+        // it's fitted to the TALLEST: b, d, f, h, k, l reach the sky line and
+        // the small letters stop below it, which is the point.
         this.MODES = {
-            upper: { name: 'Uppercase', letters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' },
-            lower: { name: 'Lowercase', letters: 'abcdefghijklmnopqrstuvwxyz' },
+            upper: { name: 'Uppercase', letters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', fit: 'median' },
+            lower: { name: 'Lowercase', letters: 'abcdefghijklmnopqrstuvwxyz', fit: 'tallest' },
         };
 
         // Handwriting rules are on by default; ?lines=off strips them, so the
@@ -100,22 +111,34 @@ class LetterTest {
 
         const ctx = document.createElement('canvas').getContext('2d');
         ctx.font = `${this.REF_SIZE}px ${family}`;
-        const spanOf = (letters, key) => Math.max(
-            ...letters.split('').map(ch => ctx.measureText(ch)[key]).filter(Number.isFinite));
+        const spansOf = (letters, key) =>
+            letters.split('').map(ch => ctx.measureText(ch)[key]).filter(Number.isFinite);
+        const maxOf = (letters, key) => Math.max(...spansOf(letters, key));
+        const medianOf = (letters, key) => {
+            const v = spansOf(letters, key).sort((a, b) => a - b);
+            const mid = v.length >> 1;
+            return v.length % 2 ? v[mid] : (v[mid - 1] + v[mid]) / 2;
+        };
 
         // How far below the grass line any mode reaches once scaled up. The
         // viewBox has to hold the deepest of them, or the box would resize
         // between modes and shift the rules on screen.
         let deepest = 0;
         for (const [name, mode] of Object.entries(this.MODES)) {
-            const rise = spanOf(mode.letters, 'actualBoundingBoxAscent') || this.REF_SIZE * 0.7;
+            const pick = mode.fit === 'median' ? medianOf : maxOf;
+            const rise = pick(mode.letters, 'actualBoundingBoxAscent') || this.REF_SIZE * 0.7;
             const scale = this.RISE / rise;
             this.sizeFor[name] = this.REF_SIZE * scale;
-            const drop = (spanOf(mode.letters, 'actualBoundingBoxDescent') || 0) * scale;
-            deepest = Math.max(deepest, drop);
+            // Room below for the deepest descender, and above for whatever
+            // sits proud of the sky line once the median is the target.
+            const drop = maxOf(mode.letters, 'actualBoundingBoxDescent') * scale;
+            deepest = Math.max(deepest, Number.isFinite(drop) ? drop : 0);
+            this.overshoot = Math.max(this.overshoot || 0,
+                maxOf(mode.letters, 'actualBoundingBoxAscent') * scale - this.RISE);
         }
 
-        const baseline = this.PAD + this.RISE;
+        const top = Math.max(this.PAD, this.overshoot + 8);
+        const baseline = top + this.RISE;
         const height = baseline + deepest + this.PAD;
 
         svg.setAttribute('viewBox', `0 0 ${this.RULE_W} ${height}`);
