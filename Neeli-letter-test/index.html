@@ -35,7 +35,12 @@
     <!-- ── The test ─────────────────────────────────────── -->
     <section id="test-screen" class="screen hidden">
         <div id="progress"></div>
-        <div id="letter"></div>
+        <svg id="letter-svg" preserveAspectRatio="xMidYMid meet">
+            <line id="rule-sky"   class="rule rule-sky"></line>
+            <line id="rule-plane" class="rule rule-plane"></line>
+            <line id="rule-grass" class="rule rule-grass"></line>
+            <text id="letter" text-anchor="middle"></text>
+        </svg>
         <!-- Deliberately plain and identical: she must not be able to read
              the outcome off the buttons, their colour, or their size. -->
         <div id="score-buttons">

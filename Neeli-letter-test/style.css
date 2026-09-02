@@ -115,18 +115,36 @@ body {
     color: var(--ink-soft);
 }
 
+/* The letter sits on handwriting rules, and it has to. In a book a letter
+   comes with neighbours, and the neighbours are what establish where the
+   baseline and the x-height are. Alone in the middle of a screen it has no
+   size reference at all — and d/q and b/p are the same shape, differing
+   only in whether the stem runs up or down from the baseline. Without a
+   line drawn there they are genuinely unreadable, and the test would score
+   her wrong for missing context rather than for not knowing the letter.
+
+   Drawn as SVG so the rules land on the font's real cap-height, x-height
+   and baseline rather than on guesses. */
+#letter-svg {
+    height: 54vh;
+    width: auto;
+    max-width: 92vw;
+    overflow: visible;
+}
+
 #letter {
     font-family: var(--hand-font);
-    font-size: min(52vh, 42vw);
-    line-height: 1.05;
-    color: var(--ink);
-    /* Reserve the full line box so letters with descenders (g, j, p, q, y)
-       don't shift the ones without them. */
-    height: min(56vh, 46vw);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    fill: var(--ink);
 }
+
+.rule {
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.rule-sky   { stroke: #9fc4e0; stroke-width: 2; }
+.rule-plane { stroke: #c9c2b4; stroke-width: 2; stroke-dasharray: 9 11; }
+.rule-grass { stroke: #9ecb9e; stroke-width: 3; }
 
 /* Small, plain, and identical to each other — down at the edge so they're
    the grown-up's controls, not part of what she's looking at. */
