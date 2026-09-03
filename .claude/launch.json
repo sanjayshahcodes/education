@@ -108,6 +108,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education", "-l", "8101", "--no-clipboard"],
       "port": 8101
+    },
+    {
+      "name": "odd-even",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/odd-even", "-l", "8102", "--no-clipboard"],
+      "port": 8102
     }
   ]
 }
