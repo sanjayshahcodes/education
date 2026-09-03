@@ -105,12 +105,23 @@ class OddEven {
                        : !aOdd && !bOdd ? 'eveneven'
                        : 'mixed';
             if (kind !== wanted) continue;
-            if (this.problem && this.problem.a === a && this.problem.b === b) continue;
 
-            const sum = a + b;
+            // On a mixed problem the even number goes first, so the odd one
+            // is the one that travels. That way both shapes survive into the
+            // result: the even number's rectangle stays whole on top, and the
+            // odd number stacks under it intact, bringing its own leftover.
+            // The other way round, the odd number's notch swallows the first
+            // block of the even one and tears its rectangle apart.
+            //
+            // Odd + odd has to break, but that's the point there — the two
+            // leftovers finding each other is the whole lesson.
+            const [first, second] = (kind === 'mixed' && aOdd) ? [b, a] : [a, b];
+            if (this.problem && this.problem.a === first && this.problem.b === second) continue;
+
+            const sum = first + second;
             return {
-                a, b, sum, kind,
-                aOdd, bOdd,
+                a: first, b: second, sum, kind,
+                aOdd: first % 2 === 1, bOdd: second % 2 === 1,
                 sumOdd: sum % 2 === 1,
                 rows: Math.ceil(sum / 2),
             };
@@ -175,7 +186,9 @@ class OddEven {
         });
 
         step(1300, () => {
-            const words = { oddodd: 'odd + odd', eveneven: 'even + even', mixed: 'odd + even' };
+            // Named in the order they're shown, which for mixed is always
+            // even first now that the odd number is the one that moves.
+            const words = { oddodd: 'odd + odd', eveneven: 'even + even', mixed: 'even + odd' };
             document.getElementById('caption').textContent =
                 `${words[kind]} = ${sumOdd ? 'odd' : 'even'}`;
             document.getElementById('main-equation').innerHTML =
