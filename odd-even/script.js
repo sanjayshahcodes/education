@@ -263,12 +263,15 @@ class OddEven {
         if (!this.problem) return;
         const { rows } = this.problem;
         const board = document.getElementById('board');
+        const row = document.getElementById('sum-row');
         const availW = board.clientWidth;
-        const availH = board.clientHeight;
+        // The row sits a fixed distance below the header, so that gap isn't
+        // available to the piles.
+        const availH = board.clientHeight - parseFloat(getComputedStyle(row).marginTop);
         if (availW <= 0 || availH <= 0) return;
 
-        // Parity word, numeral, rule, the rows themselves, plus a little air.
-        const unitsTall = 0.55 + 1.15 + 0.5 + rows + 0.6;
+        // Parity pill, numeral, rule, the rows themselves, plus a little air.
+        const unitsTall = 0.68 + 1.15 + 0.5 + rows + 0.6;
 
         // Take what the height allows, then measure and back off if the line
         // is too wide. Guessing the width in --u means guessing how wide the
@@ -283,9 +286,9 @@ class OddEven {
 
         // The buttons hang outside the row's box on both sides, so measure the
         // widest thing actually drawn rather than the row alone.
-        const row = document.getElementById('sum-row').getBoundingClientRect();
+        const rowBox = row.getBoundingClientRect();
         const btns = document.getElementById('choice-buttons').getBoundingClientRect();
-        const drawnW = Math.max(row.right, btns.right) - Math.min(row.left, btns.left);
+        const drawnW = Math.max(rowBox.right, btns.right) - Math.min(rowBox.left, btns.left);
         if (drawnW > availW) setU(clamp(u * (availW / drawnW)));
     }
 

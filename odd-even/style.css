@@ -134,7 +134,7 @@ body {
     min-height: 0;
     width: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
 }
 
@@ -143,6 +143,11 @@ body {
    if a flex child were allowed to squash instead, its nowrap text would spill
    past a box that still measured as fitting. */
 #sum-row {
+    /* Top-aligned with a fixed offset rather than vertically centred: centred,
+       a three-row problem started further down the screen than a ten-row one,
+       so the piles jumped between rounds. Every problem now begins the same
+       distance below the header and grows downward. */
+    margin-top: 22px;
     display: flex;
     align-items: flex-start;
     gap: calc(0.9 * var(--u));
@@ -172,15 +177,18 @@ body {
    rule being demonstrated is readable straight off the board, not only from
    the caption after the fact. */
 .term-parity {
-    font-size: calc(0.36 * var(--u));
+    align-self: center;
+    font-size: calc(0.3 * var(--u));
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    text-align: center;
-    margin-bottom: calc(0.1 * var(--u));
-    /* The same yellow as the rule stated underneath, so "ODD + ODD" up here
-       and "odd + odd = even" down there read as one sentence. */
-    color: var(--accent-yellow);
+    letter-spacing: 1.5px;
+    line-height: 1.15;
+    padding: calc(0.1 * var(--u)) calc(0.5 * var(--u));
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ffe066, #ffc73d);
+    color: #1a3870;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+    margin-bottom: calc(0.16 * var(--u));
 }
 
 .term-label {
@@ -240,13 +248,6 @@ body {
 
 .faded { opacity: 0; }
 
-/* The second number is spent once its blocks have moved across — but only
-   its label and rule fade. The blocks themselves are now part of the first
-   number's grid and have to stay visible, even though they're still its
-   children in the DOM. */
-.term.spent .term-parity,
-.term.spent .term-label,
-.term.spent .term-rule { opacity: 0; }
 
 /* The rule as a question from the start — "odd + odd = ?" — with the answer
    filled in once she's committed to one. */
