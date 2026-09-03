@@ -105,23 +105,26 @@ class OddEven {
                        : !aOdd && !bOdd ? 'eveneven'
                        : 'mixed';
             if (kind !== wanted) continue;
+            if (this.problem && this.problem.a === a && this.problem.b === b) continue;
 
-            // On a mixed problem the even number goes first, so the odd one
-            // is the one that travels. That way both shapes survive into the
-            // result: the even number's rectangle stays whole on top, and the
-            // odd number stacks under it intact, bringing its own leftover.
-            // The other way round, the odd number's notch swallows the first
-            // block of the even one and tears its rectangle apart.
+            // Which pile the other one moves into. On a mixed problem it's
+            // always the EVEN one, whichever side it's written on, so the odd
+            // number is the one that travels — 4 + 7 moves the 7 down under
+            // the 4, and 7 + 4 moves the 7 across and down under the 4.
             //
-            // Odd + odd has to break, but that's the point there — the two
-            // leftovers finding each other is the whole lesson.
-            const [first, second] = (kind === 'mixed' && aOdd) ? [b, a] : [a, b];
-            if (this.problem && this.problem.a === first && this.problem.b === second) continue;
+            // It matters because of whose leftover survives. Land on the odd
+            // number instead and its leftover gets partnered by the even
+            // number's first block, so the block left standing at the end came
+            // from the even number — the picture then says the even number
+            // caused the odd result, which is backwards.
+            //
+            // With two odds or two evens either will do, so the first stands.
+            const baseSide = (kind === 'mixed' && aOdd) ? 'b' : 'a';
 
-            const sum = first + second;
+            const sum = a + b;
             return {
-                a: first, b: second, sum, kind,
-                aOdd: first % 2 === 1, bOdd: second % 2 === 1,
+                a, b, sum, kind, baseSide,
+                aOdd, bOdd,
                 sumOdd: sum % 2 === 1,
                 rows: Math.ceil(sum / 2),
             };
@@ -167,30 +170,35 @@ class OddEven {
     // leftover finds a partner is the thing to watch, so it happens in one
     // moment and the rule it demonstrates is named underneath.
     runReveal() {
-        const { a, b, sum, kind, sumOdd } = this.problem;
+        const { a, b, sum, kind, sumOdd, baseSide, aOdd } = this.problem;
+        const moverSide = baseSide === 'a' ? 'b' : 'a';
         const step = (delay, fn) => this.timers.push(setTimeout(fn, delay));
 
         step(400, () => {
             this.joinBlocks();
 
-            // The first number's pile is now the whole sum; the second is spent.
-            const labelA = document.getElementById('label-a');
-            labelA.textContent = String(sum);
-            labelA.classList.add('settled');
+            // The pile that was landed on is now the whole sum; the one that
+            // travelled is spent.
+            const label = document.getElementById(`label-${baseSide}`);
+            label.textContent = String(sum);
+            label.classList.add('settled');
 
-            const parityA = document.getElementById('parity-a');
-            parityA.textContent = sumOdd ? 'Odd' : 'Even';
-            parityA.classList.add('settled');
-            document.getElementById('term-b').classList.add('spent');
+            const parity = document.getElementById(`parity-${baseSide}`);
+            parity.textContent = sumOdd ? 'Odd' : 'Even';
+            parity.classList.add('settled');
+
+            document.getElementById(`term-${moverSide}`).classList.add('spent');
             document.getElementById('op').classList.add('faded');
         });
 
         step(1300, () => {
-            // Named in the order they're shown, which for mixed is always
-            // even first now that the odd number is the one that moves.
-            const words = { oddodd: 'odd + odd', eveneven: 'even + even', mixed: 'even + odd' };
+            // Named in the order they're written, so the caption matches the
+            // equation whichever way round a mixed problem came up.
+            const words = kind === 'oddodd' ? 'odd + odd'
+                        : kind === 'eveneven' ? 'even + even'
+                        : (aOdd ? 'odd + even' : 'even + odd');
             document.getElementById('caption').textContent =
-                `${words[kind]} = ${sumOdd ? 'odd' : 'even'}`;
+                `${words} = ${sumOdd ? 'odd' : 'even'}`;
             document.getElementById('main-equation').innerHTML =
                 `<span class="eq-a">${a}</span>` +
                 `<span class="eq-op">+</span>` +
@@ -207,9 +215,12 @@ class OddEven {
     // 8 through 12. Nothing reflows — they travel by transform onto slots
     // that were holding the space all along.
     joinBlocks() {
-        const { a } = this.problem;
-        const slots = [...document.querySelectorAll('#grid-a .cell.slot')];
-        const movers = [...document.querySelectorAll('#grid-b .cell')];
+        const { a, b, baseSide } = this.problem;
+        const moverSide = baseSide === 'a' ? 'b' : 'a';
+        const baseCount = baseSide === 'a' ? a : b;
+
+        const slots = [...document.querySelectorAll(`#grid-${baseSide} .cell.slot`)];
+        const movers = [...document.querySelectorAll(`#grid-${moverSide} .cell`)];
 
         movers.forEach((cell, i) => {
             const slot = slots[i];
@@ -217,7 +228,7 @@ class OddEven {
             const from = cell.getBoundingClientRect();
             const to = slot.getBoundingClientRect();
             cell.classList.add('moving');
-            cell.textContent = String(a + i + 1);
+            cell.textContent = String(baseCount + i + 1);
             cell.style.transform =
                 `translate(${to.left - from.left}px, ${to.top - from.top}px)`;
         });
@@ -239,13 +250,13 @@ class OddEven {
     }
 
     renderBoard() {
-        const { a, b } = this.problem;
+        const { a, b, sum, baseSide } = this.problem;
         const row = document.getElementById('sum-row');
         row.innerHTML = '';
 
-        // The first number, plus a hidden slot for every block still to come,
-        // so the grid is already its final height and nothing jumps later.
-        row.appendChild(this.buildTerm('a', 'label-a', 'grid-a', a, a + b, 'a', 1));
+        // Only the pile being landed on carries hidden slots for the blocks
+        // still to come, so it's already its final height and nothing jumps.
+        row.appendChild(this.buildTerm('a', a, baseSide === 'a' ? sum : a));
 
         const op = document.createElement('div');
         op.className = 'op';
@@ -253,12 +264,12 @@ class OddEven {
         op.textContent = '+';
         row.appendChild(op);
 
-        row.appendChild(this.buildTerm('b', 'label-b', 'grid-b', b, b, 'b', 1));
+        row.appendChild(this.buildTerm('b', b, baseSide === 'b' ? sum : b));
     }
 
     // `filled` cells get numbers and colour; anything up to `total` after that
     // is an invisible slot. Laid out two across, counted top to bottom.
-    buildTerm(side, labelId, gridId, filled, total, cellClass, startAt) {
+    buildTerm(side, filled, total) {
         const term = document.createElement('div');
         term.className = `term side-${side}`;
         term.id = `term-${side}`;
@@ -271,7 +282,7 @@ class OddEven {
 
         const label = document.createElement('div');
         label.className = 'term-label';
-        label.id = labelId;
+        label.id = `label-${side}`;
         label.textContent = String(filled);
         term.appendChild(label);
 
@@ -281,7 +292,7 @@ class OddEven {
 
         const pairs = document.createElement('div');
         pairs.className = 'pairs';
-        pairs.id = gridId;
+        pairs.id = `grid-${side}`;
 
         let rowEl = null;
         for (let i = 0; i < total; i++) {
@@ -292,8 +303,8 @@ class OddEven {
             }
             const cell = document.createElement('div');
             if (i < filled) {
-                cell.className = `cell ${cellClass}`;
-                cell.textContent = String(startAt + i);
+                cell.className = `cell ${side}`;
+                cell.textContent = String(i + 1);
             } else {
                 cell.className = 'cell slot';
             }
