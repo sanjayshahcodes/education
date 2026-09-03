@@ -269,9 +269,14 @@ body {
 
 #answer-slot > * { grid-area: 1 / 1; }
 
+/* Stacked rather than side by side. Two buttons in a row made the slot about
+   three times the answer's width, and since the slot is sized by its wider
+   state, the answer ended up marooned in the middle of it. Stacked, the slot
+   is barely wider than the pile that replaces them. */
 #choice-buttons {
     display: flex;
-    gap: calc(0.3 * var(--u));
+    flex-direction: column;
+    gap: calc(0.22 * var(--u));
     margin-top: calc(0.62 * var(--u));
     transition: opacity 0.45s ease;
 }
@@ -298,8 +303,8 @@ body {
     font-size: calc(0.42 * var(--u));
     font-weight: 800;
     letter-spacing: 0.5px;
-    padding: calc(0.26 * var(--u)) calc(0.75 * var(--u));
-    min-width: calc(2.7 * var(--u));
+    padding: calc(0.24 * var(--u)) calc(0.5 * var(--u));
+    min-width: calc(2.3 * var(--u));
     background: var(--card-bg);
     color: var(--text-1);
     border: 2px solid var(--card-border);
