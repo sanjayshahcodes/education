@@ -6,27 +6,23 @@
  * bottom right, and the block sitting alone beside that notch is the whole
  * point: it is the one with no partner.
  *
- *        7              5
- *      ┌──┬──┐       ┌──┬──┐
- *      │ 1│ 2│       │ 1│ 2│
- *      │ 3│ 4│       │ 3│ 4│
- *      │ 5│ 6│       │ 5│  ▒     ▒ = nobody to pair with
- *      │ 7│ ▒│       └──┴──┘
- *      └──┴──┘
+ * She calls the answer odd or even, and the sum then appears as a third
+ * term, drawn the same way, so all three are on screen together:
  *
- * She calls the answer odd or even, and then the second number's blocks move
- * across and keep the count going. The 8 lands next to the lone 7 — the two
- * leftovers pair off — and everything from there fills whole rows:
+ *      ODD          ODD             EVEN
+ *       7      +     5       =       12
+ *    ┌──┬──┐      ┌──┬──┐         ┌──┬──┐
+ *    │ 1│ 2│      │ 1│ 2│         │ 1│ 2│
+ *    │ 3│ 4│      │ 3│ 4│         │ 3│ 4│
+ *    │ 5│ 6│      │ 5│  ▒         │ 5│ 6│
+ *    │ 7│  ▒      └──┴──┘         │ 7│ 8│  ← the two leftovers, paired
+ *    └──┴──┘                      │ 9│10│
+ *                                 │11│12│
+ *                                 └──┴──┘
  *
- *        12
- *      ┌──┬──┐
- *      │ 1│ 2│
- *      │ 3│ 4│
- *      │ 5│ 6│
- *      │ 7│ 8│   ← the two leftovers, now a pair
- *      │ 9│10│
- *      │11│12│
- *      └──┴──┘
+ * The sum keeps both numbers' colours, so it's visible which blocks came
+ * from where — and that the lone 7 is now sitting beside the 8. Two notches
+ * on the left, none on the right.
  *
  * All three rules are one rule — count the leftovers:
  *
@@ -51,8 +47,8 @@ class OddEven {
         // the rows get too short to read the numbers inside them.
         this.MAX_SUM = 20;
 
-        this.U_MIN = 26;
-        this.U_MAX = 62;
+        this.U_MIN = 24;
+        this.U_MAX = 60;
 
         this.totalGames = 0;
         this.correctCount = 0;
@@ -107,30 +103,25 @@ class OddEven {
             if (kind !== wanted) continue;
             if (this.problem && this.problem.a === a && this.problem.b === b) continue;
 
-            // Which pile the other one moves into. On a mixed problem it's
-            // always the EVEN one, whichever side it's written on, so the odd
-            // number is the one that travels — 4 + 7 moves the 7 down under
-            // the 4, and 7 + 4 moves the 7 across and down under the 4.
-            //
-            // It matters because of whose leftover survives. Land on the odd
-            // number instead and its leftover gets partnered by the even
-            // number's first block, so the block left standing at the end came
-            // from the even number — the picture then says the even number
-            // caused the odd result, which is backwards.
-            //
-            // With two odds or two evens either will do, so the first stands.
-            const baseSide = (kind === 'mixed' && aOdd) ? 'b' : 'a';
+            // Which number's blocks get counted first inside the sum. On a
+            // mixed problem it's the EVEN one, whichever side it's written,
+            // so the block left over at the bottom belongs to the odd number.
+            // Count the odd one first instead and its leftover gets partnered,
+            // leaving a block from the even number standing at the end — the
+            // picture then says the even number caused the odd result, which
+            // is backwards.
+            const leadSide = (kind === 'mixed' && aOdd) ? 'b' : 'a';
 
             const sum = a + b;
             return {
-                a, b, sum, kind, baseSide,
+                a, b, sum, kind, leadSide,
                 aOdd, bOdd,
                 sumOdd: sum % 2 === 1,
                 rows: Math.ceil(sum / 2),
             };
         }
-        return { a: 7, b: 5, sum: 12, kind: 'oddodd', aOdd: true, bOdd: true,
-                 sumOdd: false, rows: 6 };
+        return { a: 7, b: 5, sum: 12, kind: 'oddodd', leadSide: 'a',
+                 aOdd: true, bOdd: true, sumOdd: false, rows: 6 };
     }
 
     // ── Round lifecycle ────────────────────────────
@@ -145,7 +136,7 @@ class OddEven {
             b.classList.remove('right', 'wrong');
         });
         document.getElementById('choice-buttons').classList.remove('faded');
-        document.getElementById('equals').classList.remove('faded');
+        document.getElementById('answer-term').classList.remove('shown');
         document.getElementById('outcome').classList.remove('shown');
 
         this.renderEquation();
@@ -164,35 +155,19 @@ class OddEven {
         document.getElementById('correct-count').textContent = this.correctCount;
         btn.classList.add(correct ? 'right' : 'wrong');
 
-        this.runReveal();
+        this.reveal();
     }
 
-    // The second number's blocks move over and carry on the count. Whether a
-    // leftover finds a partner is the thing to watch, so it happens in one
-    // moment and the rule it demonstrates is named underneath.
-    runReveal() {
-        const { a, b, sum, kind, sumOdd, baseSide, aOdd } = this.problem;
-        const moverSide = baseSide === 'a' ? 'b' : 'a';
-        const step = (delay, fn) => this.timers.push(setTimeout(fn, delay));
+    // The sum takes the choices' place, drawn like the other two terms. Both
+    // addends stay put, so the two notches on the left can be compared
+    // against whatever the answer turned out to be.
+    reveal() {
+        const { a, b, sum, kind, sumOdd, aOdd } = this.problem;
 
-        step(400, () => {
-            this.joinBlocks();
+        this.timers.push(setTimeout(() => {
+            document.getElementById('choice-buttons').classList.add('faded');
+            document.getElementById('answer-term').classList.add('shown');
 
-            // The pile that was landed on is now the whole sum; the one that
-            // travelled is spent.
-            const label = document.getElementById(`label-${baseSide}`);
-            label.textContent = String(sum);
-            label.classList.add('settled');
-
-            // Already yellow — only the word changes.
-            document.getElementById(`parity-${baseSide}`).textContent =
-                sumOdd ? 'Odd' : 'Even';
-
-            document.getElementById(`term-${moverSide}`).classList.add('spent');
-            document.getElementById('op').classList.add('faded');
-        });
-
-        step(1300, () => {
             // Named in the order they're written, so the caption matches the
             // equation whichever way round a mixed problem came up.
             const words = kind === 'oddodd' ? 'odd + odd'
@@ -200,41 +175,15 @@ class OddEven {
                         : (aOdd ? 'odd + even' : 'even + odd');
             document.getElementById('caption').textContent =
                 `${words} = ${sumOdd ? 'odd' : 'even'}`;
+            document.getElementById('outcome').classList.add('shown');
+
             document.getElementById('main-equation').innerHTML =
                 `<span class="eq-a">${a}</span>` +
                 `<span class="eq-op">+</span>` +
                 `<span class="eq-b">${b}</span>` +
                 `<span class="eq-op">=</span>` +
                 `<span class="eq-sum">${sum}</span>`;
-            // The choices give way to what they turned out to demonstrate.
-            document.getElementById('choice-buttons').classList.add('faded');
-            document.getElementById('equals').classList.add('faded');
-            document.getElementById('outcome').classList.add('shown');
-        });
-    }
-
-    // Move each of the second number's blocks onto the waiting slot in the
-    // first number's grid, renumbering as it goes: the 5 blocks of 5 become
-    // 8 through 12. Nothing reflows — they travel by transform onto slots
-    // that were holding the space all along.
-    joinBlocks() {
-        const { a, b, baseSide } = this.problem;
-        const moverSide = baseSide === 'a' ? 'b' : 'a';
-        const baseCount = baseSide === 'a' ? a : b;
-
-        const slots = [...document.querySelectorAll(`#grid-${baseSide} .cell.slot`)];
-        const movers = [...document.querySelectorAll(`#grid-${moverSide} .cell`)];
-
-        movers.forEach((cell, i) => {
-            const slot = slots[i];
-            if (!slot) return;
-            const from = cell.getBoundingClientRect();
-            const to = slot.getBoundingClientRect();
-            cell.classList.add('moving');
-            cell.textContent = String(baseCount + i + 1);
-            cell.style.transform =
-                `translate(${to.left - from.left}px, ${to.top - from.top}px)`;
-        });
+        }, 350));
     }
 
     clearTimers() {
@@ -253,40 +202,44 @@ class OddEven {
     }
 
     renderBoard() {
-        const { a, b, sum, baseSide } = this.problem;
-        const row = document.getElementById('terms');
-        row.innerHTML = '';
+        const { a, b, sum, leadSide } = this.problem;
 
-        // Only the pile being landed on carries hidden slots for the blocks
-        // still to come, so it's already its final height and nothing jumps.
-        row.appendChild(this.buildTerm('a', a, baseSide === 'a' ? sum : a));
+        const terms = document.getElementById('terms');
+        terms.innerHTML = '';
+        terms.appendChild(this.buildTerm('a', a, () => 'a'));
 
         const op = document.createElement('div');
         op.className = 'op';
-        op.id = 'op';
         op.textContent = '+';
-        row.appendChild(op);
+        terms.appendChild(op);
 
-        row.appendChild(this.buildTerm('b', b, baseSide === 'b' ? sum : b));
+        terms.appendChild(this.buildTerm('b', b, () => 'b'));
+
+        // The sum, in both numbers' colours: the lead number's blocks first,
+        // then the other's. Where the colour changes shows what each
+        // contributed, and whose block is the one left over.
+        const leadCount = leadSide === 'a' ? a : b;
+        const otherSide = leadSide === 'a' ? 'b' : 'a';
+        const answer = document.getElementById('answer-term');
+        answer.innerHTML = '';
+        answer.appendChild(
+            this.buildTerm('sum', sum, (i) => i < leadCount ? leadSide : otherSide));
     }
 
-    // `filled` cells get numbers and colour; anything up to `total` after that
-    // is an invisible slot. Laid out two across, counted top to bottom.
-    buildTerm(side, filled, total) {
+    // Two across, counted 1, 2, 3... top to bottom. An even number comes out a
+    // perfect rectangle; an odd one leaves a notch at the bottom right.
+    buildTerm(side, value, colourOf) {
         const term = document.createElement('div');
         term.className = `term side-${side}`;
-        term.id = `term-${side}`;
 
         const parity = document.createElement('div');
         parity.className = 'term-parity';
-        parity.id = `parity-${side}`;
-        parity.textContent = filled % 2 === 1 ? 'Odd' : 'Even';
+        parity.textContent = value % 2 === 1 ? 'Odd' : 'Even';
         term.appendChild(parity);
 
         const label = document.createElement('div');
         label.className = 'term-label';
-        label.id = `label-${side}`;
-        label.textContent = String(filled);
+        label.textContent = String(value);
         term.appendChild(label);
 
         const rule = document.createElement('div');
@@ -295,22 +248,17 @@ class OddEven {
 
         const pairs = document.createElement('div');
         pairs.className = 'pairs';
-        pairs.id = `grid-${side}`;
 
         let rowEl = null;
-        for (let i = 0; i < total; i++) {
+        for (let i = 0; i < value; i++) {
             if (i % 2 === 0) {
                 rowEl = document.createElement('div');
                 rowEl.className = 'row';
                 pairs.appendChild(rowEl);
             }
             const cell = document.createElement('div');
-            if (i < filled) {
-                cell.className = `cell ${side}`;
-                cell.textContent = String(i + 1);
-            } else {
-                cell.className = 'cell slot';
-            }
+            cell.className = `cell ${colourOf(i)}`;
+            cell.textContent = String(i + 1);
             rowEl.appendChild(cell);
         }
 
@@ -318,8 +266,8 @@ class OddEven {
         return term;
     }
 
-    // Two across means height is what runs out first: the taller of the two
-    // grids sets the cell size.
+    // Two across means height is what runs out first: the sum is the tallest
+    // pile, so it sets the cell size.
     fitUnit() {
         if (!this.problem) return;
         const { rows } = this.problem;
@@ -328,15 +276,22 @@ class OddEven {
         const availH = board.clientHeight;
         if (availW <= 0 || availH <= 0) return;
 
-        // Numeral, rule, the rows themselves, plus a little air.
+        // Parity word, numeral, rule, the rows themselves, plus a little air.
         const unitsTall = 0.55 + 1.15 + 0.5 + rows + 0.6;
-        // Two piles two cells wide, the operators, and the answer slot — which
-        // has to hold the widest rule sentence, "even + even = even".
-        const unitsWide = 2 + 2 + 1.2 + 9.5 + 3.6;
 
-        let u = Math.min(availW / unitsWide, availH / unitsTall);
-        u = Math.max(this.U_MIN, Math.min(this.U_MAX, Math.floor(u)));
-        document.documentElement.style.setProperty('--u', `${u}px`);
+        // Take what the height allows, then measure and back off if the line
+        // is too wide. Guessing the width in --u means guessing how wide the
+        // rule sentence and the buttons render, which is how this ended up
+        // needlessly small; everything on the line scales with --u, so one
+        // measurement gives the right answer.
+        const setU = (u) => document.documentElement.style.setProperty('--u', `${u}px`);
+        const clamp = (u) => Math.max(this.U_MIN, Math.min(this.U_MAX, Math.floor(u)));
+
+        let u = clamp(availH / unitsTall);
+        setU(u);
+
+        const rowW = document.getElementById('sum-row').getBoundingClientRect().width;
+        if (rowW > availW) setU(clamp(u * (availW / rowW)));
     }
 
     show(id) { document.getElementById(id).classList.remove('hidden'); }

@@ -38,18 +38,18 @@
             <div id="sum-row">
                 <div id="terms"></div>
                 <div class="op" id="equals">=</div>
-                <!-- One slot, two states. She picks from it, then it tells her
-                     the rule and offers the next problem — all in the space
-                     the second pile just vacated. -->
+                <!-- One slot, two states in the same grid cell: the choices,
+                     then the answer itself, drawn like the other two terms. -->
                 <div id="answer-slot">
                     <div id="choice-buttons">
                         <button class="choice-btn" data-choice="odd">Odd</button>
                         <button class="choice-btn" data-choice="even">Even</button>
                     </div>
-                    <div id="outcome">
-                        <div id="caption"></div>
-                        <button id="continue-btn" class="btn btn-primary">Next Problem →</button>
-                    </div>
+                    <div id="answer-term"></div>
+                </div>
+                <div id="outcome">
+                    <div id="caption"></div>
+                    <button id="continue-btn" class="btn btn-primary">Next Problem →</button>
                 </div>
             </div>
         </main>

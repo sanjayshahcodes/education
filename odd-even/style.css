@@ -144,13 +144,18 @@ body {
     justify-content: center;
 }
 
+/* No max-width clamp and nothing allowed to shrink, so the row reports its
+   true content width. fitUnit measures that and backs --u off until it fits;
+   if a flex child were allowed to squash instead, its nowrap text would spill
+   past a box that still measured as fitting. */
 #sum-row {
     display: flex;
     align-items: flex-start;
     gap: calc(0.9 * var(--u));
     width: max-content;
-    max-width: 100%;
 }
+
+#sum-row > * { flex: 0 0 auto; }
 
 #terms {
     display: flex;
@@ -167,6 +172,7 @@ body {
 
 .term.side-a { color: var(--a-1); }
 .term.side-b { color: var(--b-1); }
+.term.side-sum { color: var(--accent-yellow); }
 
 /* Names what kind of number this is, right above the number itself — so the
    rule being demonstrated is readable straight off the board, not only from
@@ -222,17 +228,10 @@ body {
     font-size: calc(0.4 * var(--u));
     font-weight: 700;
     letter-spacing: -0.5px;
-    transition: transform 0.75s cubic-bezier(0.34, 0.9, 0.3, 1);
 }
 
 .cell.a { background: var(--a-fill); border-color: var(--a-1); color: var(--a-1); }
 .cell.b { background: var(--b-fill); border-color: var(--b-1); color: var(--b-1); }
-
-/* Where the second number's blocks are headed. Holds the space so nothing
-   shifts when they arrive, but shows as the empty notch until then. */
-.cell.slot { visibility: hidden; }
-
-.cell.moving { z-index: 3; }
 
 /* The operator rides at the height of the numerals. */
 .op {
@@ -258,7 +257,7 @@ body {
 /* ── The rule this problem turned out to be an instance of ── */
 
 #caption {
-    font-size: calc(0.5 * var(--u));
+    font-size: calc(0.42 * var(--u));
     font-weight: 800;
     color: var(--accent-yellow);
     letter-spacing: 0.3px;
@@ -270,28 +269,39 @@ body {
 /* One slot with two states: the choices, then what they turned out to
    demonstrate. Both stay in flow so the slot never changes size and the
    finished pile can't shift under her when they swap. */
+/* Both states occupy the same grid cell, so the slot is sized by the larger
+   of them from the start and nothing on the line moves when they swap. */
 #answer-slot {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: calc(0.45 * var(--u));
-    margin-top: calc(0.62 * var(--u));
+    display: grid;
+    align-items: start;
+    justify-items: start;
 }
+
+#answer-slot > * { grid-area: 1 / 1; }
 
 #choice-buttons {
     display: flex;
     gap: calc(0.3 * var(--u));
-    transition: opacity 0.5s ease;
+    margin-top: calc(0.62 * var(--u));
+    transition: opacity 0.45s ease;
 }
+
+#answer-term {
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+
+#answer-term.shown { opacity: 1; }
 
 #outcome {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: calc(0.4 * var(--u));
+    margin-top: calc(0.62 * var(--u));
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.45s ease;
 }
 
 #outcome.shown { opacity: 1; pointer-events: auto; }
