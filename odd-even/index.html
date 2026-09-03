@@ -17,20 +17,23 @@
 <body>
     <div id="game-container">
 
-        <div id="stats-header">
-            <div class="stat-block">
-                <div class="stat-label">Total</div>
-                <div class="stat-value" id="total-count">0</div>
-            </div>
-            <div class="stat-block">
-                <div class="stat-label">Correct</div>
-                <div class="stat-value" id="correct-count">0</div>
+        <div id="top-right">
+            <button id="continue-btn" class="btn btn-primary">Next Problem →</button>
+            <div id="stats-header">
+                <div class="stat-block">
+                    <div class="stat-label">Total</div>
+                    <div class="stat-value" id="total-count">0</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-label">Correct</div>
+                    <div class="stat-value" id="correct-count">0</div>
+                </div>
             </div>
         </div>
 
-        <header id="header">
-            <div id="main-equation"></div>
-        </header>
+        <!-- The rule this problem turned out to demonstrate. Its own strip, so
+             the board below it stays free to centre the three terms. -->
+        <div id="topbar"><div id="caption"></div></div>
 
         <main id="board">
             <!-- The whole question on one line: the two piles, then the two
@@ -46,10 +49,6 @@
                         <button class="choice-btn" data-choice="even">Even</button>
                     </div>
                     <div id="answer-term"></div>
-                </div>
-                <div id="outcome">
-                    <div id="caption"></div>
-                    <button id="continue-btn" class="btn btn-primary">Next Problem →</button>
                 </div>
             </div>
         </main>

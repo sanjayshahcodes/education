@@ -131,15 +131,14 @@ class OddEven {
         this.problem = this.generateProblem();
         this.answered = false;
 
-        document.getElementById('caption').textContent = '';
+        document.getElementById('caption').classList.remove('shown');
         document.querySelectorAll('.choice-btn').forEach(b => {
             b.classList.remove('right', 'wrong');
         });
         document.getElementById('choice-buttons').classList.remove('faded');
         document.getElementById('answer-term').classList.remove('shown');
-        document.getElementById('outcome').classList.remove('shown');
+        document.getElementById('continue-btn').classList.remove('shown');
 
-        this.renderEquation();
         this.renderBoard();
         this.fitUnit();
     }
@@ -162,7 +161,7 @@ class OddEven {
     // addends stay put, so the two notches on the left can be compared
     // against whatever the answer turned out to be.
     reveal() {
-        const { a, b, sum, kind, sumOdd, aOdd } = this.problem;
+        const { kind, sumOdd, aOdd } = this.problem;
 
         this.timers.push(setTimeout(() => {
             document.getElementById('choice-buttons').classList.add('faded');
@@ -173,16 +172,11 @@ class OddEven {
             const words = kind === 'oddodd' ? 'odd + odd'
                         : kind === 'eveneven' ? 'even + even'
                         : (aOdd ? 'odd + even' : 'even + odd');
-            document.getElementById('caption').textContent =
-                `${words} = ${sumOdd ? 'odd' : 'even'}`;
-            document.getElementById('outcome').classList.add('shown');
+            const caption = document.getElementById('caption');
+            caption.textContent = `${words} = ${sumOdd ? 'odd' : 'even'}`;
+            caption.classList.add('shown');
 
-            document.getElementById('main-equation').innerHTML =
-                `<span class="eq-a">${a}</span>` +
-                `<span class="eq-op">+</span>` +
-                `<span class="eq-b">${b}</span>` +
-                `<span class="eq-op">=</span>` +
-                `<span class="eq-sum">${sum}</span>`;
+            document.getElementById('continue-btn').classList.add('shown');
         }, 350));
     }
 
@@ -192,14 +186,6 @@ class OddEven {
     }
 
     // ── Rendering ──────────────────────────────────
-
-    renderEquation() {
-        const { a, b } = this.problem;
-        document.getElementById('main-equation').innerHTML =
-            `<span class="eq-a">${a}</span>` +
-            `<span class="eq-op">+</span>` +
-            `<span class="eq-b">${b}</span>`;
-    }
 
     renderBoard() {
         const { a, b, sum, leadSide } = this.problem;

@@ -68,17 +68,23 @@ body {
 
 /* ── Stats badge ────────────────────────────────── */
 
-#stats-header {
+#top-right {
     position: fixed;
     top: max(10px, env(safe-area-inset-top));
     right: max(14px, env(safe-area-inset-right));
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 20;
+}
+
+#stats-header {
     background: var(--card-bg);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--card-border);
     border-radius: 12px;
     padding: 5px 12px;
-    z-index: 20;
     box-shadow: var(--shadow-soft);
     display: flex;
     gap: 14px;
@@ -104,34 +110,16 @@ body {
 
 #correct-count { color: var(--a-1); }
 
-/* ── Header ────────────────────────────────────── */
+/* ── The rule, along the top ───────────────────── */
 
-#header {
+#topbar {
     flex: 0 0 auto;
+    height: 62px;
     display: flex;
+    align-items: center;
     justify-content: center;
-    align-items: center;
     width: 100%;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-    border-bottom: 3px solid rgba(255, 255, 255, 0.14);
 }
-
-#main-equation {
-    font-size: clamp(28px, 5.6vh, 48px);
-    font-weight: 800;
-    letter-spacing: -1px;
-    line-height: 1.1;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
-}
-
-#main-equation .eq-a  { color: var(--a-1); }
-#main-equation .eq-b  { color: var(--b-1); }
-#main-equation .eq-op { color: var(--text-1); padding: 0 4px; }
-#main-equation .eq-sum { color: var(--accent-yellow); }
 
 /* ── The two numbers ───────────────────────────── */
 
@@ -254,15 +242,17 @@ body {
 .term.spent .term-label,
 .term.spent .term-rule { opacity: 0; }
 
-/* ── The rule this problem turned out to be an instance of ── */
-
 #caption {
-    font-size: calc(0.42 * var(--u));
+    font-size: clamp(20px, 3.2vh, 30px);
     font-weight: 800;
     color: var(--accent-yellow);
     letter-spacing: 0.3px;
     white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.45s ease;
 }
+
+#caption.shown { opacity: 1; }
 
 /* ── The answer end of the line ────────────────── */
 
@@ -274,7 +264,7 @@ body {
 #answer-slot {
     display: grid;
     align-items: start;
-    justify-items: start;
+    justify-items: center;
 }
 
 #answer-slot > * { grid-area: 1 / 1; }
@@ -293,18 +283,15 @@ body {
 
 #answer-term.shown { opacity: 1; }
 
-#outcome {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: calc(0.4 * var(--u));
-    margin-top: calc(0.62 * var(--u));
+/* Hidden until she's answered, but always laid out, so the tally beside it
+   never moves. */
+#continue-btn {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.45s ease;
 }
 
-#outcome.shown { opacity: 1; pointer-events: auto; }
+#continue-btn.shown { opacity: 1; pointer-events: auto; }
 
 .choice-btn {
     font-family: inherit;
@@ -338,8 +325,8 @@ body {
 }
 
 .btn {
-    padding: calc(0.22 * var(--u)) calc(0.6 * var(--u));
-    font-size: calc(0.32 * var(--u));
+    padding: 11px 26px;
+    font-size: 16px;
     font-weight: 700;
     font-family: inherit;
     border: none;
