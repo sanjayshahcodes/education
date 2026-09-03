@@ -281,12 +281,20 @@ body {
     transition: opacity 0.45s ease;
 }
 
+/* Never interactive, and it shares a grid cell with the buttons while
+   sitting above them in paint order — so without this it swallows every tap
+   aimed at Odd or Even while invisible. opacity:0 hides a thing from the eye,
+   not from the pointer. */
 #answer-term {
     opacity: 0;
+    pointer-events: none;
     transition: opacity 0.45s ease;
 }
 
 #answer-term.shown { opacity: 1; }
+
+/* Likewise once they've been answered and faded out. */
+#choice-buttons.faded { pointer-events: none; }
 
 /* Hidden until she's answered, but always laid out, so the tally beside it
    never moves. */
