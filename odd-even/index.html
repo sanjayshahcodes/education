@@ -33,16 +33,21 @@
         </header>
 
         <main id="board">
-            <div id="sum-row"></div>
+            <!-- The whole question on one line: the two piles, then the two
+                 answers she can pick, where the answer belongs. -->
+            <div id="sum-row">
+                <div id="terms"></div>
+                <div class="op" id="equals">=</div>
+                <div id="choice-buttons">
+                    <button class="choice-btn" data-choice="odd">Odd</button>
+                    <button class="choice-btn" data-choice="even">Even</button>
+                </div>
+            </div>
         </main>
 
         <div id="caption"></div>
 
         <footer id="footer">
-            <div id="choice-buttons">
-                <button class="choice-btn" data-choice="odd">Odd</button>
-                <button class="choice-btn" data-choice="even">Even</button>
-            </div>
             <button id="continue-btn" class="btn btn-primary hidden">Next Problem →</button>
         </footer>
 

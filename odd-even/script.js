@@ -144,7 +144,8 @@ class OddEven {
         document.querySelectorAll('.choice-btn').forEach(b => {
             b.classList.remove('right', 'wrong');
         });
-        this.show('choice-buttons');
+        document.getElementById('choice-buttons').classList.remove('faded');
+        document.getElementById('equals').classList.remove('faded');
         this.hide('continue-btn');
 
         this.renderEquation();
@@ -205,7 +206,8 @@ class OddEven {
                 `<span class="eq-b">${b}</span>` +
                 `<span class="eq-op">=</span>` +
                 `<span class="eq-sum">${sum}</span>`;
-            this.hide('choice-buttons');
+            document.getElementById('choice-buttons').classList.add('faded');
+            document.getElementById('equals').classList.add('faded');
             this.show('continue-btn');
         });
     }
@@ -251,7 +253,7 @@ class OddEven {
 
     renderBoard() {
         const { a, b, sum, baseSide } = this.problem;
-        const row = document.getElementById('sum-row');
+        const row = document.getElementById('terms');
         row.innerHTML = '';
 
         // Only the pile being landed on carries hidden slots for the blocks
@@ -328,7 +330,7 @@ class OddEven {
         // Numeral, rule, the rows themselves, plus a little air.
         const unitsTall = 0.55 + 1.15 + 0.5 + rows + 0.6;
         // Two grids two cells wide, the operator, and the gaps between.
-        const unitsWide = 2 + 2 + 1.2 + 1.8;
+        const unitsWide = 2 + 2 + 1.2 + 6.6 + 3.6;   // piles, ops, buttons, gaps
 
         let u = Math.min(availW / unitsWide, availH / unitsTall);
         u = Math.max(this.U_MIN, Math.min(this.U_MAX, Math.floor(u)));
