@@ -255,37 +255,46 @@ body {
 .term.spent .term-label,
 .term.spent .term-rule { opacity: 0; }
 
-/* ── Caption: the rule this problem is an instance of ── */
+/* ── The rule this problem turned out to be an instance of ── */
 
 #caption {
-    flex: 0 0 auto;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(20px, 3.4vh, 32px);
+    font-size: calc(0.5 * var(--u));
     font-weight: 800;
     color: var(--accent-yellow);
     letter-spacing: 0.3px;
-    text-align: center;
+    white-space: nowrap;
 }
 
-/* ── Footer ────────────────────────────────────── */
+/* ── The answer end of the line ────────────────── */
 
-#footer {
-    flex: 0 0 auto;
-    height: 62px;
+/* One slot with two states: the choices, then what they turned out to
+   demonstrate. Both stay in flow so the slot never changes size and the
+   finished pile can't shift under her when they swap. */
+#answer-slot {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(0.45 * var(--u));
+    margin-top: calc(0.62 * var(--u));
 }
 
 #choice-buttons {
     display: flex;
     gap: calc(0.3 * var(--u));
-    margin-top: calc(0.62 * var(--u));
     transition: opacity 0.5s ease;
 }
+
+#outcome {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(0.4 * var(--u));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+#outcome.shown { opacity: 1; pointer-events: auto; }
 
 .choice-btn {
     font-family: inherit;
@@ -319,8 +328,8 @@ body {
 }
 
 .btn {
-    padding: 12px 38px;
-    font-size: 18px;
+    padding: calc(0.22 * var(--u)) calc(0.6 * var(--u));
+    font-size: calc(0.32 * var(--u));
     font-weight: 700;
     font-family: inherit;
     border: none;

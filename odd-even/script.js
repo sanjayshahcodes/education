@@ -146,7 +146,7 @@ class OddEven {
         });
         document.getElementById('choice-buttons').classList.remove('faded');
         document.getElementById('equals').classList.remove('faded');
-        this.hide('continue-btn');
+        document.getElementById('outcome').classList.remove('shown');
 
         this.renderEquation();
         this.renderBoard();
@@ -206,9 +206,10 @@ class OddEven {
                 `<span class="eq-b">${b}</span>` +
                 `<span class="eq-op">=</span>` +
                 `<span class="eq-sum">${sum}</span>`;
+            // The choices give way to what they turned out to demonstrate.
             document.getElementById('choice-buttons').classList.add('faded');
             document.getElementById('equals').classList.add('faded');
-            this.show('continue-btn');
+            document.getElementById('outcome').classList.add('shown');
         });
     }
 
@@ -329,8 +330,9 @@ class OddEven {
 
         // Numeral, rule, the rows themselves, plus a little air.
         const unitsTall = 0.55 + 1.15 + 0.5 + rows + 0.6;
-        // Two grids two cells wide, the operator, and the gaps between.
-        const unitsWide = 2 + 2 + 1.2 + 6.6 + 3.6;   // piles, ops, buttons, gaps
+        // Two piles two cells wide, the operators, and the answer slot — which
+        // has to hold the widest rule sentence, "even + even = even".
+        const unitsWide = 2 + 2 + 1.2 + 9.5 + 3.6;
 
         let u = Math.min(availW / unitsWide, availH / unitsTall);
         u = Math.max(this.U_MIN, Math.min(this.U_MAX, Math.floor(u)));
