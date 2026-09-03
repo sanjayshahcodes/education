@@ -183,9 +183,9 @@ class OddEven {
             label.textContent = String(sum);
             label.classList.add('settled');
 
-            const parity = document.getElementById(`parity-${baseSide}`);
-            parity.textContent = sumOdd ? 'Odd' : 'Even';
-            parity.classList.add('settled');
+            // Already yellow — only the word changes.
+            document.getElementById(`parity-${baseSide}`).textContent =
+                sumOdd ? 'Odd' : 'Even';
 
             document.getElementById(`term-${moverSide}`).classList.add('spent');
             document.getElementById('op').classList.add('faded');

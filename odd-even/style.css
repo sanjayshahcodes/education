@@ -171,12 +171,11 @@ body {
     text-transform: uppercase;
     letter-spacing: 2px;
     text-align: center;
-    opacity: 0.85;
     margin-bottom: calc(0.1 * var(--u));
-    transition: color 0.45s ease;
+    /* The same yellow as the rule stated underneath, so "ODD + ODD" up here
+       and "odd + odd = even" down there read as one sentence. */
+    color: var(--accent-yellow);
 }
-
-.term-parity.settled { color: var(--accent-yellow); }
 
 .term-label {
     font-size: calc(1.05 * var(--u));
