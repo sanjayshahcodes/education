@@ -124,6 +124,15 @@ class OddEven {
                  aOdd: true, bOdd: true, sumOdd: false, rows: 6 };
     }
 
+    // The rule this problem is an instance of, named in the order it's
+    // written so it matches the terms on the board.
+    ruleWords() {
+        const { kind, aOdd } = this.problem;
+        return kind === 'oddodd' ? 'odd + odd'
+             : kind === 'eveneven' ? 'even + even'
+             : (aOdd ? 'odd + even' : 'even + odd');
+    }
+
     // ── Round lifecycle ────────────────────────────
 
     startNewRound() {
@@ -131,7 +140,8 @@ class OddEven {
         this.problem = this.generateProblem();
         this.answered = false;
 
-        document.getElementById('caption').classList.remove('shown');
+        document.getElementById('caption').innerHTML =
+            `${this.ruleWords()} = <span class="unknown">?</span>`;
         document.querySelectorAll('.choice-btn').forEach(b => {
             b.classList.remove('right', 'wrong');
         });
@@ -161,20 +171,15 @@ class OddEven {
     // addends stay put, so the two notches on the left can be compared
     // against whatever the answer turned out to be.
     reveal() {
-        const { kind, sumOdd, aOdd } = this.problem;
+        const { sumOdd } = this.problem;
 
         this.timers.push(setTimeout(() => {
             document.getElementById('choice-buttons').classList.add('faded');
             document.getElementById('answer-term').classList.add('shown');
 
-            // Named in the order they're written, so the caption matches the
-            // equation whichever way round a mixed problem came up.
-            const words = kind === 'oddodd' ? 'odd + odd'
-                        : kind === 'eveneven' ? 'even + even'
-                        : (aOdd ? 'odd + even' : 'even + odd');
-            const caption = document.getElementById('caption');
-            caption.textContent = `${words} = ${sumOdd ? 'odd' : 'even'}`;
-            caption.classList.add('shown');
+            // The question mark it has been carrying gets its answer.
+            document.getElementById('caption').textContent =
+                `${this.ruleWords()} = ${sumOdd ? 'odd' : 'even'}`;
 
             document.getElementById('continue-btn').classList.add('shown');
         }, 350));
