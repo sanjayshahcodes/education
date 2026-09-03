@@ -281,8 +281,12 @@ class OddEven {
         let u = clamp(availH / unitsTall);
         setU(u);
 
-        const rowW = document.getElementById('sum-row').getBoundingClientRect().width;
-        if (rowW > availW) setU(clamp(u * (availW / rowW)));
+        // The buttons hang outside the row's box on both sides, so measure the
+        // widest thing actually drawn rather than the row alone.
+        const row = document.getElementById('sum-row').getBoundingClientRect();
+        const btns = document.getElementById('choice-buttons').getBoundingClientRect();
+        const drawnW = Math.max(row.right, btns.right) - Math.min(row.left, btns.left);
+        if (drawnW > availW) setU(clamp(u * (availW / drawnW)));
     }
 
     show(id) { document.getElementById(id).classList.remove('hidden'); }

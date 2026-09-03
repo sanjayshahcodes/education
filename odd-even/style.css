@@ -268,25 +268,26 @@ body {
 /* One slot with two states: the choices, then what they turned out to
    demonstrate. Both stay in flow so the slot never changes size and the
    finished pile can't shift under her when they swap. */
-/* Both states occupy the same grid cell, so the slot is sized by the larger
-   of them from the start and nothing on the line moves when they swap. */
+/* The slot takes its size from the answer alone. The buttons are lifted out
+   of the flow and centred over it, so putting them side by side doesn't
+   widen the slot and strand the answer in the middle of it — which is what
+   happened when they were laid out normally. */
 #answer-slot {
+    position: relative;
     display: grid;
     align-items: start;
     justify-items: center;
 }
 
-#answer-slot > * { grid-area: 1 / 1; }
-
-/* Stacked rather than side by side. Two buttons in a row made the slot about
-   three times the answer's width, and since the slot is sized by its wider
-   state, the answer ended up marooned in the middle of it. Stacked, the slot
-   is barely wider than the pile that replaces them. */
+/* Anchored to the slot's left edge, not centred on it: centred, they'd be
+   wide enough to reach back over the = sign. Starting here means they sit
+   exactly where the answer will appear and run rightward into empty space. */
 #choice-buttons {
+    position: absolute;
+    top: calc(0.62 * var(--u));
+    left: 0;
     display: flex;
-    flex-direction: column;
-    gap: calc(0.22 * var(--u));
-    margin-top: calc(0.62 * var(--u));
+    gap: calc(0.28 * var(--u));
     transition: opacity 0.45s ease;
 }
 
@@ -320,8 +321,9 @@ body {
     font-size: calc(0.42 * var(--u));
     font-weight: 800;
     letter-spacing: 0.5px;
-    padding: calc(0.24 * var(--u)) calc(0.5 * var(--u));
+    padding: calc(0.24 * var(--u)) calc(0.6 * var(--u));
     min-width: calc(2.3 * var(--u));
+    white-space: nowrap;
     background: var(--card-bg);
     color: var(--text-1);
     border: 2px solid var(--card-border);
