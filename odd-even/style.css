@@ -162,6 +162,22 @@ body {
 .term.side-a { color: var(--a-1); }
 .term.side-b { color: var(--b-1); }
 
+/* Names what kind of number this is, right above the number itself — so the
+   rule being demonstrated is readable straight off the board, not only from
+   the caption after the fact. */
+.term-parity {
+    font-size: calc(0.36 * var(--u));
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+    opacity: 0.85;
+    margin-bottom: calc(0.1 * var(--u));
+    transition: color 0.45s ease;
+}
+
+.term-parity.settled { color: var(--accent-yellow); }
+
 .term-label {
     font-size: calc(1.05 * var(--u));
     font-weight: 800;
@@ -229,6 +245,7 @@ body {
    its label and rule fade. The blocks themselves are now part of the first
    number's grid and have to stay visible, even though they're still its
    children in the DOM. */
+.term.spent .term-parity,
 .term.spent .term-label,
 .term.spent .term-rule { opacity: 0; }
 

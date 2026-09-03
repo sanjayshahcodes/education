@@ -166,6 +166,10 @@ class OddEven {
             const labelA = document.getElementById('label-a');
             labelA.textContent = String(sum);
             labelA.classList.add('settled');
+
+            const parityA = document.getElementById('parity-a');
+            parityA.textContent = sumOdd ? 'Odd' : 'Even';
+            parityA.classList.add('settled');
             document.getElementById('term-b').classList.add('spent');
             document.getElementById('op').classList.add('faded');
         });
@@ -246,6 +250,12 @@ class OddEven {
         term.className = `term side-${side}`;
         term.id = `term-${side}`;
 
+        const parity = document.createElement('div');
+        parity.className = 'term-parity';
+        parity.id = `parity-${side}`;
+        parity.textContent = filled % 2 === 1 ? 'Odd' : 'Even';
+        term.appendChild(parity);
+
         const label = document.createElement('div');
         label.className = 'term-label';
         label.id = labelId;
@@ -292,7 +302,7 @@ class OddEven {
         if (availW <= 0 || availH <= 0) return;
 
         // Numeral, rule, the rows themselves, plus a little air.
-        const unitsTall = 1.15 + 0.5 + rows + 0.6;
+        const unitsTall = 0.55 + 1.15 + 0.5 + rows + 0.6;
         // Two grids two cells wide, the operator, and the gaps between.
         const unitsWide = 2 + 2 + 1.2 + 1.8;
 
