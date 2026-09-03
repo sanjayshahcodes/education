@@ -42,18 +42,21 @@ class OddEven {
         this.CASES = ['oddodd', 'eveneven', 'mixed'];
 
         this.MIN_TERM = 2;
-        this.MAX_TERM = 13;
-        // Two across, so the tallest a sum can be is half of it. Past twenty
-        // the rows get too short to read the numbers inside them.
-        this.MAX_SUM = 20;
+        this.MAX_TERM = 25;
+        // Two across, so a sum of forty is twenty rows tall — which is what
+        // sets the smallest the cells can get.
+        this.MAX_SUM = 40;
 
-        this.U_MIN = 24;
+        this.U_MIN = 16;
         this.U_MAX = 60;
 
         this.totalGames = 0;
         this.correctCount = 0;
         this.problem = null;
         this.answered = false;
+        // Which addends she has named so far. The answer's choice stays shut
+        // until both are in.
+        this.named = { a: false, b: false };
         this.timers = [];
 
         this.init();
@@ -124,15 +127,6 @@ class OddEven {
                  aOdd: true, bOdd: true, sumOdd: false, rows: 6 };
     }
 
-    // The rule this problem is an instance of, named in the order it's
-    // written so it matches the terms on the board.
-    ruleWords() {
-        const { kind, aOdd } = this.problem;
-        return kind === 'oddodd' ? 'odd + odd'
-             : kind === 'eveneven' ? 'even + even'
-             : (aOdd ? 'odd + even' : 'even + odd');
-    }
-
     // ── Round lifecycle ────────────────────────────
 
     startNewRound() {
@@ -140,12 +134,11 @@ class OddEven {
         this.problem = this.generateProblem();
         this.answered = false;
 
-        document.getElementById('caption').innerHTML =
-            `${this.ruleWords()} = <span class="unknown">?</span>`;
+        this.named = { a: false, b: false };
         document.querySelectorAll('.choice-btn').forEach(b => {
             b.classList.remove('right', 'wrong');
         });
-        document.getElementById('choice-buttons').classList.remove('faded');
+        document.getElementById('choice-buttons').classList.remove('faded', 'ready');
         document.getElementById('answer-term').classList.remove('shown');
         document.getElementById('continue-btn').classList.remove('shown');
 
@@ -155,6 +148,7 @@ class OddEven {
 
     answer(choice, btn) {
         if (this.answered) return;
+        if (!this.named.a || !this.named.b) return;
         this.answered = true;
 
         const correct = (choice === 'odd') === this.problem.sumOdd;
@@ -171,15 +165,9 @@ class OddEven {
     // addends stay put, so the two notches on the left can be compared
     // against whatever the answer turned out to be.
     reveal() {
-        const { sumOdd } = this.problem;
-
         this.timers.push(setTimeout(() => {
             document.getElementById('choice-buttons').classList.add('faded');
             document.getElementById('answer-term').classList.add('shown');
-
-            // The question mark it has been carrying gets its answer.
-            document.getElementById('caption').textContent =
-                `${this.ruleWords()} = ${sumOdd ? 'odd' : 'even'}`;
 
             document.getElementById('continue-btn').classList.add('shown');
         }, 350));
@@ -197,14 +185,14 @@ class OddEven {
 
         const terms = document.getElementById('terms');
         terms.innerHTML = '';
-        terms.appendChild(this.buildTerm('a', a, () => 'a'));
+        terms.appendChild(this.buildTerm('a', a, () => 'a', true));
 
         const op = document.createElement('div');
         op.className = 'op';
         op.textContent = '+';
         terms.appendChild(op);
 
-        terms.appendChild(this.buildTerm('b', b, () => 'b'));
+        terms.appendChild(this.buildTerm('b', b, () => 'b', true));
 
         // The sum, in both numbers' colours: the lead number's blocks first,
         // then the other's. Where the colour changes shows what each
@@ -214,19 +202,62 @@ class OddEven {
         const answer = document.getElementById('answer-term');
         answer.innerHTML = '';
         answer.appendChild(
-            this.buildTerm('sum', sum, (i) => i < leadCount ? leadSide : otherSide));
+            this.buildTerm('sum', sum, (i) => i < leadCount ? leadSide : otherSide, false));
+    }
+
+    // The settled pill: what a number is, stated.
+    buildPill(value) {
+        const pill = document.createElement('div');
+        pill.className = 'term-parity';
+        pill.textContent = value % 2 === 1 ? 'Odd' : 'Even';
+        return pill;
+    }
+
+    // The unsettled one: what a number is, asked. She reads it off the blocks
+    // underneath and says so; the answer's choice stays shut until both
+    // addends have been named.
+    buildChooser(side, value) {
+        const wrap = document.createElement('div');
+        wrap.className = 'parity-pick-wrap';
+
+        const pick = document.createElement('select');
+        pick.className = 'parity-pick';
+        pick.innerHTML =
+            '<option value="">?</option>' +
+            '<option value="odd">Odd</option>' +
+            '<option value="even">Even</option>';
+
+        pick.addEventListener('change', () => {
+            const want = value % 2 === 1 ? 'odd' : 'even';
+            if (pick.value === want) {
+                pick.classList.remove('wrong');
+                pick.classList.add('locked');
+                wrap.classList.add('locked');
+                pick.disabled = true;
+                this.named[side] = true;
+                if (this.named.a && this.named.b) {
+                    document.getElementById('choice-buttons').classList.add('ready');
+                }
+            } else {
+                // Wrong: say so, and put the question back for another go.
+                pick.classList.add('wrong');
+                this.timers.push(setTimeout(() => {
+                    pick.classList.remove('wrong');
+                    pick.value = '';
+                }, 550));
+            }
+        });
+
+        wrap.appendChild(pick);
+        return wrap;
     }
 
     // Two across, counted 1, 2, 3... top to bottom. An even number comes out a
     // perfect rectangle; an odd one leaves a notch at the bottom right.
-    buildTerm(side, value, colourOf) {
+    buildTerm(side, value, colourOf, chooser) {
         const term = document.createElement('div');
         term.className = `term side-${side}`;
-
-        const parity = document.createElement('div');
-        parity.className = 'term-parity';
-        parity.textContent = value % 2 === 1 ? 'Odd' : 'Even';
-        term.appendChild(parity);
+        term.appendChild(chooser ? this.buildChooser(side, value) : this.buildPill(value));
 
         const label = document.createElement('div');
         label.className = 'term-label';

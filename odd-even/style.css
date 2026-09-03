@@ -117,13 +117,8 @@ body {
 
 #topbar {
     flex: 0 0 auto;
-    height: 62px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 52px;
     width: 100%;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
     border-bottom: 3px solid rgba(255, 255, 255, 0.14);
 }
 
@@ -191,6 +186,72 @@ body {
     margin-bottom: calc(0.16 * var(--u));
 }
 
+/* Each addend's parity is hers to say, from a dropdown wearing the same pill
+   shape. Outlined and dim while it's still a question; once she's right it
+   locks and fills in, becoming the pill the answer's will match. */
+.parity-pick-wrap {
+    align-self: center;
+    position: relative;
+    margin-bottom: calc(0.16 * var(--u));
+}
+
+.parity-pick {
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: inherit;
+    font-size: calc(0.3 * var(--u));
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    line-height: 1.15;
+    text-align: center;
+    padding: calc(0.1 * var(--u)) calc(0.78 * var(--u)) calc(0.1 * var(--u)) calc(0.5 * var(--u));
+    min-width: calc(2.5 * var(--u));
+    border-radius: 999px;
+    border: 2px solid var(--accent-yellow);
+    background: transparent;
+    color: var(--accent-yellow);
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.parity-pick-wrap::after {
+    content: "▾";
+    position: absolute;
+    right: calc(0.34 * var(--u));
+    top: 50%;
+    transform: translateY(-52%);
+    font-size: calc(0.3 * var(--u));
+    color: var(--accent-yellow);
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Settled: indistinguishable from the answer's pill. */
+.parity-pick.locked {
+    background: linear-gradient(135deg, #ffe066, #ffc73d);
+    color: #1a3870;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+    padding-right: calc(0.5 * var(--u));
+    cursor: default;
+}
+
+.parity-pick-wrap.locked::after { opacity: 0; }
+
+.parity-pick.wrong {
+    border-color: var(--wrong);
+    color: var(--wrong);
+}
+
+.parity-pick option {
+    font-size: 17px;
+    letter-spacing: 0;
+    color: #1a3870;
+    background: #ffffff;
+}
+
+
 .term-label {
     font-size: calc(1.05 * var(--u));
     font-weight: 800;
@@ -249,20 +310,7 @@ body {
 .faded { opacity: 0; }
 
 
-/* The rule as a question from the start — "odd + odd = ?" — with the answer
-   filled in once she's committed to one. */
-#caption {
-    font-size: clamp(20px, 3.2vh, 30px);
-    font-weight: 800;
-    color: var(--accent-yellow);
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-}
 
-#caption .unknown {
-    color: var(--text-3);
-    transition: color 0.45s ease;
-}
 
 /* ── The answer end of the line ────────────────── */
 
@@ -289,8 +337,13 @@ body {
     left: 0;
     display: flex;
     gap: calc(0.28 * var(--u));
+    /* Shut until both addends have been named, and shut again once answered. */
+    opacity: 0;
+    pointer-events: none;
     transition: opacity 0.45s ease;
 }
+
+#choice-buttons.ready { opacity: 1; pointer-events: auto; }
 
 /* Never interactive, and it shares a grid cell with the buttons while
    sitting above them in paint order — so without this it swallows every tap
@@ -304,8 +357,7 @@ body {
 
 #answer-term.shown { opacity: 1; }
 
-/* Likewise once they've been answered and faded out. */
-#choice-buttons.faded { pointer-events: none; }
+#choice-buttons.faded { opacity: 0; pointer-events: none; }
 
 /* Hidden until she's answered, but always laid out, so the tally beside it
    never moves. */
