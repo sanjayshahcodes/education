@@ -12,9 +12,10 @@
     --a-1:    #7ee090;
     --a-fill: rgba(126, 224, 144, 0.22);
 
-    /* Second number. Not red: nothing is being taken away. */
-    --b-1:    #5fd8f5;
-    --b-fill: rgba(95, 216, 245, 0.22);
+    /* Second number. Purple — not red, since nothing is being taken away,
+       and it picks up the violet already in the background wash. */
+    --b-1:    #c77dff;
+    --b-fill: rgba(199, 125, 255, 0.22);
 
     --accent-cyan: #00d4ff;
     --accent-yellow: #FFD93D;
