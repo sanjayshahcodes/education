@@ -8,14 +8,16 @@
     --card-bg: rgba(255, 255, 255, 0.06);
     --card-border: rgba(255, 255, 255, 0.12);
 
-    /* First number. */
+    /* The two numbers. Fills are strong rather than washed out: at low
+       opacity both settled toward the navy underneath them and the green and
+       blue were hard to tell apart exactly where it matters most, inside the
+       sum where they sit next to each other. */
     --a-1:    #7ee090;
-    --a-fill: rgba(126, 224, 144, 0.22);
+    --a-fill: rgba(126, 224, 144, 0.46);
 
-    /* Second number. Purple — not red, since nothing is being taken away,
-       and it picks up the violet already in the background wash. */
-    --b-1:    #c77dff;
-    --b-fill: rgba(199, 125, 255, 0.22);
+    /* Not red: nothing here is being taken away. */
+    --b-1:    #5fd8f5;
+    --b-fill: rgba(95, 216, 245, 0.46);
 
     --accent-cyan: #00d4ff;
     --accent-yellow: #FFD93D;
