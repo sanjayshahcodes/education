@@ -19,11 +19,14 @@
 // is really 51 + 1.
 function scoreValue(v) {
     const n = Math.abs(v);
-    if (n % 100 === 0) return 100;   // 356 − 56 = 300
-    if (n <= 2)        return 90;    // −16 + 17 = 1
-    if (n % 10 === 0)  return 60;    // 63 + 27 = 90
-    if (n <= 5)        return 50;
-    if (n <= 10)       return 30;
+    // Landing on a round number is the trick, and a ten is as round as a
+    // hundred — 54 − 44 = 10 is no worse a move than 65 + 35 = 100, and in
+    // 54 + 65 + 35 − 44 they are the two halves of the same answer. Ranking
+    // the hundred above the ten had the game refusing one of its own pairs.
+    if (n % 10 === 0) return 100;
+    // The other half of the lesson: a pair that all but cancels.
+    // − 16 + 17 is really + 1.
+    if (n <= 2) return 100;
     return 0;
 }
 
