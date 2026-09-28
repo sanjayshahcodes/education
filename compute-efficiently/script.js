@@ -142,8 +142,11 @@ class ComputeEfficiently {
 
         const a = this.itemAt(aRef), b = this.itemAt(bRef);
         // Read left to right, so the pair shows the way she'd write it.
-        const [first, second] = aRef.order <= bRef.order ? [a, b] : [b, a];
-        this.pending = { pair, aRef, bRef, first, second, value: pair.value };
+        const inOrder = aRef.order <= bRef.order;
+        const [first, second] = inOrder ? [a, b] : [b, a];
+        const [firstRef, secondRef] = inOrder ? [aRef, bRef] : [bRef, aRef];
+        this.pending = { pair, aRef, bRef, first, second, firstRef, secondRef,
+                         value: pair.value };
         this.sign = '+';
         this.entry = '';
         this.openWork();
@@ -154,10 +157,15 @@ class ComputeEfficiently {
     }
 
     openWork() {
-        const { first, second } = this.pending;
-        const text = `${first.sign === '-' ? '−' : ''}${first.value} ` +
-                     `${second.sign === '-' ? '−' : '+'} ${second.value}`;
-        document.getElementById('work-pair').textContent = text;
+        const { first, second, firstRef, secondRef } = this.pending;
+        // Written exactly as it is up in the expression, signs and all: she
+        // picked up "+ 43" and "− 45", so that's what she's working out. Only
+        // the expression's own leading term goes without a sign, which is why
+        // 63 − 48 + 27 still pairs as "63 + 27".
+        const say = (it, ref) =>
+            (ref.showSign ? (it.sign === '-' ? '− ' : '+ ') : '') + it.value;
+        document.getElementById('work-pair').textContent =
+            `${say(first, firstRef)} ${say(second, secondRef)}`;
         // Once only one number is left, its sign isn't a question — it's the
         // answer, and the answer is what it is.
         this.say('');
@@ -336,6 +344,7 @@ class ComputeEfficiently {
 
             if (this.done) el.classList.add('settled');
             ref.order = order++;
+            ref.showSign = showSign;   // so the pair reads the way it's written
             el.__ref = ref;
             if (!this.done && !this.pending) this.makeDraggable(el, ref);
             return el;
