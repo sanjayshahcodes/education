@@ -269,12 +269,21 @@ const SHAPES = {
 
 const SHAPE_NAMES = Object.keys(SHAPES);
 
-function generate(wantedShape) {
+// Brackets are a separate skill — taking them off and getting the signs
+// right — so by default they're left out and the game is purely about
+// choosing a pairing. ?mode=parens brings them in alongside the rest.
+const MODES = {
+    plain:  ['onePair', 'middleCancels', 'twoPairs'],
+    parens: ['onePair', 'middleCancels', 'twoPairs', 'bracketsHideRound', 'insideFirst'],
+};
+
+function generate(mode, wantedShape) {
+    const pool = MODES[mode] || MODES.plain;
     // The shape is chosen once, before trying. Choosing it inside the loop
     // would let the shapes that satisfy their conditions most easily crowd out
-    // the ones that don't — which had endsMakeRound and bracketsHideRound, the
-    // two most characteristic problems on the worksheet, down at 3% each.
-    const name = wantedShape || pick(SHAPE_NAMES);
+    // the ones that don't — which had onePair and bracketsHideRound, the two
+    // most characteristic problems on the worksheet, down at 3% each.
+    const name = wantedShape || pick(pool);
 
     for (let tries = 0; tries < 400; tries++) {
         const items = SHAPES[name]();
@@ -298,7 +307,7 @@ function generate(wantedShape) {
 
 const LOGIC = { num, group, signed, availablePairs, withoutParens,
                 expandGroup, scoreValue, judge, bestScore, SLACK,
-                generate, total, SHAPE_NAMES, applyPair, reachesZero,
+                generate, total, SHAPE_NAMES, MODES, applyPair, reachesZero,
                 leadsNegative, reachableStates };
 
 if (typeof module !== 'undefined') module.exports = LOGIC;

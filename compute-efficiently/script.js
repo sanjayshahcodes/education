@@ -11,6 +11,9 @@
  *     85 − (12 + 25)    remove brackets  →  85 − 12 − 25  →  60 − 12  →  48
  *     54 + (47 − 32)    nothing outside beats the inside, so start there
  *
+ * Brackets are a skill of their own, so the default has none of them and the
+ * game is purely about choosing a pairing. ?mode=parens brings them in.
+ *
  * The judgement itself lives in logic.js, kept clear of the DOM so it can be
  * run against the worksheet directly.
  */
@@ -21,6 +24,10 @@ const L = window.LOGIC;
 
 class ComputeEfficiently {
     constructor() {
+        // Brackets are their own skill, so they're out of the way by default.
+        this.mode = new URLSearchParams(window.location.search).get('mode') === 'parens'
+            ? 'parens' : 'plain';
+
         this.solved = 0;
         this.clean = 0;
 
@@ -70,7 +77,7 @@ class ComputeEfficiently {
 
     newProblem() {
         this.clearTimers();
-        const p = L.generate();
+        const p = L.generate(this.mode);
         this.items = p.items;
         this.answer = p.answer;
         this.history = [this.asText(this.items)];
