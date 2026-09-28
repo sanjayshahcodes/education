@@ -300,13 +300,31 @@ const MODES = {
     parens: ['onePair', 'middleCancels', 'twoPairs', 'bracketsHideRound', 'insideFirst'],
 };
 
-function generate(mode, wantedShape) {
+// Picking a shape at random each time clumps: with five shapes there was a
+// one-in-three chance of going five problems without seeing a four-term one.
+// So the shapes are dealt from a shuffled bag instead — every shape comes up
+// once per cycle, and the order is still a surprise.
+const BAGS = {};
+function dealShape(mode) {
     const pool = MODES[mode] || MODES.plain;
+    let bag = BAGS[mode];
+    if (!bag || !bag.length) {
+        bag = pool.slice();
+        for (let i = bag.length - 1; i > 0; i--) {
+            const k = Math.floor(Math.random() * (i + 1));
+            [bag[i], bag[k]] = [bag[k], bag[i]];
+        }
+        BAGS[mode] = bag;
+    }
+    return bag.pop();
+}
+
+function generate(mode, wantedShape) {
     // The shape is chosen once, before trying. Choosing it inside the loop
     // would let the shapes that satisfy their conditions most easily crowd out
     // the ones that don't — which had onePair and bracketsHideRound, the two
     // most characteristic problems on the worksheet, down at 3% each.
-    const name = wantedShape || pick(pool);
+    const name = wantedShape || dealShape(mode);
 
     for (let tries = 0; tries < 400; tries++) {
         const items = SHAPES[name]();
