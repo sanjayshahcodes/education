@@ -207,6 +207,7 @@ class ComputeEfficiently {
         this.sign = s;
         document.querySelectorAll('.sign-btn').forEach(b =>
             b.classList.toggle('on', b.dataset.sign === s));
+        this.renderEntry();
     }
 
     onKey(key) {
@@ -222,8 +223,21 @@ class ComputeEfficiently {
         this.renderEntry();
     }
 
+    // The box holds a term, not a number, so it wears the sign she has chosen:
+    // − 14 + 13 = + 1. Where no sign was asked for the result lands first, and
+    // a leading term is written bare, so the box is bare too.
     renderEntry() {
-        document.getElementById('work-value').textContent = this.entry;
+        const box = document.getElementById('work-value');
+        box.innerHTML = '';
+        if (!this.signForced) {
+            const sg = document.createElement('span');
+            sg.className = 'work-sign';
+            sg.textContent = this.sign === '-' ? '−' : '+';
+            box.appendChild(sg);
+        }
+        const v = document.createElement('span');
+        v.textContent = this.entry;
+        box.appendChild(v);
     }
 
     submit() {

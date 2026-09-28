@@ -305,6 +305,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.14em;
     min-width: 2.4em;
     height: 1.4em;
     padding: 0 0.2em;
@@ -314,6 +315,9 @@ body {
 }
 
 #work-value.wrong { border-color: var(--wrong); color: var(--wrong); }
+
+/* Inherits the box's colour, so it goes red with it when the number's off. */
+.work-sign { opacity: 0.85; }
 
 #numpad { display: flex; gap: 6px; }
 
