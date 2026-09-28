@@ -34,6 +34,7 @@ class ComputeEfficiently {
         this.items = [];
         this.history = [];
         this.pending = null;      // the pair she's working out
+        this.signForced = null;   // set when the answer's direction isn't in doubt
         this.sign = '+';
         this.entry = '';
         this.slipped = false;     // took an inefficient turn on this problem
@@ -169,8 +170,19 @@ class ComputeEfficiently {
         // Once only one number is left, its sign isn't a question — it's the
         // answer, and the answer is what it is.
         this.say('');
-        const lastStep = this.countNumbers() === 2;
-        document.getElementById('work-signs').classList.toggle('hidden', lastStep);
+
+        // What she's making isn't a number, it's a term going back into the
+        // equation, and a term is written with its sign: pairing 45 and 15 in
+        // 32 + 45 + 15 produces + 60, and saying so is the point.
+        //
+        // The one place there's no sign to give is first, where the leading
+        // term is written bare — which is also where the last pair lands, its
+        // result being a total rather than a direction.
+        const { pair } = this.pending;
+        const lands = pair.where === 'top' ? Math.min(pair.i, pair.j) : pair.gi;
+        this.signForced = lands === 0 ? '+' : null;
+        document.getElementById('work-signs')
+            .classList.toggle('hidden', this.signForced !== null);
         this.setSign('+');
         this.renderEntry();
         document.getElementById('work').classList.remove('hidden');
@@ -180,6 +192,7 @@ class ComputeEfficiently {
 
     cancelWork() {
         this.pending = null;
+        this.signForced = null;
         this.entry = '';
         document.getElementById('work').classList.add('hidden');
         document.getElementById('work-value').classList.remove('wrong');
@@ -215,10 +228,10 @@ class ComputeEfficiently {
 
     submit() {
         if (this.entry === '') return;
-        const lastStep = this.countNumbers() === 2;
         const typed = parseInt(this.entry, 10);
         const wanted = this.pending.value;
-        const got = lastStep ? typed : (this.sign === '-' ? -typed : typed);
+        const sign = this.signForced || this.sign;
+        const got = sign === '-' ? -typed : typed;
 
         if (got !== wanted) {
             const box = document.getElementById('work-value');
