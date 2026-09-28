@@ -82,6 +82,36 @@ function withoutParens(items) {
     return out;
 }
 
+// Carrying out a move: the result takes the place of the leftmost of the two,
+// and a bracket holding a single number stops being a bracket.
+function applyPair(items, pair) {
+    const out = [...items];
+    if (pair.where === 'top') {
+        const keep = Math.min(pair.i, pair.j), drop = Math.max(pair.i, pair.j);
+        out[keep] = num(pair.value < 0 ? '-' : '+', Math.abs(pair.value));
+        out.splice(drop, 1);
+    } else {
+        const g = items[pair.gi];
+        const v = (g.sign === '-' ? -1 : 1) * pair.value;
+        out[pair.gi] = num(v < 0 ? '-' : '+', Math.abs(v));
+    }
+    return out;
+}
+
+// Whether any pairing anywhere down the problem comes to nothing. A pair of
+// equal-and-opposite terms scores as highly as anything can, so it would
+// always be the move being recommended — and "take 41 from 41" teaches
+// nothing about choosing an efficient route.
+function reachesZero(items, depth = 0) {
+    if (depth > 3) return false;
+    const pairs = availablePairs(items);
+    if (pairs.some(p => p.value === 0)) return true;
+    for (const p of pairs) if (reachesZero(applyPair(items, p), depth + 1)) return true;
+    if (items.some(it => it.kind === 'group') &&
+        reachesZero(withoutParens(items), depth + 1)) return true;
+    return false;
+}
+
 const bestScore = (items) => {
     const pairs = availablePairs(items);
     return pairs.length ? Math.max(...pairs.map(p => scoreValue(p.value))) : 0;
@@ -219,6 +249,7 @@ function generate(wantedShape) {
 
         const answer = total(items);
         if (answer < 1 || answer > 400) continue;
+        if (reachesZero(items)) continue;
 
         // It has to actually be worth doing cleverly, except for the shape
         // whose whole point is that the brackets come first.
@@ -233,7 +264,7 @@ function generate(wantedShape) {
 
 const LOGIC = { num, group, signed, availablePairs, withoutParens,
                 expandGroup, scoreValue, judge, bestScore, SLACK,
-                generate, total, SHAPE_NAMES };
+                generate, total, SHAPE_NAMES, applyPair, reachesZero };
 
 if (typeof module !== 'undefined') module.exports = LOGIC;
 if (typeof window !== 'undefined') window.LOGIC = LOGIC;

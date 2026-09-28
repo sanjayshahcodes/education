@@ -215,24 +215,11 @@ class ComputeEfficiently {
         this.applyCombine();
     }
 
-    // Put the result where the leftmost of the two numbers was.
     applyCombine() {
-        const { pair, value } = this.pending;
-        const sign = value < 0 ? '-' : '+';
-        const item = L.num(sign, Math.abs(value));
-
-        if (pair.where === 'top') {
-            const keep = Math.min(pair.i, pair.j), drop = Math.max(pair.i, pair.j);
-            this.items[keep] = item;
-            this.items.splice(drop, 1);
-        } else {
-            // Two numbers inside brackets leave a single number, so the
-            // brackets have nothing left to hold.
-            const g = this.items[pair.gi];
-            const outer = g.sign === '-' ? -1 : 1;
-            const v = outer * value;
-            this.items[pair.gi] = L.num(v < 0 ? '-' : '+', Math.abs(v));
-        }
+        // The result takes the leftmost of the two places, and brackets left
+        // holding a single number stop being brackets — same rule the
+        // efficiency search walks the problem with.
+        this.items = L.applyPair(this.items, this.pending.pair);
 
         this.pending = null;
         this.entry = '';
