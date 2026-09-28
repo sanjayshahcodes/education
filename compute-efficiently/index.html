@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Efficiently">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f1e3d">
+
+    <title>Compute Efficiently</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <div id="top-right">
+            <button id="continue-btn" class="btn btn-primary">Next Problem →</button>
+            <div id="stats-header">
+                <div class="stat-block">
+                    <div class="stat-label">Solved</div>
+                    <div class="stat-value" id="total-count">0</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-label">Efficiently</div>
+                    <div class="stat-value" id="clean-count">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="topbar"></div>
+
+        <main id="board">
+            <!-- Steps already taken, the way she'd write them down the page. -->
+            <div id="history"></div>
+
+            <!-- The expression as it stands. Numbers drag onto each other. -->
+            <div id="expression"></div>
+
+            <div id="message"></div>
+
+            <div id="actions">
+                <button id="remove-parens" class="btn btn-ghost hidden">Remove parentheses</button>
+            </div>
+
+            <!-- Choosing what the expression reads once the brackets come off. -->
+            <div id="paren-options" class="hidden"></div>
+
+            <!-- Working out the pair she's just put together. -->
+            <div id="work" class="hidden">
+                <div id="work-sum">
+                    <span id="work-pair"></span>
+                    <span class="work-eq">=</span>
+                    <span id="work-signs">
+                        <button class="sign-btn" data-sign="+">+</button>
+                        <button class="sign-btn" data-sign="-">−</button>
+                    </span>
+                    <span id="work-value"></span>
+                </div>
+                <div id="numpad">
+                    <button class="numkey" data-key="1">1</button>
+                    <button class="numkey" data-key="2">2</button>
+                    <button class="numkey" data-key="3">3</button>
+                    <button class="numkey" data-key="4">4</button>
+                    <button class="numkey" data-key="5">5</button>
+                    <button class="numkey" data-key="6">6</button>
+                    <button class="numkey" data-key="7">7</button>
+                    <button class="numkey" data-key="8">8</button>
+                    <button class="numkey" data-key="9">9</button>
+                    <button class="numkey" data-key="0">0</button>
+                    <button class="numkey numkey-back" data-key="back">⌫</button>
+                    <button class="numkey numkey-enter" data-key="enter">✓</button>
+                </div>
+                <button id="work-cancel" class="btn btn-ghost">Put it back</button>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="logic.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

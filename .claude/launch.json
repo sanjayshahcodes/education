@@ -114,6 +114,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/odd-even", "-l", "8102", "--no-clipboard"],
       "port": 8102
+    },
+    {
+      "name": "compute-efficiently",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/compute-efficiently", "-l", "8103", "--no-clipboard"],
+      "port": 8103
     }
   ]
 }
