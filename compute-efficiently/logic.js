@@ -119,6 +119,26 @@ function reachesZero(items) {
         .some(st => availablePairs(st).some(p => p.value === 0));
 }
 
+// A pairing that starts from a takeaway and comes out an addition:
+// − 27 + 57 = 30. Reading that needs negative numbers — took away 27, put
+// back 57, so now you've added 30 — and the same pair written the other way
+// round, 57 − 27, is just a subtraction. Written the other way round is how
+// it should arrive.
+//
+// A pair that starts negative and stays negative is fine, and is the one
+// case she does follow without negative numbers: − 15 + 14 is taking away
+// one more than you put back, and − 22 − 48 is two takeaways together.
+function flipsToPositive(items) {
+    return reachableStates(items).some(st => {
+        const j = judge(st);
+        return availablePairs(st).some(p => {
+            if (!j.pairOK(p) || p.value <= 0) return false;
+            const left = p.where === 'top' ? st[Math.min(p.i, p.j)] : st[p.gi].inner[0];
+            return left.sign === '-';
+        });
+    });
+}
+
 // A state that opens with a negative number. 21 − 61 + 55 starts innocently
 // enough, but pairing the first two is the efficient move and leaves
 // −40 + 55. She hasn't met negative numbers, and shouldn't meet them here.
@@ -293,6 +313,7 @@ function generate(mode, wantedShape) {
         if (answer < 1 || answer > 400) continue;
         if (reachesZero(items)) continue;
         if (leadsNegative(items)) continue;
+        if (flipsToPositive(items)) continue;
 
         // It has to actually be worth doing cleverly, except for the shape
         // whose whole point is that the brackets come first.
@@ -308,7 +329,7 @@ function generate(mode, wantedShape) {
 const LOGIC = { num, group, signed, availablePairs, withoutParens,
                 expandGroup, scoreValue, judge, bestScore, SLACK,
                 generate, total, SHAPE_NAMES, MODES, applyPair, reachesZero,
-                leadsNegative, reachableStates };
+                leadsNegative, flipsToPositive, reachableStates };
 
 if (typeof module !== 'undefined') module.exports = LOGIC;
 if (typeof window !== 'undefined') window.LOGIC = LOGIC;
