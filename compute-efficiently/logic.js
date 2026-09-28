@@ -98,18 +98,33 @@ function applyPair(items, pair) {
     return out;
 }
 
-// Whether any pairing anywhere down the problem comes to nothing. A pair of
-// equal-and-opposite terms scores as highly as anything can, so it would
-// always be the move being recommended — and "take 41 from 41" teaches
-// nothing about choosing an efficient route.
-function reachesZero(items, depth = 0) {
-    if (depth > 3) return false;
-    const pairs = availablePairs(items);
-    if (pairs.some(p => p.value === 0)) return true;
-    for (const p of pairs) if (reachesZero(applyPair(items, p), depth + 1)) return true;
-    if (items.some(it => it.kind === 'group') &&
-        reachesZero(withoutParens(items), depth + 1)) return true;
-    return false;
+// Every state the problem can actually get into, following only the moves
+// she'd be allowed to make. Small — four terms give a couple of dozen.
+function reachableStates(items, depth = 0, out = []) {
+    out.push(items);
+    if (depth > 3) return out;
+    const j = judge(items);
+    for (const p of availablePairs(items)) {
+        if (j.pairOK(p)) reachableStates(applyPair(items, p), depth + 1, out);
+    }
+    if (j.removalOK) reachableStates(withoutParens(items), depth + 1, out);
+    return out;
+}
+
+// A pairing that comes to nothing. Equal and opposite terms score as highly
+// as anything can, so it would always be the move being recommended — and
+// taking 41 from 41 teaches nothing about choosing a route.
+function reachesZero(items) {
+    return reachableStates(items)
+        .some(st => availablePairs(st).some(p => p.value === 0));
+}
+
+// A state that opens with a negative number. 21 − 61 + 55 starts innocently
+// enough, but pairing the first two is the efficient move and leaves
+// −40 + 55. She hasn't met negative numbers, and shouldn't meet them here.
+function leadsNegative(items) {
+    return reachableStates(items)
+        .some(st => st[0].kind === 'num' && st[0].sign === '-');
 }
 
 const bestScore = (items) => {
@@ -168,13 +183,31 @@ function pickWithLastDigit(lo, hi, digit) {
 const total = (items) => withoutParens(items).reduce((t, it) => t + signed(it), 0);
 
 const SHAPES = {
-    // 63 − 48 + 27 : the ends make ninety
-    endsMakeRound() {
-        const a = randInt(41, 78);
-        const c = pickWithLastDigit(12, 39, (10 - a % 10) % 10);
-        if (c === null) return null;
-        const b = randInt(11, a - 5);
-        return [num('+', a), num('-', b), num('+', c)];
+    // 63 − 48 + 27 : two of the three make a round number.
+    //
+    // Which two is not fixed — it can be the ends, the first two or the last
+    // two — and the signs are free, so 26 + 34 + 51 is as much a pairing
+    // problem as 63 − 48 + 27. Only the leading term has to be positive,
+    // because a problem doesn't open with a minus.
+    onePair() {
+        const [i, j] = pick([[0, 1], [0, 2], [1, 2]]);
+        const signs = ['+', pick(['+', '-']), pick(['+', '-'])];
+        const sgn = (k) => (signs[k] === '-' ? -1 : 1);
+
+        const vi = randInt(21, 69);
+        // The partner's last digit is whatever makes the two land on a ten,
+        // which depends on how the pair is signed: agreeing signs need the
+        // digits to complement, opposing signs need them to match.
+        const want = ((-sgn(i) * sgn(j) * vi) % 10 + 10) % 10;
+        const vj = pickWithLastDigit(12, 69, want);
+        if (vj === null) return null;
+        if (sgn(i) * vi + sgn(j) * vj === 0) return null;
+
+        const k = [0, 1, 2].find(x => x !== i && x !== j);
+        const values = [];
+        values[i] = vi; values[j] = vj; values[k] = randInt(12, 58);
+
+        return values.map((v, x) => num(signs[x], v));
     },
 
     // 51 − 16 + 17 : the middle two all but cancel
@@ -250,6 +283,7 @@ function generate(wantedShape) {
         const answer = total(items);
         if (answer < 1 || answer > 400) continue;
         if (reachesZero(items)) continue;
+        if (leadsNegative(items)) continue;
 
         // It has to actually be worth doing cleverly, except for the shape
         // whose whole point is that the brackets come first.
@@ -258,13 +292,14 @@ function generate(wantedShape) {
 
         return { name, items, answer };
     }
-    return { name: 'endsMakeRound',
+    return { name: 'onePair',
              items: [num('+', 63), num('-', 48), num('+', 27)], answer: 42 };
 }
 
 const LOGIC = { num, group, signed, availablePairs, withoutParens,
                 expandGroup, scoreValue, judge, bestScore, SLACK,
-                generate, total, SHAPE_NAMES, applyPair, reachesZero };
+                generate, total, SHAPE_NAMES, applyPair, reachesZero,
+                leadsNegative, reachableStates };
 
 if (typeof module !== 'undefined') module.exports = LOGIC;
 if (typeof window !== 'undefined') window.LOGIC = LOGIC;
