@@ -78,7 +78,7 @@ class ComputeEfficiently {
         this.slipped = false;
         this.done = false;
 
-        this.say('');
+        this.say('Drag a number onto another one.', 'hint');
         this.cancelWork();
         document.getElementById('paren-options').classList.add('hidden');
         document.getElementById('continue-btn').classList.remove('shown');
@@ -153,6 +153,7 @@ class ComputeEfficiently {
         document.getElementById('work-pair').textContent = text;
         // Once only one number is left, its sign isn't a question — it's the
         // answer, and the answer is what it is.
+        this.say('');
         const lastStep = this.countNumbers() === 2;
         document.getElementById('work-signs').classList.toggle('hidden', lastStep);
         this.setSign('+');
@@ -239,6 +240,7 @@ class ComputeEfficiently {
         this.history.push(this.asText(this.items));
         this.say('');
 
+
         if (this.items.length === 1 && this.items[0].kind === 'num') this.finish();
         else this.render();
     }
@@ -323,38 +325,46 @@ class ComputeEfficiently {
         expr.innerHTML = '';
         let order = 0;
 
-        const chipFor = (it, ref) => {
-            const c = document.createElement('span');
-            c.className = 'chip';
-            c.textContent = it.value;
-            if (this.done) c.classList.add('settled');
-            ref.order = order++;
-            c.__ref = ref;                       // what a drop lands on
-            if (!this.done && !this.pending) this.makeDraggable(c, ref);
-            return c;
-        };
-        const op = (text, cls) => {
+        // A term is its sign and its number together. The leading term shows
+        // a sign only when it has one to show.
+        const termFor = (it, ref, showSign) => {
             const el = document.createElement('span');
-            el.className = cls || 'op';
+            el.className = 'term';
+            if (showSign) {
+                const sg = document.createElement('span');
+                sg.className = 'tsign';
+                sg.textContent = it.sign === '-' ? '−' : '+';
+                el.appendChild(sg);
+            }
+            const v = document.createElement('span');
+            v.textContent = it.value;
+            el.appendChild(v);
+
+            if (this.done) el.classList.add('settled');
+            ref.order = order++;
+            el.__ref = ref;
+            if (!this.done && !this.pending) this.makeDraggable(el, ref);
+            return el;
+        };
+        const punct = (text, cls) => {
+            const el = document.createElement('span');
+            el.className = cls ? `paren ${cls}` : 'paren';
             el.textContent = text;
             return el;
         };
 
         this.items.forEach((it, i) => {
             if (it.kind === 'num') {
-                if (i > 0) expr.appendChild(op(it.sign === '-' ? '−' : '+'));
-                else if (it.sign === '-') expr.appendChild(op('−'));
-                expr.appendChild(chipFor(it, { where: 'top', i }));
-            } else {
-                if (i > 0 || it.sign === '-') expr.appendChild(op(it.sign === '-' ? '−' : '+'));
-                expr.appendChild(op('(', 'paren'));
-                it.inner.forEach((t, k) => {
-                    if (k > 0) expr.appendChild(op(t.sign === '-' ? '−' : '+'));
-                    else if (t.sign === '-') expr.appendChild(op('−'));
-                    expr.appendChild(chipFor(t, { where: 'group', gi: i, i: k }));
-                });
-                expr.appendChild(op(')', 'paren'));
+                expr.appendChild(termFor(it, { where: 'top', i }, i > 0 || it.sign === '-'));
+                return;
             }
+            // The bracket's own sign isn't a term — it belongs to the group.
+            if (i > 0 || it.sign === '-') expr.appendChild(punct(it.sign === '-' ? '−' : '+'));
+            expr.appendChild(punct('(', 'open'));
+            it.inner.forEach((t, k) => {
+                expr.appendChild(termFor(t, { where: 'group', gi: i, i: k }, k > 0 || t.sign === '-'));
+            });
+            expr.appendChild(punct(')', 'close'));
         });
 
         const hasGroup = this.items.some(it => it.kind === 'group');
@@ -371,7 +381,7 @@ class ComputeEfficiently {
             const rect = chip.getBoundingClientRect();
             const ghost = document.createElement('div');
             ghost.id = 'ghost';
-            ghost.textContent = chip.textContent;
+            ghost.innerHTML = chip.innerHTML;   // sign and all
             document.body.appendChild(ghost);
 
             this.drag = { chip, ref, ghost,
@@ -393,10 +403,12 @@ class ComputeEfficiently {
     moveGhost(e) {
         const d = this.drag;
         if (!d) return;
+        // Lifted clear of the finger, so the term she's about to land on stays
+        // visible underneath it.
         d.ghost.style.left = `${e.clientX - d.dx}px`;
-        d.ghost.style.top = `${e.clientY - d.dy}px`;
+        d.ghost.style.top = `${e.clientY - d.dy - 30}px`;
 
-        const over = [...document.querySelectorAll('.chip')].find(c => {
+        const over = [...document.querySelectorAll('.term')].find(c => {
             if (c === d.chip) return false;
             const r = c.getBoundingClientRect();
             return e.clientX >= r.left && e.clientX <= r.right &&
