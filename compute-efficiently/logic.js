@@ -127,14 +127,22 @@ function judge(items) {
 const randInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
+// A value in range whose last digit is the one that makes the pair land on a
+// ten. Built rather than hunted for, so a shape never burns its attempts.
+function pickWithLastDigit(lo, hi, digit) {
+    const options = [];
+    for (let v = lo; v <= hi; v++) if (v % 10 === digit) options.push(v);
+    return options.length ? pick(options) : null;
+}
+
 const total = (items) => withoutParens(items).reduce((t, it) => t + signed(it), 0);
 
 const SHAPES = {
     // 63 − 48 + 27 : the ends make ninety
     endsMakeRound() {
         const a = randInt(41, 78);
-        const c = randInt(12, 39);
-        if ((a + c) % 10 !== 0) return null;
+        const c = pickWithLastDigit(12, 39, (10 - a % 10) % 10);
+        if (c === null) return null;
         const b = randInt(11, a - 5);
         return [num('+', a), num('-', b), num('+', c)];
     },
@@ -150,10 +158,10 @@ const SHAPES = {
     // 85 − (12 + 25) : take the brackets off and one of them pairs
     bracketsHideRound() {
         const a = pick([randInt(60, 99), randInt(120, 399)]);
-        const c = randInt(11, 58);
-        if ((a - c) % 10 !== 0 && (a - c) % 100 !== 0) return null;
-        const b = randInt(11, 48);
-        if (a - b - c < 5) return null;
+        const c = pickWithLastDigit(11, 58, a % 10);
+        if (c === null) return null;
+        const b = randInt(11, Math.min(48, a - c - 5));
+        if (b < 11) return null;
         return [num('+', a), group('-', [num('+', b), num('+', c)])];
     },
 
@@ -165,23 +173,47 @@ const SHAPES = {
         return [num('+', a), group('+', [num('+', b), num('-', c)])];
     },
 
-    // 45 + 38 − 25 + 22 : two separate pairs, one each way
+    // 45 + 38 − 25 + 22 : two separate pairs, each landing on a ten.
+    //
+    // Both pairs are built to agree mod ten rather than hunted for, so this
+    // never runs out of attempts. Each pair is independently a sum or a
+    // difference, so a problem can carry two subtractions, one, or none —
+    // 45 + 25 + 38 + 22 is as much a pairing problem as 45 + 38 − 25 + 22.
     twoPairs() {
-        const a = randInt(31, 69);
-        const c = randInt(11, a - 10);
-        if ((a - c) % 10 !== 0) return null;
-        const b = randInt(21, 58);
-        const d = randInt(11, 48);
-        if ((b + d) % 10 !== 0) return null;
-        return [num('+', a), num('+', b), num('-', c), num('+', d)];
+        const makePair = () => {
+            const v1 = randInt(21, 69);
+            const minus = Math.random() < 0.5;
+            // The partner has to agree mod ten: same last digit to subtract,
+            // complementary last digit to add.
+            const want = minus ? v1 % 10 : (10 - v1 % 10) % 10;
+            const options = [];
+            for (let v = 12; v <= 58; v++) if (v % 10 === want) options.push(v);
+            if (!options.length) return null;
+            return [num('+', v1), num(minus ? '-' : '+', pick(options))];
+        };
+
+        const A = makePair(), B = makePair();
+        if (!A || !B) return null;
+
+        // Interleaved, so the two halves of a pair aren't sitting together.
+        return pick([
+            [A[0], B[0], A[1], B[1]],
+            [A[0], B[0], B[1], A[1]],
+            [B[0], A[0], A[1], B[1]],
+        ]);
     },
 };
 
 const SHAPE_NAMES = Object.keys(SHAPES);
 
 function generate(wantedShape) {
+    // The shape is chosen once, before trying. Choosing it inside the loop
+    // would let the shapes that satisfy their conditions most easily crowd out
+    // the ones that don't — which had endsMakeRound and bracketsHideRound, the
+    // two most characteristic problems on the worksheet, down at 3% each.
+    const name = wantedShape || pick(SHAPE_NAMES);
+
     for (let tries = 0; tries < 400; tries++) {
-        const name = wantedShape || pick(SHAPE_NAMES);
         const items = SHAPES[name]();
         if (!items) continue;
 
