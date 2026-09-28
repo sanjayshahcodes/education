@@ -115,8 +115,14 @@ function judge(items) {
 
 // ── Generating problems ────────────────────────────
 //
-// Six shapes, all taken from the worksheet. Each is built so a shortcut
-// exists, then checked against judge() before it's handed out.
+// Five shapes, each one a problem from question 5 of the worksheet. Each is
+// built so a shortcut exists, then checked against judge() before it's handed
+// out.
+//
+// Deliberately absent: a − b − c, pairing the two takeaways. That form is on
+// the worksheet, but in question 4 — the one about order of operations — not
+// in question 5. It still turns up mid-problem, since 85 − (12 + 25) expands
+// straight into it, but there the move is 85 − 25 rather than the pairing.
 
 const randInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -139,15 +145,6 @@ const SHAPES = {
         const c = b + pick([1, 2, -1, -2]);
         const a = randInt(Math.max(b + 6, 30), 95);
         return [num('+', a), num('-', b), num('+', c)];
-    },
-
-    // 100 − 13 − 27 : the two takeaways make forty between them
-    negativesMakeRound() {
-        const b = randInt(11, 48);
-        const c = randInt(11, 48);
-        if ((b + c) % 10 !== 0) return null;
-        const a = randInt(b + c + 8, 99);
-        return [num('+', a), num('-', b), num('-', c)];
     },
 
     // 85 − (12 + 25) : take the brackets off and one of them pairs
