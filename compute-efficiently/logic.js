@@ -131,6 +131,51 @@ function reachesZero(items) {
 // A pair that starts negative and stays negative is fine, and is the one
 // case she does follow without negative numbers: − 15 + 14 is taking away
 // one more than you put back, and − 22 − 48 is two takeaways together.
+// The other half of the same rule. She has takeaways, not negative numbers,
+// so read left to right a pair may never hand her one:
+//
+//   + 36 + 24   she adds                                        fine
+//   + 36 − 24   she subtracts, and it comes out positive        fine
+//   − 25 − 13   two takeaways add up to a bigger takeaway       fine
+//   − 15 + 14   they all but cancel, one left to take away      fine
+//   − 36 + 26   a takeaway of ten, but only if she can hold −10  NO
+//   + 26 − 36   subtracting a number bigger than the one before NO
+//
+// The near-cancel is the one negative she reads fluently, so it stays; a
+// pair that lands negative any other way is out unless both terms were
+// already takeaways.
+// And the expression she is looking at has to survive being read the plain
+// way, left to right, even though that is the route the game is talking her
+// out of. 34 − 52 + 46 is a fair pairing problem and the game would refuse
+// 34 − 52 as inefficient, but it is still a takeaway bigger than the number
+// in front of it sitting on the screen, which is the thing she cannot read.
+function prefixGoesNegative(items) {
+    const running = (st) => {
+        let sum = 0;
+        for (const it of st) {
+            const v = it.kind === 'group'
+                ? (it.sign === '-' ? -1 : 1) * total(it.inner)
+                : signed(it);
+            sum += v;
+            if (sum < 0) return true;
+        }
+        return false;
+    };
+    return reachableStates(items).some(running);
+}
+
+function handsHerANegative(items) {
+    return reachableStates(items).some(st => {
+        const j = judge(st);
+        return availablePairs(st).some(p => {
+            if (!j.pairOK(p) || p.value >= 0) return false;
+            const [a, b] = pairOperands(st, p);
+            if (a.sign === '-' && b.sign === '-') return false;
+            return !(a.sign === '-' && Math.abs(p.value) <= 2);
+        });
+    });
+}
+
 function flipsToPositive(items) {
     return reachableStates(items).some(st => {
         const j = judge(st);
@@ -357,6 +402,8 @@ function generate(mode, wantedShape) {
         if (leadsNegative(items)) continue;
         if (flipsToPositive(items)) continue;
         if (addsAbove100(items)) continue;
+        if (handsHerANegative(items)) continue;
+        if (prefixGoesNegative(items)) continue;
 
         // It has to actually be worth doing cleverly, except for the shape
         // whose whole point is that the brackets come first.
@@ -372,7 +419,7 @@ function generate(mode, wantedShape) {
 const LOGIC = { num, group, signed, availablePairs, withoutParens,
                 expandGroup, scoreValue, judge, bestScore, SLACK,
                 generate, total, SHAPE_NAMES, MODES, applyPair, reachesZero,
-                leadsNegative, flipsToPositive, reachableStates, addsAbove100 };
+                leadsNegative, flipsToPositive, reachableStates, addsAbove100, handsHerANegative, prefixGoesNegative };
 
 if (typeof module !== 'undefined') module.exports = LOGIC;
 if (typeof window !== 'undefined') window.LOGIC = LOGIC;
