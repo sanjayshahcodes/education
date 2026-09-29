@@ -145,6 +145,27 @@ function flipsToPositive(items) {
 // A state that opens with a negative number. 21 − 61 + 55 starts innocently
 // enough, but pairing the first two is the efficient move and leaves
 // −40 + 55. She hasn't met negative numbers, and shouldn't meet them here.
+// She can add past a hundred, but that isn't the lesson — the point is that
+// the clever route keeps the numbers small. So no move she is allowed to make
+// may ask her to add above 100. Only additions count: she is adding whenever
+// the two terms carry the same sign (65 + 35, or the 25 + 13 inside
+// − 25 − 13). An inefficient route may still run over, which is the whole
+// argument for the efficient one — 65 + 43 − 25 − 13 is a fine problem.
+function pairOperands(items, p) {
+    return p.where === 'top' ? [items[p.i], items[p.j]] : items[p.gi].inner;
+}
+
+function addsAbove100(items) {
+    return reachableStates(items).some(st => {
+        const j = judge(st);
+        return availablePairs(st).some(p => {
+            if (!j.pairOK(p)) return false;
+            const [a, b] = pairOperands(st, p);
+            return a.sign === b.sign && Math.abs(p.value) > 100;
+        });
+    });
+}
+
 function leadsNegative(items) {
     return reachableStates(items)
         .some(st => st[0].kind === 'num' && st[0].sign === '-');
@@ -335,6 +356,7 @@ function generate(mode, wantedShape) {
         if (reachesZero(items)) continue;
         if (leadsNegative(items)) continue;
         if (flipsToPositive(items)) continue;
+        if (addsAbove100(items)) continue;
 
         // It has to actually be worth doing cleverly, except for the shape
         // whose whole point is that the brackets come first.
@@ -350,7 +372,7 @@ function generate(mode, wantedShape) {
 const LOGIC = { num, group, signed, availablePairs, withoutParens,
                 expandGroup, scoreValue, judge, bestScore, SLACK,
                 generate, total, SHAPE_NAMES, MODES, applyPair, reachesZero,
-                leadsNegative, flipsToPositive, reachableStates };
+                leadsNegative, flipsToPositive, reachableStates, addsAbove100 };
 
 if (typeof module !== 'undefined') module.exports = LOGIC;
 if (typeof window !== 'undefined') window.LOGIC = LOGIC;
