@@ -164,8 +164,8 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.17em;
-    margin: 0 0.11em;
-    padding: 0.04em 0.16em;
+    margin: 0 0.06em;
+    padding: 0.12em 0.3em;
     border-radius: 14px;
     color: var(--text-1);
     cursor: grab;

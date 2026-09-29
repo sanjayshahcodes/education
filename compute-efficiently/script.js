@@ -438,17 +438,40 @@ class ComputeEfficiently {
         d.ghost.style.left = `${e.clientX - d.dx}px`;
         d.ghost.style.top = `${e.clientY - d.dy - 30}px`;
 
-        const over = [...document.querySelectorAll('.term')].find(c => {
-            if (c === d.chip) return false;
-            const r = c.getBoundingClientRect();
-            return e.clientX >= r.left && e.clientX <= r.right &&
-                   e.clientY >= r.top && e.clientY <= r.bottom;
-        });
+        const over = this.termUnder(d.ghost.getBoundingClientRect(), d.chip);
         if (over !== d.target) {
             if (d.target) d.target.classList.remove('target');
             if (over) over.classList.add('target');
             d.target = over || null;
         }
+    }
+
+    // What she is aiming is the chip, not her fingertip — it rides above her
+    // hand and off to whichever side she grabbed it. So the target is whatever
+    // the chip's middle is over.
+    //
+    // And a term is two digits of ink, far too small a thing for a six-year-old
+    // to land on. The catch area is grown well past the ink in every direction,
+    // which makes the boxes overlap, and the nearest one wins — so the row is
+    // carved up between the terms and every drop on it goes somewhere. Drop
+    // clear of the row and it still comes to nothing, which is how she backs out.
+    termUnder(rect, skip) {
+        const x = (rect.left + rect.right) / 2;
+        const y = (rect.top + rect.bottom) / 2;
+        const pad = 0.55 * parseFloat(
+            getComputedStyle(document.getElementById('expression')).fontSize);
+
+        let best = null, bestDist = Infinity;
+        for (const c of document.querySelectorAll('.term')) {
+            if (c === skip) continue;
+            const r = c.getBoundingClientRect();
+            if (x < r.left - pad || x > r.right + pad) continue;
+            if (y < r.top - pad || y > r.bottom + pad) continue;
+            const dist = Math.hypot(x - (r.left + r.right) / 2,
+                                    y - (r.top + r.bottom) / 2);
+            if (dist < bestDist) { bestDist = dist; best = c; }
+        }
+        return best;
     }
 
     endDrag(e) {
