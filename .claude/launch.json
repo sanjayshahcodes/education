@@ -120,6 +120,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/compute-efficiently", "-l", "8103", "--no-clipboard"],
       "port": 8103
+    },
+    {
+      "name": "what-changed",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/sanjay/Desktop/Personal/education/what-changed", "-l", "8104", "--no-clipboard"],
+      "port": 8104
     }
   ]
 }

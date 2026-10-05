@@ -1,0 +1,465 @@
+/* What Changed? — built for iPad landscape.
+   Same palette and chrome as compute-efficiently and the block-* games.
+   Green is the number she started with, red the number she gave away —
+   the colour language the cancel-* games already taught her. */
+
+:root {
+    --bg-1: #0f1e3d;
+    --bg-2: #1a3870;
+    --bg-3: #0f1e3d;
+    --card-bg: rgba(255, 255, 255, 0.06);
+    --card-border: rgba(255, 255, 255, 0.12);
+
+    --start:      rgba(126, 224, 144, 0.26);
+    --start-edge: #7ee090;
+    --taken:      rgba(255, 138, 138, 0.24);
+    --taken-edge: #ff8a8a;
+
+    --accent-cyan: #00d4ff;
+    --accent-yellow: #FFD93D;
+    --wrong: #ff8a8a;
+
+    --text-1: #ffffff;
+    --text-2: rgba(255, 255, 255, 0.78);
+    --text-3: rgba(255, 255, 255, 0.46);
+    --text-4: rgba(255, 255, 255, 0.22);
+
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.20);
+
+    /* One row of choices. The reserved heights below are built from it, so
+       the chips and the space held for them can never drift apart. */
+    --row: 44px;
+
+    /* The label column every question row shares, so the five chips land in
+       the same five places on every row. Sized in em off the label's own
+       font, which is viewport-scaled — a px value would be outgrown at the
+       large end and wrap the label onto a second line. */
+    --label-w: 13.7em;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    background:
+        radial-gradient(ellipse at top left,     rgba(199, 125, 255, 0.12), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(0, 212, 255, 0.10),   transparent 55%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    background-attachment: fixed;
+    color: var(--text-1);
+}
+
+.hidden { display: none !important; }
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    padding: max(10px, env(safe-area-inset-top)) 18px max(10px, env(safe-area-inset-bottom));
+}
+
+/* ── Chrome ────────────────────────────────────── */
+
+#top-right {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    right: max(14px, env(safe-area-inset-right));
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 30;
+}
+
+#stats-header {
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 5px 12px;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    gap: 14px;
+}
+
+.stat-block { text-align: center; }
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    margin-bottom: 1px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent-cyan);
+    letter-spacing: -0.5px;
+}
+
+#clean-count { color: var(--start-edge); }
+
+#mode-label {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-3);
+    padding: 6px 2px 10px;
+}
+
+#board {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    /* Widened with the label column: the longest row is the label plus five
+       chips, and 860 left it closer to the edge than is comfortable once the
+       type scales up on a bigger iPad. */
+    max-width: 920px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: clamp(6px, 1.2vh, 14px);
+}
+
+/* ── The two equations ─────────────────────────── */
+
+#anchor, #problem {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+}
+
+.eq-caption {
+    flex: 0 0 auto;
+    width: 150px;
+    text-align: right;
+    font-size: clamp(12px, 1.7vh, 15px);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-3);
+}
+
+.eq {
+    display: flex;
+    align-items: baseline;
+    font-size: clamp(30px, 5.6vh, 52px);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tabular figures plus a fixed box per number, so the variant sits exactly
+   under the fact it came from and the digit that moved is the only thing
+   that looks different. */
+.num {
+    display: inline-block;
+    min-width: 3.4ch;
+    text-align: right;
+    padding: 0.04em 0.12em;
+    border-radius: 12px;
+    transition: background 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+}
+
+.op { padding: 0 0.26em; color: var(--text-3); }
+
+#anchor .eq { color: var(--text-3); }
+#anchor .op { color: var(--text-4); }
+
+/* Lit only while the step that asks about it is open, and only in the new
+   equation — never in the fact above, which stays quiet so that spotting
+   what moved is still her job. */
+.num.lit-start {
+    background: var(--start);
+    box-shadow: inset 0 0 0 3px var(--start-edge);
+    color: var(--start-edge);
+}
+
+.num.lit-taken {
+    background: var(--taken);
+    box-shadow: inset 0 0 0 3px var(--taken-edge);
+    color: var(--taken-edge);
+}
+
+#problem .num.blank { color: var(--text-4); }
+
+/* ── Steps ─────────────────────────────────────── */
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: clamp(6px, 1.1vh, 12px) 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    opacity: 0.32;
+    transition: opacity 0.22s ease, border-color 0.22s ease;
+}
+
+/* Steps she has not reached stay dimmed and dead, so there is only ever one
+   live question on the screen. */
+.step.live { opacity: 1; border-color: rgba(255, 255, 255, 0.3); }
+
+/* A finished step is now the only record of what she decided, and she reads
+   both of them back while working out the answer — so it dims to get out of
+   the way, but not so far that it stops being legible. */
+.step.done { opacity: 0.72; }
+
+.step-num {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--text-4);
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+    margin-top: 2px;
+}
+
+.step.live .step-num { border-color: var(--accent-yellow); color: var(--accent-yellow); }
+.step.done .step-num { border-color: var(--start-edge); color: var(--start-edge); }
+
+.step-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* A clear break between the two equations and the steps that work on them —
+   the board's own gap is sized for the space between steps, which is too
+   tight to separate the question from the working. */
+#step-1 { margin-top: clamp(12px, 3vh, 32px); }
+
+/* Steps 1 and 2 hold the height of their two rows even after folding down to
+   one summary line. Letting them shrink would pull everything below them up
+   the screen at the exact moment she reaches for the next step. */
+#step-1 .step-body,
+#step-2 .step-body {
+    min-height: calc(var(--row) * 2 + 6px);
+}
+
+/* The fold itself: the two question rows go, the summary takes their place.
+   Nothing is removed from the DOM, so next round's rows are still there.
+
+   Qualified as .ask.summary rather than .summary because .ask sets its own
+   display further down this file — at equal specificity the later rule wins,
+   and the summary would quietly hold a row's height all round. */
+.ask.summary { display: none; }
+.step.collapsed .ask:not(.summary) { display: none; }
+.step.collapsed .ask.summary { display: flex; }
+
+/* A chip in the summary is a record, not an offer. It sits outside the
+   five-column grid, so it is given a width of its own — otherwise step 1's
+   "1 less" and step 2's "1 more" size differently and knock the second half
+   of the two summaries out of line with each other. */
+.summary .choice {
+    flex: 0 0 7em;
+    cursor: default;
+}
+
+/* The second half of a step keeps its space while it is still hidden, so
+   revealing it does not shove everything below it down the screen. With the
+   numpad held the same way, nothing moves under her finger all round. */
+.ask.hidden { display: flex !important; visibility: hidden; }
+
+.ask {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    /* Matches .choice's own min-height exactly — a few pixels short here and
+       the reserved row is smaller than the one that replaces it, which is
+       enough to make the steps twitch as she answers. */
+    min-height: var(--row);
+}
+
+/* Fixed width and right-aligned, matching the equation captions above. This
+   is what puts the chips in actual columns: "1 more" in step 1 sits directly
+   over "−1" in step 2, so the crossing between the two steps is something she
+   can see rather than something she has to be told. */
+.ask-text {
+    flex: 0 0 var(--label-w);
+    text-align: right;
+    font-size: clamp(14px, 2.1vh, 19px);
+    font-weight: 700;
+    color: var(--text-2);
+}
+
+/* Five equal columns, not five min-widths. A min-width only aligns the rows
+   while every chip is below it — at larger type "1 more" outgrows 96px and
+   "+1" does not, and the two rows quietly stop being columns at exactly the
+   sizes where the alignment reads most clearly. Equal fractions hold at any
+   font size and cannot overflow the row. */
+.choices {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+/* Big enough for a child's finger — the drop-zone lesson from the earlier
+   games applies just as much to a row of choices. */
+.choice {
+    font-family: inherit;
+    font-size: clamp(14px, 2vh, 18px);
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    min-width: 0;
+    min-height: var(--row);
+    padding: 8px 18px;
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-1);
+    border: 2px solid var(--card-border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.16s ease,
+                border-color 0.16s ease, color 0.16s ease;
+}
+
+.choice:active { transform: scale(0.96); }
+
+.choice.chosen {
+    background: rgba(255, 217, 61, 0.18);
+    border-color: var(--accent-yellow);
+    color: var(--accent-yellow);
+}
+
+.choice.wrong {
+    background: rgba(255, 138, 138, 0.16);
+    border-color: var(--wrong);
+    color: var(--wrong);
+}
+
+.choice:disabled { cursor: default; }
+
+/* ── Step 3: the answer ────────────────────────── */
+
+#answer-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.6em;
+    height: 1.5em;
+    padding: 0 0.24em;
+    font-size: clamp(24px, 4vh, 38px);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    border-radius: 14px;
+    color: var(--accent-yellow);
+}
+
+#answer-box.wrong { border-color: var(--wrong); color: var(--wrong); }
+#answer-box.right { border-color: var(--start-edge); color: var(--start-edge); }
+
+/* ── Messages ──────────────────────────────────── */
+
+#message {
+    /* Two lines' worth, because the sentence at the end of a round wraps on
+       the longer stages and would otherwise nudge the steps as it appears. */
+    min-height: 2.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: clamp(14px, 2.1vh, 19px);
+    font-weight: 700;
+    padding: 0 8px;
+}
+
+#message.scold { color: var(--wrong); }
+#message.good  { color: var(--accent-yellow); }
+#message.hint  { color: var(--text-3); font-weight: 600; }
+
+/* ── Numpad ────────────────────────────────────── */
+
+/* Held in place rather than removed, so step 4 appearing does not shove
+   the steps above it up the screen mid-problem. */
+#numpad.hidden { display: flex !important; visibility: hidden; }
+
+#numpad {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    padding-bottom: 2px;
+}
+
+.numkey {
+    width: clamp(42px, 6.4vh, 52px);
+    height: clamp(42px, 6.4vh, 52px);
+    font-size: clamp(17px, 2.6vh, 21px);
+    font-weight: 700;
+    font-family: inherit;
+    background: var(--card-bg);
+    color: var(--text-1);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.numkey:active { transform: scale(0.94); background: rgba(255, 255, 255, 0.14); }
+
+.numkey-enter {
+    background: linear-gradient(135deg, #ffe066, #ffc73d);
+    color: #1a3870;
+    border-color: transparent;
+}
+
+.numkey-back { color: var(--text-2); font-size: clamp(14px, 2.1vh, 17px); }
+
+/* ── Buttons ───────────────────────────────────── */
+
+.btn {
+    padding: 11px 26px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: transform 0.1s ease, filter 0.15s ease, opacity 0.3s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.btn-primary { background: linear-gradient(135deg, #ffe066, #ffc73d); color: #1a3870; }
+.btn-primary:active { transform: scale(0.97); filter: brightness(1.05); }
+
+#continue-btn { opacity: 0; pointer-events: none; }
+#continue-btn.shown { opacity: 1; pointer-events: auto; }
+
+/* Belt and braces with the phase check in script.js: a step she has not
+   reached does not take taps at all. */
+.step:not(.live) .choice { pointer-events: none; }

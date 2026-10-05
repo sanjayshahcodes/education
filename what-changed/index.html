@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="What Changed">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f1e3d">
+
+    <title>What Changed?</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <div id="top-right">
+            <button id="continue-btn" class="btn btn-primary">Next Problem →</button>
+            <div id="stats-header">
+                <div class="stat-block">
+                    <div class="stat-label">Solved</div>
+                    <div class="stat-value" id="total-count">0</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-label">First try</div>
+                    <div class="stat-value" id="clean-count">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mode-label"></div>
+
+        <main id="board">
+
+            <!-- The fact she is allowed to lean on. Never computed here, always given. -->
+            <div id="anchor">
+                <div class="eq-caption">You already know</div>
+                <div class="eq" id="anchor-eq"></div>
+            </div>
+
+            <!-- The one she is being asked about. Same shape, directly underneath,
+                 so the digit that moved lines up with the one it came from. -->
+            <div id="problem">
+                <div class="eq-caption">So what about</div>
+                <div class="eq" id="problem-eq"></div>
+            </div>
+
+            <!-- Steps 1 and 2 are the same shape: what moved, then which way it
+                 pushes the answer. Step 2's second half is the backwards-feeling
+                 one, and the whole game exists to drill it. -->
+            <div class="step" id="step-1">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <div class="ask">
+                        <span class="ask-text" id="ask-1a">You started with…</span>
+                        <div class="choices" id="choices-1a"></div>
+                    </div>
+                    <div class="ask hidden" id="ask-1b-row">
+                        <span class="ask-text">The effect on the answer is</span>
+                        <div class="choices" id="choices-1b"></div>
+                    </div>
+                    <!-- Replaces the two rows above once both are answered,
+                         keeping only what she chose. -->
+                    <div class="ask summary" id="summary-1"></div>
+                </div>
+            </div>
+
+            <div class="step" id="step-2">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <div class="ask">
+                        <span class="ask-text" id="ask-2a">You subtracted…</span>
+                        <div class="choices" id="choices-2a"></div>
+                    </div>
+                    <div class="ask hidden" id="ask-2b-row">
+                        <span class="ask-text">The effect on the answer is</span>
+                        <div class="choices" id="choices-2b"></div>
+                    </div>
+                    <div class="ask summary" id="summary-2"></div>
+                </div>
+            </div>
+
+            <div class="step" id="step-3">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <div class="ask">
+                        <span class="ask-text" id="ask-3">So the answer is</span>
+                        <div id="answer-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="message"></div>
+
+            <div id="numpad" class="hidden">
+                <button class="numkey" data-key="1">1</button>
+                <button class="numkey" data-key="2">2</button>
+                <button class="numkey" data-key="3">3</button>
+                <button class="numkey" data-key="4">4</button>
+                <button class="numkey" data-key="5">5</button>
+                <button class="numkey" data-key="6">6</button>
+                <button class="numkey" data-key="7">7</button>
+                <button class="numkey" data-key="8">8</button>
+                <button class="numkey" data-key="9">9</button>
+                <button class="numkey" data-key="0">0</button>
+                <button class="numkey numkey-back" data-key="back">⌫</button>
+                <button class="numkey numkey-enter" data-key="enter">✓</button>
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="logic.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
